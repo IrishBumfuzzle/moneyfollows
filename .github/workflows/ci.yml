@@ -3,7 +3,7 @@ name: ci
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, Backend]
 
 jobs:
   check:
@@ -32,3 +32,5 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
+      # The Vercel build, so a broken app build fails here and not on deploy.
+      - run: pnpm --filter student build

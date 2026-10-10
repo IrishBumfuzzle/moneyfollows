@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createTestDb, skipDbTests, type TestDb } from '../../supabase/tests/db';
 import { buildSeedSql, DEMO, seedTargetProblem } from '../seed-data';
@@ -7,6 +8,12 @@ const hosted = (email: string) => buildSeedSql(undefined, { facilitatorEmail: em
 describe('demo seed', () => {
   it('is deterministic', () => {
     expect(buildSeedSql()).toBe(buildSeedSql());
+  });
+
+  it('matches the committed supabase/seed.sql (run `pnpm seed -- --write-only` after content or engine changes)', () => {
+    const committed = readFileSync(new URL('../../supabase/seed.sql', import.meta.url), 'utf8');
+    const lf = (t: string) => t.replace(/\r\n/g, '\n');
+    expect(lf(committed) === lf(buildSeedSql()), 'supabase/seed.sql is stale').toBe(true);
   });
 
   it('is labelled as demo data and puts the demo facilitator on the staff allowlist', () => {

@@ -41,7 +41,7 @@ Each app's `vercel.json` sets the rest: install at the workspace root with the f
 
 Preview deploys: connect the repository with the Vercel GitHub integration. Every pull request then gets a preview URL per app. Previews use the Preview environment variables, so point those at the same hosted project (only the demo class) or at a separate one.
 
-Demo mode: `https://<student>.vercel.app/?demo=1` loads the engine's seeded save (`createDemoGame`), and class code `HYD234` joins the hosted demo class from step 4.
+Demo mode (planned, not wired in the student app yet): `https://<student>.vercel.app/?demo=1` will load the engine's seeded save (`createDemoGame`), and class code `HYD234` will join the hosted demo class from step 4.
 
 ### Staff accounts
 
@@ -86,7 +86,7 @@ The new owner must also be in `public.staff`.
 | `scripts` | BE-1 | `lint-content.ts`, `seed.ts` |
 | `packages/api-client` | BE-2 | Typed client for the Supabase functions, staff auth, and an offline sync queue |
 | `supabase` | BE-2 | Migrations (tables, RLS, functions), seed, SQL tests |
-| `apps/student`, `apps/dashboard` | UI-1, UI-2 | Not in this branch yet |
+| `apps/student`, `apps/dashboard` | UI-1, UI-2 | Student app scaffold (map, classroom quiz); the dashboard has only `vercel.json` so far |
 
 ## Backend API
 
