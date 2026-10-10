@@ -1,7 +1,13 @@
 {
+  "life.meters.label": "तुम्हारे पैसे, सेहत और मन की शांति",
+  "life.meter.value": "{{label}}: 100 में से {{value}}",
   "life.meter.money": "पैसे",
   "life.meter.health": "सेहत",
   "life.meter.sanity": "मन की शांति",
+  "life.store.title": "दुकान",
+  "life.store.intro": "क्या खरीदोगे? तुम्हारे पास {{money}} हैं।",
+  "life.store.close": "दुकान बंद करो",
+  "life.store.bought": "खरीद लिया!",
   "life.shop.necessity.label": "ज़रूरी चीज़ें खरीदो",
   "life.shop.necessity.hint": "चावल, दाल, साबुन। कम खर्च, मन थोड़ा अच्छा होता है।",
   "life.shop.want.label": "अपनी पसंद की चीज़ खरीदो",

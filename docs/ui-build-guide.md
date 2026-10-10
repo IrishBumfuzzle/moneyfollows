@@ -44,7 +44,7 @@ This split differs from CLAUDE.md, which gives onboarding and the Room hub to UI
 | `pnpm` on your laptop | Fixed; your `package.json` has a new `packageManager` line that is not committed yet |
 | Onboarding, main screen, Paisa Times, `apps/dashboard` | Nothing yet |
 | `packages/shared`, engine (`earn()`), content, api-client | Not on `main` yet (an `origin/Backend` branch exists) |
-| Life meters API (`src/features/life`, see `docs/life-meters-api.md`): one common money wallet, health, sanity; the store's necessity/want options, work, school | Frontend API and tests built; screens, engine and backend not yet |
+| Life meters API (`src/features/life`, see `docs/life-meters-api.md`): one common money wallet, health, sanity; the store's necessity/want options, work, school | Frontend API, meters bar and store sheet built; work/school buttons, engine and backend not yet |
 
 ### Which document wins
 
@@ -347,7 +347,7 @@ Placeholders are fine in every phase: an emoji avatar or a grey box for an artic
 | Demo panel "mark a new edition" | Demo panel owner → you | Their panel calls your `markNewEdition()` |
 | `App.tsx` | Shared | You add `onboarding`, `main` and `news` screens the way `classroom` is added, and tell the other UI dev each time |
 | Quiz scores for the dashboard | Baseline/end-line owner → BE-2 → you | `quiz_submitted` events; your dashboard reads `learning_gain` |
-| Meters bar, store sheet, work and school | Other UI dev | They call `lifeApi.shopOffers / buy / work / attendSchool` and render the result (`docs/life-meters-api.md` §6) |
+| Meters bar, store sheet, work and school | Other UI dev | `MetersBar` and `StoreSheet` are built; work and school buttons call `lifeApi.work / attendSchool` (`docs/life-meters-api.md` §6) |
 
 **Prompt 0a — record the new lanes**
 

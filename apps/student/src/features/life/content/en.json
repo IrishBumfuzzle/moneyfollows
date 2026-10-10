@@ -1,7 +1,13 @@
 {
+  "life.meters.label": "Your money, health and sanity",
+  "life.meter.value": "{{label}}: {{value}} of 100",
   "life.meter.money": "Money",
   "life.meter.health": "Health",
   "life.meter.sanity": "Sanity",
+  "life.store.title": "Store",
+  "life.store.intro": "What will you buy? You can spend {{money}}.",
+  "life.store.close": "Close the store",
+  "life.store.bought": "Bought!",
   "life.shop.necessity.label": "Buy necessities",
   "life.shop.necessity.hint": "Rice, dal, soap. Costs less, lifts your mood a little.",
   "life.shop.want.label": "Buy something you want",

@@ -3,7 +3,7 @@
 // (CLAUDE.md 4: pure, no DOM, no clock, no randomness, never mutates its input). When BE-1
 // ships buy/work/attendSchool in packages/engine (docs/life-meters-api.md §4), point
 // `lifeApi` at those and delete the stand-in below; the screens don't change.
-import { LIFE_CONTENT_VERSION, SCHOOL, SHOP, START_VITALS, VITALS_MAX, VITALS_MIN, WORK } from './config';
+import { LIFE_CONTENT_VERSION, SCHOOL, SHOP, START_MONEY, START_VITALS, VITALS_MAX, VITALS_MIN, WORK } from './config';
 import type {
   LifeBlock,
   LifeDelta,
@@ -28,6 +28,11 @@ const clamp = (n: number) => Math.min(VITALS_MAX, Math.max(VITALS_MIN, Math.roun
 /** Vitals for a new game, or for a save made before vitals existed. */
 export function startVitals(): Vitals {
   return { ...START_VITALS };
+}
+
+/** A fresh life state for screens to play with until the shared game store exists. */
+export function startLife(): LifeState {
+  return { month: 1, week: 1, money: START_MONEY, flags: [], earned: [], vitals: startVitals() };
 }
 
 /** Once-per-week keys. Work uses the engine's earn() sourceId convention. */
