@@ -8,9 +8,10 @@ Read this file fully at the start of every session. It is the source of truth fo
 - **Plan briefly before any change touching more than ~3 files.** State the plan in 3–5 lines, then do it.
 - **Contracts are frozen** (section 5). Never change types in `packages/shared` or the API shapes without telling the user, because it breaks other people's work. Additive changes are fine if announced.
 - **Run `pnpm check` before every commit.** Fix failures; never skip or disable tests/lint to get green.
-- **commits**, In commits don't write coauthored by claude.
+- **commits**, In commits don't write coauthored by claude. and for pushes related to specific tasks, do those in a different branch 
 - **No scope creep.** If asked for something in the "Won't" list (section 2), say so once, name the cost, and ask for confirmation.
 - **Never commit secrets.** Use `.env` (git-ignored) and keep `.env.example` current.
+
 
 ## 1. Project in one paragraph
 
