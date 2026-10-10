@@ -1,0 +1,8 @@
+{
+  "name": "paisa-path",
+  "private": true,
+  "scripts": {
+    "dev:student": "pnpm --filter student dev",
+    "typecheck": "pnpm -r --if-present typecheck"
+  }
+}
