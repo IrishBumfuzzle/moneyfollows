@@ -33,6 +33,7 @@ Sign-up is disabled, and signing in alone does not make someone a facilitator. T
 
 1. Invite the email (Studio → Authentication → Invite user).
 2. Add it to the allowlist in the SQL editor: `insert into public.staff (email) values ('name@ngo.org');` (lowercase).
+3. The person clicks **Accept the invite** in the email once. After that they sign in with their email and the 6-digit code we send. A code request before the invite is accepted fails with `signup_disabled`.
 
 Removing the row from `public.staff` revokes access to all their classes immediately.
 
@@ -77,11 +78,29 @@ Students never create accounts. They reach the database only through two securit
 
 | Function | Who | Returns |
 | --- | --- | --- |
-| `join_class(class_code, nickname)` | anyone | `{ anon_id, class_id, default_lang }`. Nickname word filter; errors `class_not_found`, `nickname_taken`, `nickname_blocked`, `nickname_invalid`, `nickname_personal_info` |
-| `push_events(events)` | anyone | `{ accepted }`. Idempotent on `event_id`, at most 500 events. `quiz_submitted` also writes `quiz_attempts`; `language_changed` updates the student's language |
+| `join_class(class_code, nickname)` | anyone | `{ anon_id, class_id, default_lang }`. The code is case-insensitive. Nickname word filter. At most 300 students per class and 60 new joins per class per minute |
+| `push_events(events)` | anyone | `{ accepted }`. Idempotent on `event_id`, at most 500 events. `quiz_submitted` also writes `quiz_attempts` (first attempt per type counts); `language_changed` updates the student's language |
 | `class_progress(class_id)` | facilitator | One row per student: modules done, last active, decisions per pillar, baseline and end-line scores |
-| `learning_gain(class_id)` | facilitator | Baseline vs end-line percent correct by pillar |
+| `learning_gain(class_id)` | facilitator | Per pillar: `baseline_avg`, `endline_avg` (percent correct), `baseline_n`, `endline_n` and `n`. Matched students only (answers for that pillar in both quizzes), so `n` = `baseline_n` = `endline_n`. Type: `MatchedLearningGainRow` |
 | `classes` table | facilitator | Insert `{ name, default_lang }` to create a class. The code is generated. |
+
+Errors reach the apps as `ApiError` from `@paisa/api-client`, with a stable `code` (map it to a `t:` key) and the HTTP `status` when the server answered:
+
+| `code` | From | HTTP | Meaning |
+| --- | --- | --- | --- |
+| `class_not_found` | `join_class` | 404 | No class with that code |
+| `class_full` | `join_class` | 403 | The class already has 300 students |
+| `join_rate_limited` | `join_class` | 429 | Over 60 joins to this class in the last minute; try again shortly |
+| `nickname_taken` | `join_class` | 409 | Someone in the class already uses it (case-insensitive) |
+| `nickname_blocked` | `join_class` | 422 | Matches the word filter |
+| `nickname_invalid` | `join_class` | 422 | Not 2–20 characters of Latin or Devanagari letters, digits, space `_ . -`, or mixes scripts |
+| `nickname_personal_info` | `join_class` | 422 | Looks like a phone number or email (5+ digits, or `@`) |
+| `too_many_events` | `push_events` | 413 | More than 500 events in one call (the client also refuses before sending) |
+| `timeout` | client | – | The request was aborted after the sync queue's `timeoutMs` (default 15 s); retried later |
+| `network` | client | – | Offline or the request failed; retried later |
+| `unknown` | any | any | Anything else, with the server message |
+
+`timeout`, `network`, 5xx, 408 and 429 are retryable (`isRetryableError`). The sync queue retries those and moves batches with any other error to a dead-letter store (`deadLetters()`, `requeueDeadLetters()`, `clearDeadLetters()`), so no event is dropped silently.
 
 For the UI teams:
 - **Translation keys.** i18n files are flat maps with dotted keys and no `t:` prefix, so configure react-i18next with `keySeparator: false`. To resolve a `TKey`, drop the `t:` prefix.
