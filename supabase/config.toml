@@ -439,7 +439,21 @@ enabled = true
 [remotes.production]
 project_id = "verbvywwsxggqycpykec"
 
-# TODO: switch site_url and the redirect list to the deployed dashboard URL.
+# TODO: switch site_url and the redirect list to the deployed dashboard URL (https only) before
+# the first real invite. Until then invite links point at localhost and fail. For example:
+# [remotes.production.auth]
+# site_url = "https://<dashboard>.vercel.app"
+# additional_redirect_urls = ["https://<dashboard>.vercel.app"]
+
+# Never load seed.sql (known demo password) into the hosted project, even via db reset --linked.
+# The hosted demo class comes from `pnpm seed -- --hosted-demo` instead (README, step 4).
+[remotes.production.db.seed]
+enabled = false
+
+# One sign-in code per minute per address (local dev keeps 1s), so nobody can burn the
+# project's hourly email quota or the SMTP account's daily limit by spamming a staff email.
+[remotes.production.auth.email]
+max_frequency = "60s"
 
 # The local default (2 emails an hour) is too low for inviting staff. Gmail allows ~500 a day.
 [remotes.production.auth.rate_limit]

@@ -352,6 +352,30 @@ describe.skipIf(skipDbTests)('database', () => {
       ).toBe(0);
     });
 
+    it('accepts classroom quiz results as events, keeps quiz_id, and never makes them quiz attempts', async () => {
+      const answers: QuizAnswer[] = [
+        { questionId: 'quiz.classroom.save.q1', pillar: 'save_manage', choice: 2, correct: true },
+      ];
+      const first = ev(student, 'quiz_submitted', {
+        quiz_type: 'classroom',
+        quiz_id: 'classroom',
+        answers,
+        score: 100,
+      });
+      const again = ev(student, 'quiz_submitted', { quiz_type: 'classroom', quiz_id: 'classroom', answers, score: 0 });
+      // Both count as accepted, so the client sync queue never sees a partial batch.
+      expect(await push([first, again])).toEqual({ accepted: 2 });
+      const stored =
+        await db.sql`select payload from events where event_id in ${db.sql([first.event_id, again.event_id])}`;
+      expect(stored).toHaveLength(2);
+      expect(stored.map((r) => r.payload.quiz_id)).toEqual(['classroom', 'classroom']);
+      expect(
+        await count(
+          db.sql`select count(*)::int as n from quiz_attempts where anon_id = ${student.anon_id} and quiz_type = 'classroom'`,
+        ),
+      ).toBe(0);
+    });
+
     it('caps a batch at 500 events', async () => {
       const many = Array.from({ length: 501 }, () => ev(student, 'app_open'));
       await expect(push(many)).rejects.toMatchObject({ code: 'PT413' });
