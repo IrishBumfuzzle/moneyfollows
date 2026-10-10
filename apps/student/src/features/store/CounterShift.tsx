@@ -191,7 +191,7 @@ function Bill({ customer, tr }: { customer: Customer; tr: Tr }) {
       <ul>
         {customer.items.map((it) => (
           <li key={it.id}>
-            <span>{tr(`counter.item.${it.id}`)}</span>
+            <span>{tr(`store.item.${it.id}`)}</span>
             <span className="ct-num">{rupees(it.price)}</span>
           </li>
         ))}

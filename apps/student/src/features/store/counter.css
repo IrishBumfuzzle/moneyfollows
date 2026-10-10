@@ -120,3 +120,35 @@
 }
 @keyframes ct-rise { from { transform: translateY(16px); opacity: 0; } }
 @keyframes ct-drop { from { transform: translateY(-8px); opacity: 0; } }
+
+/* ---- Kirana Run: Ammi's list, two shelves, a basket that stays in thumb reach ---- */
+.kr-list li { align-items: baseline; }
+.kr-shelf { display: flex; flex-direction: column; gap: 4px; }
+.kr-shelf-title { display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: normal; }
+.kr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.kr-item {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 2px;
+  min-height: 96px;
+  padding: 4px 6px;
+}
+.kr-item-name { line-height: 1.2; }
+.kr-item-price { font-size: 18px; }
+.kr-item-fx { display: flex; flex-wrap: wrap; gap: 2px 8px; font-size: 14px; }
+.kr-tag { font-size: 14px; padding: 0 4px; background: #fff3dc; color: #4a2b17; }
+.kr-item.is-correct .kr-item-fx { color: #fff; }
+.kr-got { color: #2f7a2a; }
+.kr-over { color: #b0362f; }
+.kr-basket {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px;
+}
+.kr-basket-sum { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 8px; font-size: 18px; }
+.kr-fx { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 18px; }
+.kr-checks { display: flex; flex-direction: column; gap: 4px; }

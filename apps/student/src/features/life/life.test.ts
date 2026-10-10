@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SCHOOL, SHOP, WORK } from './config';
+import { NEED_HEALTH, SCHOOL, SHOP, WORK } from './config';
 import en from './content/en.json';
 import hi from './content/hi.json';
 import { localLifeApi as api, startVitals, toLifeEvent } from './life';
@@ -30,6 +30,10 @@ describe('config', () => {
     expect(SHOP.necessity.price).toBeLessThan(SHOP.want.price);
     expect(SHOP.necessity.sanity).toBeGreaterThan(0);
     expect(SHOP.want.sanity).toBeGreaterThan(SHOP.necessity.sanity);
+    // ...but needs give more sanity per rupee, and keep you healthy.
+    expect(SHOP.necessity.sanity / SHOP.necessity.price).toBeGreaterThan(SHOP.want.sanity / SHOP.want.price);
+    expect(SHOP.necessity.health).toBe(NEED_HEALTH);
+    expect(SHOP.want.health).toBe(0);
     expect(WORK.sanity).toBeLessThan(0);
     expect(SCHOOL.sanity).toBeLessThan(0);
   });
@@ -41,7 +45,7 @@ describe('buy', () => {
     expect(blocked).toBeUndefined();
     expect(state.money).toBe(1000 - SHOP.necessity.price);
     expect(state.vitals.sanity).toBe(base.vitals.sanity + SHOP.necessity.sanity);
-    expect(delta).toEqual({ money: -SHOP.necessity.price, health: 0, sanity: SHOP.necessity.sanity });
+    expect(delta).toEqual({ money: -SHOP.necessity.price, health: NEED_HEALTH, sanity: SHOP.necessity.sanity });
   });
 
   it('a want spends from the same wallet and lifts sanity a lot', () => {

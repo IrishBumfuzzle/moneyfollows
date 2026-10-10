@@ -131,7 +131,7 @@ describe('store strings (CLAUDE.md 7.2: every key in en and hi)', () => {
   });
 
   it('has a name for every item and customer, and a line for every reason', () => {
-    for (const it of ITEMS) expect(STRINGS.en![`counter.item.${it.id}`]).toBeDefined();
+    for (const it of ITEMS) expect(STRINGS.en![`store.item.${it.id}`]).toBeDefined();
     for (const c of dealShift(1)) expect(STRINGS.en![`counter.who.${c.who}`]).toBeDefined();
     const reasons = ['change_right', 'change_short', 'change_over', 'upi_real', 'upi_real_refused', 'upi_fake_screenshot', 'upi_collect_request', 'upi_wrong_amount'];
     for (const r of reasons) expect(STRINGS.en![`counter.why.${r}`]).toBeDefined();

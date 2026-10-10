@@ -20,7 +20,8 @@ import { t as mainT } from './features/main/content';
 import { MainScreen } from './features/main/MainScreen';
 import { PaisaTimes } from './features/news';
 import { Onboarding, loadProfile } from './features/onboarding';
-import { CounterShift } from './features/store';
+import { CounterShift, KiranaRun } from './features/store';
+import type { Receipt } from './features/store';
 import { OfflineBanner } from './features/sync/OfflineBanner';
 import type { Profile } from './features/onboarding';
 import { useStoresHydrated } from './game/hydration';
@@ -28,10 +29,10 @@ import { useGame } from './game/useGame';
 import { LocationScreen } from './screens/LocationScreen';
 import './design/kenney.css';
 
-type Screen = 'main' | 'map' | 'classroom' | 'store' | 'counter' | 'news' | 'phone';
-const SCREENS: Screen[] = ['main', 'map', 'classroom', 'store', 'counter', 'news', 'phone'];
+type Screen = 'main' | 'map' | 'classroom' | 'store' | 'kirana' | 'counter' | 'news' | 'phone';
+const SCREENS: Screen[] = ['main', 'map', 'classroom', 'store', 'kirana', 'counter', 'news', 'phone'];
 
-// No router or language picker yet: ?lang=hi switches language, ?screen=map|classroom|store|counter|news|phone
+// No router or language picker yet: ?lang=hi switches language, ?screen=map|classroom|store|kirana|counter|news|phone
 // opens that screen directly, ?seed=N fixes the quiz, ?event=<id> fires an event (demo / tests).
 const params = new URLSearchParams(window.location.search);
 const LANG: Lang = params.get('lang') === 'hi' ? 'hi' : 'en';
@@ -103,7 +104,8 @@ function Game({ profile, setProfile, lang, onLang, onOpenClassroom }: {
     window.history.pushState({ screen: s }, '');
     setScreen(s);
   };
-  const parentOf = (s: Screen): Screen => (s === 'counter' ? 'store' : s === 'store' || s === 'classroom' ? 'map' : 'main');
+  const parentOf = (s: Screen): Screen =>
+    s === 'counter' || s === 'kirana' ? 'store' : s === 'store' || s === 'classroom' ? 'map' : 'main';
   const back = useCallback(() => {
     const from = screenOf(window.history.state);
     if (!(window.history.state as { screen?: Screen } | null)?.screen) return setScreen((s) => parentOf(s));
@@ -194,6 +196,34 @@ function Game({ profile, setProfile, lang, onLang, onOpenClassroom }: {
     );
   }
   const worked = life.earned.includes(workSourceId(life));
+  // Pays for a Kirana Run basket: money out, sanity and health in. One shop_purchase per kind.
+  const payBasket = (r: Receipt) => {
+    const before = useGame.getState().life;
+    const out = lifeApi.applyEffects(before, { money: -r.total, sanity: r.sanity, health: r.health });
+    if (out.blocked) return false;
+    for (const kind of ['necessity', 'want'] as const) {
+      const items = r.items.filter((it) => it.kind === kind);
+      if (items.length === 0) continue;
+      const sum = (f: (it: (typeof items)[number]) => number) => items.reduce((s, it) => s + f(it), 0);
+      const delta = { money: -r.spent[kind], health: sum((it) => it.health), sanity: sum((it) => it.sanity) };
+      trackLife({ kind: 'buy', shop: kind }, before, { state: out.state, delta });
+    }
+    apply(out);
+    tick();
+    return true;
+  };
+  if (screen === 'kirana') {
+    return (
+      <KiranaRun
+        lang={lang}
+        // This week's list and shelves; ?seed= fixes them for demos and tests.
+        seed={(SEED + life.month * 8 + life.week) >>> 0}
+        money={life.money}
+        onPay={payBasket}
+        onExit={back}
+      />
+    );
+  }
   if (screen === 'counter') {
     return (
       <CounterShift
@@ -227,12 +257,8 @@ function Game({ profile, setProfile, lang, onLang, onOpenClassroom }: {
           lang={lang}
           state={life}
           worked={worked}
+          onShop={() => open('kirana')}
           onWork={() => open('counter')}
-          onBuy={(kind, out) => {
-            trackLife({ kind: 'buy', shop: kind }, life, out);
-            apply(out);
-            tick();
-          }}
           onClose={back}
         />
       )}

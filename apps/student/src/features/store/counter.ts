@@ -4,6 +4,7 @@
 // Pure like the engine: no clock, no Math.random, never mutates its input; the same seed
 // always deals the same customers, so a shift can be replayed and tested.
 import { WORK } from '../life/config';
+import { hash, shuffle } from './seed';
 
 export type ItemId = 'rice' | 'dal' | 'soap' | 'milk' | 'biscuits' | 'eggs' | 'oil' | 'tea' | 'bread';
 export type CustomerId = 'aunty' | 'uncle' | 'student' | 'driver' | 'dadi';
@@ -70,28 +71,6 @@ export const ITEMS: readonly Item[] = [
 ];
 const WHO: readonly CustomerId[] = ['aunty', 'uncle', 'student', 'driver', 'dadi'];
 const BAD_UPI: readonly UpiCase[] = ['fake_screenshot', 'collect_request', 'wrong_amount'];
-
-/** 32-bit integer hash (mulberry32 step) of the inputs: same inputs, same number. */
-function hash(...xs: number[]): number {
-  let h = 0x9e3779b9;
-  for (const x of xs) {
-    h = Math.imul(h ^ x, 0x85ebca6b);
-    h ^= h >>> 13;
-    h = Math.imul(h, 0xc2b2ae35);
-    h ^= h >>> 16;
-  }
-  return h >>> 0;
-}
-
-/** A deterministic shuffle (Fisher–Yates driven by hash). */
-function shuffle<T>(xs: readonly T[], seed: number, salt: number): T[] {
-  const out = [...xs];
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = hash(seed, salt, i) % (i + 1);
-    [out[i], out[j]] = [out[j]!, out[i]!];
-  }
-  return out;
-}
 
 /** A short payment that looks close: the last two digits swapped (173 → 137), else ₹10–30 less. */
 function shortOf(bill: number, h: number): number {

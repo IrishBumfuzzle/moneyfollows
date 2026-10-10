@@ -1,30 +1,28 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { t as storeT } from '../store/content';
 import { WORK } from './config';
-import { rupees, signed, signedRupees, t } from './content';
+import { rupees, t } from './content';
 import type { Lang } from './content';
-import { lifeApi } from './life';
 import { PixelIcon } from './PixelIcon';
-import type { LifeDelta, LifeOutcome, LifeState, ShopKind } from './types';
+import type { LifeState } from './types';
 import '../../design/kenney.css';
 import './life.css';
 
 /**
- * The convenience store's two options as a bottom sheet over the map, plus a shift at the
- * counter (the Counter Shift mini-game). It only asks lifeApi and reports the outcome; the
- * parent owns the state (and later queues toLifeEvent).
+ * The convenience store as a bottom sheet over the map: go shopping (the Kirana Run mini-game)
+ * or work a shift at the counter (the Counter Shift mini-game). The games do the buying and
+ * earning; this sheet only opens them.
  */
-export function StoreSheet<S extends LifeState>({ lang, state, worked, onBuy, onWork, onClose }: {
+export function StoreSheet({ lang, state, worked, onShop, onWork, onClose }: {
   lang: Lang;
-  state: S;
+  state: LifeState;
   /** Already worked this week: the counter shift is practice only. */
   worked: boolean;
-  onBuy: (kind: ShopKind, outcome: LifeOutcome<S>) => void;
+  onShop: () => void;
   onWork: () => void;
   onClose: () => void;
 }) {
   const tr = (key: string, vars?: Record<string, string | number>) => t(lang, key, vars);
-  const [last, setLast] = useState<{ id: number; delta: LifeDelta } | null>(null);
   const firstRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -33,13 +31,6 @@ export function StoreSheet<S extends LifeState>({ lang, state, worked, onBuy, on
     window.addEventListener('keydown', on);
     return () => window.removeEventListener('keydown', on);
   }, [onClose]);
-
-  function buy(kind: ShopKind) {
-    const out = lifeApi.buy(state, kind);
-    if (out.blocked) return;
-    setLast((p) => ({ id: (p?.id ?? 0) + 1, delta: out.delta }));
-    onBuy(kind, out);
-  }
 
   return (
     <div className="lf-overlay" lang={lang} onClick={onClose}>
@@ -62,31 +53,15 @@ export function StoreSheet<S extends LifeState>({ lang, state, worked, onBuy, on
         <p>{tr('life.store.intro', { money: rupees(state.money) })}</p>
 
         <div className="lf-offers">
-          {lifeApi.shopOffers(state).map((o, i) => (
-            <button
-              key={o.kind}
-              ref={i === 0 ? firstRef : undefined}
-              className={`k-btn lf-offer ${o.affordable ? '' : 'is-dim'}`}
-              aria-disabled={!o.affordable}
-              onClick={() => buy(o.kind)}
-            >
-              <span className="lf-offer-icon">
-                <PixelIcon id={o.icon} size={32} />
-              </span>
-              <span className="lf-offer-body">
-                <span className="lf-offer-label">{tr(o.label)}</span>
-                <span className="lf-offer-hint">{tr(o.hint)}</span>
-                <span className="lf-offer-cost">
-                  <span>{rupees(o.price)}</span>
-                  <span className="lf-inline">
-                    <PixelIcon id="smile" />
-                    {tr('life.meter.sanity')} {signed(o.sanity)}
-                  </span>
-                </span>
-                {!o.affordable && <span className="lf-offer-why">{tr('life.blocked.not_enough_money')}</span>}
-              </span>
-            </button>
-          ))}
+          <button ref={firstRef} className="k-btn lf-offer" onClick={onShop}>
+            <span className="lf-offer-icon">
+              <PixelIcon id="sack" size={32} />
+            </span>
+            <span className="lf-offer-body">
+              <span className="lf-offer-label">{storeT(lang, 'store.sheet.shop.label')}</span>
+              <span className="lf-offer-hint">{storeT(lang, 'store.sheet.shop.hint')}</span>
+            </span>
+          </button>
           <button className="k-btn lf-offer" onClick={onWork}>
             <span className="lf-offer-icon">
               <PixelIcon id="coin" size={32} />
@@ -99,15 +74,6 @@ export function StoreSheet<S extends LifeState>({ lang, state, worked, onBuy, on
             </span>
           </button>
         </div>
-
-        <p className="lf-status" role="status" aria-live="polite">
-          {last && (
-            <span key={last.id} className="lf-status-text">
-              {tr('life.store.bought')} {signedRupees(last.delta.money)}
-              {last.delta.sanity !== 0 && ` · ${tr('life.meter.sanity')} ${signed(last.delta.sanity)}`}
-            </span>
-          )}
-        </p>
       </div>
     </div>
   );
