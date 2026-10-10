@@ -1,4 +1,5 @@
--- The parts of Supabase the migrations rely on, for a plain Postgres test database.
+-- The parts of Supabase the migrations rely on, for a plain Postgres test database only:
+-- on the supabase/postgres image (docker-compose.yml) db.ts uses the real ones instead.
 -- On a real Supabase project these already exist.
 do $$
 begin
