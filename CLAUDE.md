@@ -19,6 +19,13 @@ Read this file fully at the start of every session. It is the source of truth fo
 
 Full product spec: `docs/spec.md` (paste the team's spec there). This file summarizes what we build *this weekend*.
 
+### 1.1 App and game structure
+
+- The app has several **sections**; the **game** is one of them. The other sections are not decided yet.
+- Entering the game takes the player to a **map** with places: **Home, Shop, School, Hospital** (more may be added).
+- A place can open a **sub-map** with its own locations, and the player plays inside those locations.
+- Still to decide: what the other app sections are, and how the map's places connect to the weekly decision loop and the mini-games (section 2).
+
 ## 2. Scope for the hackathon (MoSCoW)
 
 ### Must (the demo path depends on these)
@@ -280,20 +287,31 @@ Nobody on the team speaks Telugu. Telugu is **not** a shipped language. If gener
 
 | When | Deadline | Our internal target |
 |---|---|---|
-| Sat 10 Oct, 22:00 | **Mid Submission 1** | Submit by **21:30** |
-| Sun 11 Oct, 04:00 | **Mid Submission 2** | Submit by **03:30** |
+| Sat 10 Oct, 22:00 | **M1 (Approach PDF)** | Submit by **21:30** |
+| Sun 11 Oct, 04:00 | **M2 (Progress PDF + code push)** | Submit by **03:30** |
 | Sun 11 Oct, 08:30 | — | **Feature freeze** |
-| Sun 11 Oct, 11:00 | **Code submission (hard)** | Submit by **10:30** |
-| Sun 11 Oct, 11:30 | **PPT submission** | PPT finished by 10:00, submit by 11:15 |
+| Sun 11 Oct, 11:00 | **Final submission (hard):** code, README, LICENSE, zip, report, video | Submit by **10:30** |
+| Sun 11 Oct, 11:30 | **Slides submission** | Slides finished by 10:00, submit by 11:15 |
 | Sun 11 Oct, 13:30–17:00 | R1 internal presentations | Take notes on every piece of judge feedback |
 | Sun 11 Oct, 17:30 on | R2 final + closing | Fix the pitch only, no code changes |
 
+**What each submission requires (from the organizers)**
+
+- **M1, Approach (10 Oct, 22:00):** a PDF, **max 2 pages**, with the high-level idea, abstract, approach and/or proposed architecture (a high-level pipeline is enough, no exact details), plus a rough testing plan outlining the testing methods we intend to use.
+- **M2, Mid-submission (11 Oct, 04:00):** (i) a progress report PDF, **max 2 pages**: approach, experiments run so far, progress on testing; (ii) a **code push** with all scripts built so far.
+- **Final submission (11 Oct, 11:00):**
+  - Full solution code in the repository, with a `README.md` holding **build and run instructions only** (do not explain the solution or approach in it) and a `LICENSE` file (per Section 11 of the brief).
+  - A **zip archive** of the code, uploaded through the submission form as a backup.
+  - A **final report PDF, max 3 pages**: the solution, approach, features, etc.
+  - A **demo video, max 4 minutes**: a recording of the solution with a voiceover explaining it.
+- **Slides (11 Oct, 11:30):** the presentation slides.
+
 **Definition of done per checkpoint**
 
-- **Mid 1 (live URL, even if rough):** language (en/hi) → join class → nickname → persona → weekly decisions → consequence + lesson → rewind → month-end score. Engine tests green. Deployed. Submission text maps our features to the brief's measures. *Confirm now what format Mid 1 and Mid 2 require (link, video, doc).*
-- **Mid 2:** + Scam or Safe?, Time Machine with `AssumptionBanner`, offline play with queued sync, dashboard class progress, Hindi complete for all 24 cards, guardrail linter in CI.
-- **Freeze (08:30):** + baseline/end-line quiz and learning-gain chart, demo mode, voice-over if time allows. After this: bugs, copy, polish only.
-- **Code submit (10:30):** clean `main`, README with run steps, `.env.example`, no secrets, deployed link works on a phone.
+- **M1:** the approach PDF is submitted. Build target for the same time (live URL, even if rough): language (en/hi) → join class → nickname → persona → weekly decisions → consequence + lesson → rewind → month-end score. Engine tests green. Deployed.
+- **M2:** the progress PDF is submitted and all code is pushed. Build target: + Scam or Safe?, Time Machine with `AssumptionBanner`, offline play with queued sync, dashboard class progress, Hindi complete for all 24 cards, guardrail linter in CI.
+- **Freeze (08:30):** + baseline/end-line quiz and learning-gain chart, demo mode, voice-over if time allows. After this: bugs, copy, polish only. Start the final report and record the demo video now.
+- **Final submit (10:30):** clean `main`, README (build/run steps only), `LICENSE`, `.env.example`, no secrets, deployed link works on a phone, zip uploaded, final report PDF (≤ 3 pages), demo video (≤ 4 min, voiceover).
 
 Sleep in staggered shifts (min. 3 hours each), roughly Sun 01:00–04:00 and 04:00–08:00. Tired teams ship bugs.
 
@@ -309,7 +327,7 @@ Sleep in staggered shifts (min. 3 hours each), roughly Sun 01:00–04:00 and 04:
 8. **Close (15 s):** scale story and the rubric map slide.
 
 **Demo mode:** `?demo=1` loads a seeded save (fixed seed, mid-year state) so the demo never depends on luck or a long play-through.
-**Fallbacks:** a recorded 3-minute video, a seeded database, and a local build on a laptop. Record the video before R1 (by ~13:00).
+**Fallbacks:** the submitted demo video (≤ 4 min, with voiceover, due at the 11:00 final submission), a seeded database, and a local build on a laptop.
 
 ## 10. Pitch slides (5) and the rubric map
 
@@ -335,6 +353,7 @@ Note: the brief's heading says "six measures" but lists seven. We cover all seve
 - Manual smoke on a real Android phone: install the PWA, play offline, reconnect, sync.
 - Run the new-user path from scratch with someone who has never seen the app; time to first decision under 3 minutes.
 - Final check: a fresh clone → `pnpm install && pnpm dev:student` works from the README alone.
+- `README.md` contains only build and run instructions; `LICENSE` exists at the repo root; the zip archive matches the pushed code.
 
 ## 12. Decisions log and open questions
 
@@ -344,7 +363,8 @@ Append decisions here as `YYYY-MM-DD HH:MM — decision — who`.
 - 2026-10-10 — No runtime LLM in the student app; AI used at authoring time with human review — team.
 
 Open questions:
-- What do Mid 1 and Mid 2 submissions require (link, video, document)?
+- Which license does Section 11 of the brief require for the `LICENSE` file?
+- What are the app's other sections, and how do the game map's places (Home, Shop, School, Hospital) and sub-maps connect to the weekly decision loop and mini-games?
 - Which success measures are scored: six or seven?
 - Compliance-approved assumed growth rates for Time Machine (placeholders: 4/8/12%).
 - Who is the native Telugu reviewer, if any, via the NGO partner?
