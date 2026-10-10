@@ -1,0 +1,12 @@
+{
+  "id": "budget.recharge.01",
+  "pillar": "plan_budget",
+  "concept": "needs_vs_wants",
+  "personas": ["ravi", "sana", "kiran"],
+  "difficulty": 1,
+  "text": "t:budget.recharge.01.story",
+  "choices": [
+    { "id": "a", "label": "t:recharge_basic", "effects": { "needs": -199 }, "lesson": "t:lesson.needs_first" },
+    { "id": "b", "label": "t:recharge_plus_earphones", "effects": { "needs": -199, "wants": -599 }, "lesson": "t:lesson.wants_cost" }
+  ]
+}

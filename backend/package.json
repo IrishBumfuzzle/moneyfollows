@@ -1,0 +1,30 @@
+{
+  "name": "paisa-path-backend",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @paisa/api",
+    "start": "npm run start -w @paisa/api",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "vitest run",
+    "check:boundaries": "node scripts/check-boundaries.mjs",
+    "check": "npm run check:boundaries && npm run typecheck && npm test",
+    "db:up": "docker compose up -d db",
+    "db:down": "docker compose down",
+    "db:generate": "npm run generate -w @paisa/db",
+    "db:migrate": "npm run migrate -w @paisa/db"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}
