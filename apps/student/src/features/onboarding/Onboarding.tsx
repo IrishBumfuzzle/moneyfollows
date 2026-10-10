@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { JoinError, joinClass } from '../../api/joinClass';
 import type { JoinResult } from '../../api/joinClass';
-import { track } from '../../api/track';
+import { setStudent, track } from '../../api/track';
 import { formatRupees, t } from './content';
 import { AVATARS, PERSONAS } from './presets';
 import { saveProfile } from './profile';
@@ -83,15 +83,23 @@ export function Onboarding({ onDone, initialLang = 'en' }: { onDone: (profile: P
     if (joined?.code === c && joined.nickname === n) return goTo(3);
     setBusy(true);
     try {
-      setJoined({ code: c, nickname: n, result: await joinClass(c, n) });
+      const result = await joinClass(c, n, lang);
+      // Events tracked so far (language_changed) were held; they now go out with the student's ids.
+      setStudent(result.anon_id, result.class_id);
+      setJoined({ code: c, nickname: n, result });
       goTo(3);
     } catch (err) {
       const kind = err instanceof JoinError ? err.code : null;
-      if (kind === 'class_not_found') {
-        setError({ step: 1, key: 'onboarding.class.notFound' });
+      if (kind === 'class_not_found' || kind === 'class_closed') {
+        setError({ step: 1, key: kind === 'class_closed' ? 'onboarding.class.closed' : 'onboarding.class.notFound' });
         window.history.back(); // to the class-code step
       } else {
-        setError({ step: 2, key: kind === 'nickname_rejected' ? 'onboarding.nickname.rejected' : 'onboarding.error.generic' });
+        const key =
+          kind === 'nickname_rejected' ? 'onboarding.nickname.rejected'
+          : kind === 'nickname_taken' ? 'onboarding.nickname.taken'
+          : kind === 'busy' ? 'onboarding.error.busy'
+          : 'onboarding.error.generic';
+        setError({ step: 2, key });
       }
     } finally {
       setBusy(false);
@@ -109,6 +117,7 @@ export function Onboarding({ onDone, initialLang = 'en' }: { onDone: (profile: P
       classCode: joined.code,
       classId: joined.result.class_id,
       anonId: joined.result.anon_id,
+      ...(joined.result.rejoin_code ? { rejoinCode: joined.result.rejoin_code } : {}),
     };
     setBusy(true);
     try {

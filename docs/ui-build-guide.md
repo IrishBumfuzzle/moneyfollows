@@ -31,25 +31,23 @@ Paisa Path is a web app that looks and plays like a small pixel-art game on a ph
 
 This split differs from CLAUDE.md, which gives onboarding and the Room hub to UI-1 and describes a Room with a door, newspaper, trophy and notebook. Phase 0 records the new lanes and the simpler main screen in CLAUDE.md, because Claude reads it to decide which files you may edit.
 
-### What exists today (checked Sat 23:00)
+### What exists today (checked Sun, after the Backend merge)
 
 | Thing | State |
 | --- | --- |
-| Map screen (`src/screens/LocationScreen.tsx`); tapping School opens the classroom | Works |
-| School classroom quiz (`src/features/classroom`): 5 practice questions, en + hi, tests | Works (other UI dev) |
-| Kenney pixel UI kit (`src/design/kenney.css`): `k-btn`, `k-btn is-primary`, `k-panel`, `k-banner`, `k-round` | Works; reuse it for your buttons and panels |
-| `App.tsx`: switches between map and classroom with `history.pushState`, so Android back works; `?lang=hi` switches language | Works; no main screen, onboarding or news yet |
-| Translations: each feature keeps `content/en.json` + `hi.json` and a small `t()` (see `features/classroom/content/index.ts`); react-i18next not installed | Pattern to copy |
-| `pnpm check` (typecheck + tests) and Vitest | Works |
-| `pnpm` on your laptop | Fixed; your `package.json` has a new `packageManager` line that is not committed yet |
-| Onboarding (`src/features/onboarding`) | Works |
-| Main screen (`src/features/main`): persona on a couch (placeholder pixel art), news rack with "New" badge, Play → map | Works; start screen after onboarding |
-| Paisa Times (`src/features/news`): front page, articles, thought-cloud words with speaker, questions with full/half wage, toast and coins, Word Wallet, `markNewEdition()` | Works on a copy of BE-1's edition 2026-W41 (`content/pack/`) |
-| Shared game store (`src/game/useGame.ts`, Zustand + IndexedDB): common money wallet, health, sanity, `earn(amount, sourceId)` | Works; swap its internals for the engine when `packages/engine` is on main |
-| Sudden events and the phone (`src/features/events`): an injury → hospital bill (pay, borrow from family, or rest); a phone with an inbox and chat threads, 4 scams to spot (KYC link, lottery fee, "double your money", OTP) and 3 real offers (tutoring hour, shop shift, savings club pointing to the Bank); red flags, lesson, 1930 helpline; debt and Pay back | Works on a deterministic schedule (steps = place visits and purchases); `?event=<id>` and `triggerEvent(id)` for the demo panel |
-| `apps/dashboard` | Nothing yet |
-| `packages/shared`, engine (`earn()`), content, api-client | Not on `main` yet (an `origin/Backend` branch exists) |
-| Life meters API (`src/features/life`, see `docs/life-meters-api.md`): one common money wallet, health, sanity; the store's necessity/want options, work, school | Frontend API, meters bar and store sheet built; work/school buttons, engine and backend not yet |
+| `packages/shared`, `engine`, `content`, `api-client` | On `main` (PR #30). The student app imports `@paisa/shared`, `@paisa/content`, `@paisa/api-client` and the engine's quiz session |
+| Event sync (`src/api/track.ts`) | `track()` → api-client tracker → IndexedDB sync queue → `push_events`. Events made before joining are held, then stamped with the student's ids; offline events wait and flush on start, on reconnect and every 5 events. Sends onboarding, app_open, map_opened, location_selected, shop_purchase, event_triggered, quiz_submitted, glossary and news events |
+| Join class (`src/api/joinClass.ts`) | Real `join_class` through the api-client, with friendly errors (wrong code, closed class, nickname taken or rejected, too many tries). Falls back to a stand-in when no backend is configured (`VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` in the repo-root `.env`) |
+| Onboarding (`src/features/onboarding`) | Works; saves the rejoin code |
+| Main screen (`src/features/main`) | Works, real pixel-art room (PR #28) |
+| Paisa Times (`src/features/news`) | Works on `@paisa/content` (edition 2026-W41 + glossary); Word Wallet, `markNewEdition()` |
+| Map (`src/screens/LocationScreen.tsx`), store sheet, meters bar | Works |
+| Classroom (`src/features/classroom`) | Works; questions from `@paisa/content`, quiz logic from `@paisa/engine`; question count and pillars from the class (`API.md` §5.5, backend field proposed); bigger stage that fills the screen |
+| Sudden events and the phone (`src/features/events`) | Works: injury → hospital bill, 4 scams, 3 real offers, debt and Pay back |
+| Shared game store (`src/game/useGame.ts`) | Works: common money wallet, health, sanity, debt, `earn`. Not yet on the engine's `GameState`: the engine pays into jars, the app uses one wallet; decide when building the game loop |
+| Crash screen (`src/ErrorBoundary.tsx`) | A crash shows "Back to the main screen" instead of a blank page, and logs the error |
+| Game loop (pins, place decisions, rewind, sleep, Month Recap), Bank, mini-games, Me/Notes/Settings, demo panel, PWA/offline banner | Not built |
+| `apps/dashboard` | Only `vercel.json`; backend RPCs are ready |
 
 ### Which document wins
 

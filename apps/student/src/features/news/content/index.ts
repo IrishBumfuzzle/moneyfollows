@@ -1,20 +1,17 @@
-// Paisa Times content. `pack/` is a copy of BE-1's content pack on origin/Backend
-// (packages/content/news/2026-W41.json, glossary.json and their news.* / glossary.* strings),
-// keys unchanged. When packages/content is on main, point getEdition() and the glossary at it
-// and delete pack/; nothing else changes.
-import edition from './pack/2026-W41.json';
-import glossary from './pack/glossary.json';
-import packEn from './pack/en.json';
-import packHi from './pack/hi.json';
+// Paisa Times content comes from BE-1's content pack (@paisa/content): the edition, the
+// glossary and their news.* / glossary.* strings. Only the reader's own UI strings live here.
+import { glossary, i18n, news } from '@paisa/content';
 import en from './en.json';
 import hi from './hi.json';
 import type { Article, Edition, GlossaryTerm, Lang, TKey } from '../types';
 
-export const CONTENT_VERSION = 'news-2026-W41';
+export { CONTENT_VERSION } from '@paisa/content';
+
+const pack = i18n as Partial<Record<Lang, Record<string, string>>>;
 
 export const STRINGS: Partial<Record<Lang, Record<string, string>>> = {
-  en: { ...packEn, ...en },
-  hi: { ...packHi, ...hi },
+  en: { ...pack.en, ...en },
+  hi: { ...pack.hi, ...hi },
 };
 
 /** Resolves a `t:` key (or bare key) with {{var}} substitution; falls back to English, then the key. */
@@ -28,9 +25,10 @@ const INR = new Intl.NumberFormat('en-IN');
 /** ₹ with Indian grouping in every language (CLAUDE.md 5.7). */
 export const formatRupees = (n: number) => `₹${INR.format(n)}`;
 
-const ARTICLES = edition as Article[];
-const EDITION: Edition = { id: ARTICLES[0].edition, articles: ARTICLES };
-const GLOSSARY = new Map((glossary as GlossaryTerm[]).map((g) => [g.id, g]));
+// The newest edition in the pack is the current one (edition ids sort by ISO week).
+const EDITION_ID = [...new Set(news.map((a: Article) => a.edition))].sort().at(-1) ?? '';
+const EDITION: Edition = { id: EDITION_ID, articles: news.filter((a: Article) => a.edition === EDITION_ID) };
+const GLOSSARY = new Map(glossary.map((g: GlossaryTerm) => [g.id, g]));
 
 /** The current edition. The only place that knows where articles come from. */
 export function getEdition(): Edition {

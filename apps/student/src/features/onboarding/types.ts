@@ -1,8 +1,6 @@
-// Mirror of the types onboarding needs from packages/shared (CLAUDE.md 5.1). `packages/shared`
-// is not on main yet; when it lands, import Lang and PersonaId from '@paisa/shared' instead.
+import type { Lang, PersonaId } from '@paisa/shared';
 
-export type Lang = 'en' | 'hi' | 'te' | 'ur';
-export type PersonaId = 'ravi' | 'sana' | 'kiran' | 'lakshmi';
+export type { Lang, PersonaId };
 
 /** Saved on the phone (IndexedDB) after onboarding. Nickname + class only, no real names (CLAUDE.md 7.5). */
 export interface Profile {
@@ -14,4 +12,5 @@ export interface Profile {
   classCode: string;
   classId: string;             // from join_class
   anonId: string;              // from join_class
+  rejoinCode?: string;         // from join_class: lets the student rejoin on a new phone (show on Me)
 }
