@@ -1,0 +1,37 @@
+{
+  "name": "paisa-path",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.34.6",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev:student": "pnpm --filter student dev",
+    "dev:dashboard": "pnpm --filter dashboard dev",
+    "typecheck": "pnpm -r --if-present typecheck && tsc -p tsconfig.json",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "lint:content": "tsx scripts/lint-content.ts",
+    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm lint:content",
+    "seed": "tsx scripts/seed.ts",
+    "db:test:up": "docker compose -f supabase/tests/docker-compose.yml up -d --wait"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@paisa/content": "workspace:*",
+    "@paisa/engine": "workspace:*",
+    "@paisa/shared": "workspace:*",
+    "@types/node": "^22.20.5",
+    "eslint": "^9.39.5",
+    "globals": "^16.5.0",
+    "postgres": "^3.4.9",
+    "prettier": "^3.9.10",
+    "tsx": "^4.23.15",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.71.1",
+    "vitest": "^3.2.7",
+    "zod": "^4.6.5"
+  }
+}

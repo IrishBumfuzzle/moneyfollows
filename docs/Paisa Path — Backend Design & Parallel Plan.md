@@ -1,3 +1,5 @@
+> **Superseded (2026-10-10).** The team follows `CLAUDE.md` on `main`: a pnpm workspace with Supabase, `packages/shared` contracts and the BE-1 / BE-2 lanes. The Fastify/Drizzle `backend/` this doc describes was removed. Kept for reference only.
+
 # Paisa Path — Backend Design & Parallel Plan
 
 Oct 10, 2026 · Parth Sharma · Draft v0.1

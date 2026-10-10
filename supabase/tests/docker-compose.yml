@@ -1,0 +1,15 @@
+# Plain Postgres for the SQL tests (pnpm db:test:up). Tests create and drop their
+# own databases here and stub the bits of Supabase they need (auth-stub.sql).
+# `supabase start` works too: point SUPABASE_TEST_DB_URL at its database.
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '54330:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 3s
+      timeout: 3s
+      retries: 20

@@ -1,0 +1,29 @@
+{
+  "_readme": "Guardrail word lists for the content check (pnpm lint:content). Anyone can edit this file: add a word or phrase to a list and the check enforces it. Matching ignores case and works on whole words, in every language file. 'brands' and 'promises' are errors. 'shaming' only gives a warning. 'investingTerms' are real product words that are not allowed in cards about investing. Scam or Safe? messages may show a scammer's promises, links and numbers on purpose, but never real brands.",
+  "brands": [
+    "paytm", "phonepe", "phone pe", "gpay", "google pay", "bhim", "amazon pay", "mobikwik", "cred",
+    "sbi", "state bank", "hdfc", "icici", "axis bank", "kotak", "yes bank", "canara", "bank of baroda", "punjab national", "union bank", "indusind", "idfc", "bandhan",
+    "lic", "zerodha", "groww", "upstox", "angel one", "paisabazaar", "coin dcx", "wazirx", "binance", "bitcoin", "ethereum",
+    "sensex", "nifty", "reliance", "tata", "infosys", "adani", "vanguard",
+    "dream11", "my11circle", "mpl", "rummy circle", "winzo",
+    "kreditbee", "moneyview", "cashe", "lazypay", "simpl", "bajaj finserv",
+    "ppf", "nps", "sukanya", "atal pension", "jan dhan", "mutual fund"
+  ],
+  "promises": [
+    "guaranteed", "guarantee", "risk-free", "risk free", "no risk", "sure return", "sure returns", "sure profit", "100% safe", "double your money",
+    "can't lose", "cannot lose", "you should invest", "you should buy", "you must invest", "best investment",
+    "गारंटी", "गारंटीड", "बिना जोखिम", "जोखिम-मुक्त", "पक्का मुनाफ़ा", "पक्का मुनाफा", "पैसा दोगुना", "पैसे दोगुने", "ज़रूर निवेश करो", "ज़रूर निवेश करें"
+  ],
+  "shaming": [
+    "poor people", "lazy", "stupid", "useless", "beggar", "shameful", "idiot", "worthless",
+    "गरीब लोग", "आलसी", "बेवकूफ़", "बेवकूफ", "निकम्मा", "बेकार लोग"
+  ],
+  "investingTerms": [
+    "mutual fund", "mutual funds", "stock", "stocks", "share market", "stock market", "shares", "fd", "fixed deposit", "sip",
+    "demat", "etf", "index fund", "crypto", "cryptocurrency", "म्यूचुअल फंड", "शेयर बाज़ार", "शेयर बाजार", "फिक्स्ड डिपॉज़िट"
+  ],
+  "allowedLinks": ["cybercrime.gov.in"],
+  "allowedNumbers": ["1930"],
+  "fictionalAssets": ["Steady Deposit", "Mixed Basket", "Rocket Co"],
+  "lengthCaps": { "story": 220, "label": 40, "lesson": 140, "note": 140 }
+}

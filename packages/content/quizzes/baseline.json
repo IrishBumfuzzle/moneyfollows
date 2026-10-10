@@ -1,0 +1,110 @@
+[
+  {
+    "id": "quiz.budget.needs.baseline",
+    "quiz": "baseline",
+    "pillar": "plan_budget",
+    "concept": "needs_vs_wants",
+    "text": "t:quiz.budget.needs.baseline.q",
+    "options": [
+      "t:quiz.budget.needs.baseline.o1",
+      "t:quiz.budget.needs.baseline.o2",
+      "t:quiz.budget.needs.baseline.o3"
+    ],
+    "answer": 0,
+    "explanation": "t:quiz.budget.needs.baseline.why",
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "quiz.budget.plan.baseline",
+    "quiz": "baseline",
+    "pillar": "plan_budget",
+    "concept": "pay_goal_first",
+    "text": "t:quiz.budget.plan.baseline.q",
+    "options": [
+      "t:quiz.budget.plan.baseline.o1",
+      "t:quiz.budget.plan.baseline.o2",
+      "t:quiz.budget.plan.baseline.o3"
+    ],
+    "answer": 1,
+    "explanation": "t:quiz.budget.plan.baseline.why",
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "quiz.save.emergency.baseline",
+    "quiz": "baseline",
+    "pillar": "save_manage",
+    "concept": "emergency_fund",
+    "text": "t:quiz.save.emergency.baseline.q",
+    "options": [
+      "t:quiz.save.emergency.baseline.o1",
+      "t:quiz.save.emergency.baseline.o2",
+      "t:quiz.save.emergency.baseline.o3"
+    ],
+    "answer": 1,
+    "explanation": "t:quiz.save.emergency.baseline.why",
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "quiz.invest.compound.baseline",
+    "quiz": "baseline",
+    "pillar": "understand_investing",
+    "concept": "compounding",
+    "text": "t:quiz.invest.compound.baseline.q",
+    "options": [
+      "t:quiz.invest.compound.baseline.o1",
+      "t:quiz.invest.compound.baseline.o2",
+      "t:quiz.invest.compound.baseline.o3"
+    ],
+    "answer": 1,
+    "explanation": "t:quiz.invest.compound.baseline.why",
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "quiz.safe.otp.baseline",
+    "quiz": "baseline",
+    "pillar": "stay_safe",
+    "concept": "never_share_otp",
+    "text": "t:quiz.safe.otp.baseline.q",
+    "options": [
+      "t:quiz.safe.otp.baseline.o1",
+      "t:quiz.safe.otp.baseline.o2",
+      "t:quiz.safe.otp.baseline.o3"
+    ],
+    "answer": 1,
+    "explanation": "t:quiz.safe.otp.baseline.why",
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "quiz.safe.collect.baseline",
+    "quiz": "baseline",
+    "pillar": "stay_safe",
+    "concept": "upi_collect",
+    "text": "t:quiz.safe.collect.baseline.q",
+    "options": [
+      "t:quiz.safe.collect.baseline.o1",
+      "t:quiz.safe.collect.baseline.o2",
+      "t:quiz.safe.collect.baseline.o3"
+    ],
+    "answer": 1,
+    "explanation": "t:quiz.safe.collect.baseline.why",
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  }
+]

@@ -1,0 +1,26 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`golden > sana / explorer / seed 42, always the first choice 1`] = `
+"start jars={"needs":3500,"wants":1800,"goals":800,"savings":1900} debt=0 stage=event
+m1w1 event event.rain -> a | jars={"needs":3500,"wants":1800,"goals":800,"savings":1850} debt=0
+m1w1 decision save.delayed -> a | jars={"needs":3500,"wants":1700,"goals":800,"savings":1850} debt=0
+m1w2 event event.ok -> ok | jars={"needs":3500,"wants":1700,"goals":800,"savings":1850} debt=0
+m1w2 decision invest.a -> a | jars={"needs":3500,"wants":1600,"goals":800,"savings":1850} debt=0
+m1w3 decision flag.set -> a | jars={"needs":3500,"wants":1600,"goals":800,"savings":1850} debt=200
+m1w4 decision budget.sana_only -> a | jars={"needs":3500,"wants":1500,"goals":800,"savings":1850} debt=200
+m1w4 monthEnd score=30 t:reflection.save_first -> continue | jars={"needs":6500,"wants":3100,"goals":1600,"savings":3450} debt=200 payday=8000
+m2w1 decision flag.req -> a | jars={"needs":6500,"wants":3000,"goals":1600,"savings":3450} debt=200
+m2w2 event event.rain -> a | jars={"needs":6500,"wants":3000,"goals":1600,"savings":3400} debt=200
+m2w2 decision save.a -> a | jars={"needs":6500,"wants":2800,"goals":1600,"savings":4100} debt=200 landed=t:note.later
+m2w3 decision budget.a -> a | jars={"needs":6500,"wants":2700,"goals":1600,"savings":4100} debt=200
+m2w4 decision save.delayed -> a | jars={"needs":6500,"wants":2600,"goals":1600,"savings":4100} debt=200
+m2w4 monthEnd score=59 t:reflection.goal_steps -> continue | jars={"needs":9500,"wants":4200,"goals":2400,"savings":5700} debt=200 payday=8000
+m3w1 decision budget.sana_only -> a | jars={"needs":9500,"wants":4100,"goals":2400,"savings":5700} debt=200
+m3w2 decision flag.set -> a | jars={"needs":9500,"wants":4100,"goals":2400,"savings":5700} debt=400
+m3w3 event event.ok -> ok | jars={"needs":9500,"wants":4100,"goals":2400,"savings":5700} debt=400
+m3w3 decision flag.req -> a | jars={"needs":9500,"wants":4000,"goals":2400,"savings":5700} debt=400
+m3w4 event event.rain -> a | jars={"needs":9500,"wants":4000,"goals":2400,"savings":5650} debt=400
+m3w4 decision save.a -> a | jars={"needs":9500,"wants":3800,"goals":2400,"savings":5850} debt=400
+m3w4 monthEnd score=59 t:reflection.save_first -> continue | jars={"needs":9500,"wants":3800,"goals":2400,"savings":5850} debt=400
+end scores=[30,59,59] seen=17 lessons=2"
+`;

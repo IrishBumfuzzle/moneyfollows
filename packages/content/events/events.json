@@ -1,0 +1,615 @@
+[
+  {
+    "id": "event.bicycle_puncture.01",
+    "pillar": "save_manage",
+    "concept": "surprise",
+    "personas": [
+      "ravi",
+      "sana",
+      "kiran",
+      "lakshmi"
+    ],
+    "levels": [
+      "starter",
+      "explorer",
+      "planner"
+    ],
+    "weight": 3,
+    "text": "t:event.bicycle_puncture.01.story",
+    "choices": [
+      {
+        "id": "ok",
+        "label": "t:common.ok",
+        "icon": "bike",
+        "effects": {
+          "jars": {
+            "needs": -50
+          }
+        },
+        "lesson": "t:event.bicycle_puncture.01.lesson"
+      }
+    ],
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "event.bonus_tip.01",
+    "pillar": "save_manage",
+    "concept": "surprise",
+    "personas": [
+      "ravi",
+      "kiran"
+    ],
+    "levels": [
+      "starter",
+      "explorer",
+      "planner"
+    ],
+    "weight": 1,
+    "text": "t:event.bonus_tip.01.story",
+    "choices": [
+      {
+        "id": "ok",
+        "label": "t:common.ok",
+        "icon": "coins",
+        "effects": {
+          "jars": {
+            "wants": 50,
+            "savings": 50
+          }
+        },
+        "lesson": "t:event.bonus_tip.01.lesson"
+      }
+    ],
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "event.exam_fee.01",
+    "pillar": "save_manage",
+    "concept": "surprise",
+    "personas": [
+      "ravi",
+      "sana",
+      "kiran"
+    ],
+    "levels": [
+      "starter",
+      "explorer",
+      "planner"
+    ],
+    "weight": 3,
+    "text": "t:event.exam_fee.01.story",
+    "choices": [
+      {
+        "id": "a",
+        "label": "t:event.exam_fee.01.a.label",
+        "icon": "book",
+        "effects": {
+          "jars": {
+            "savings": -500
+          }
+        },
+        "lesson": "t:event.exam_fee.01.a.lesson",
+        "rating": "best"
+      },
+      {
+        "id": "b",
+        "label": "t:event.exam_fee.01.b.label",
+        "icon": "piggy",
+        "effects": {
+          "jars": {
+            "goals": -500
+          }
+        },
+        "lesson": "t:event.exam_fee.01.b.lesson",
+        "rating": "ok"
+      },
+      {
+        "id": "c",
+        "label": "t:event.exam_fee.01.c.label",
+        "icon": "wait",
+        "effects": {},
+        "delayed": [
+          {
+            "afterWeeks": 2,
+            "effects": {
+              "jars": {
+                "needs": -600
+              }
+            },
+            "note": "t:event.exam_fee.01.c.later"
+          }
+        ],
+        "lesson": "t:event.exam_fee.01.c.lesson",
+        "rating": "risky"
+      }
+    ],
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "event.festival_gift.01",
+    "pillar": "plan_budget",
+    "concept": "surprise",
+    "personas": [
+      "ravi",
+      "sana",
+      "kiran",
+      "lakshmi"
+    ],
+    "levels": [
+      "starter",
+      "explorer",
+      "planner"
+    ],
+    "weight": 2,
+    "text": "t:event.festival_gift.01.story",
+    "choices": [
+      {
+        "id": "a",
+        "label": "t:event.festival_gift.01.a.label",
+        "icon": "gift",
+        "effects": {
+          "jars": {
+            "wants": 150,
+            "savings": 150
+          }
+        },
+        "lesson": "t:event.festival_gift.01.a.lesson",
+        "rating": "best"
+      },
+      {
+        "id": "b",
+        "label": "t:event.festival_gift.01.b.label",
+        "icon": "festival",
+        "effects": {
+          "jars": {
+            "wants": 300
+          }
+        },
+        "lesson": "t:event.festival_gift.01.b.lesson",
+        "rating": "ok"
+      },
+      {
+        "id": "c",
+        "label": "t:event.festival_gift.01.c.label",
+        "icon": "piggy",
+        "effects": {
+          "jars": {
+            "goals": 300
+          }
+        },
+        "lesson": "t:event.festival_gift.01.c.lesson",
+        "rating": "ok"
+      }
+    ],
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "event.friend_borrow.01",
+    "pillar": "save_manage",
+    "concept": "surprise",
+    "personas": [
+      "ravi",
+      "sana",
+      "kiran",
+      "lakshmi"
+    ],
+    "levels": [
+      "starter",
+      "explorer",
+      "planner"
+    ],
+    "weight": 3,
+    "text": "t:event.friend_borrow.01.story",
+    "choices": [
+      {
+        "id": "a",
+        "label": "t:event.friend_borrow.01.a.label",
+        "icon": "share",
+        "effects": {
+          "jars": {
+            "wants": -100
+          }
+        },
+        "delayed": [
+          {
+            "afterWeeks": 3,
+            "effects": {
+              "jars": {
+                "wants": 50
+              }
+            },
+            "note": "t:event.friend_borrow.01.a.later"
+          }
+        ],
+        "lesson": "t:event.friend_borrow.01.a.lesson",
+        "rating": "ok"
+      },
+      {
+        "id": "b",
+        "label": "t:event.friend_borrow.01.b.label",
+        "icon": "gift",
+        "effects": {
+          "jars": {
+            "wants": -30
+          }
+        },
+        "lesson": "t:event.friend_borrow.01.b.lesson",
+        "rating": "best"
+      },
+      {
+        "id": "c",
+        "label": "t:event.friend_borrow.01.c.label",
+        "icon": "wait",
+        "effects": {},
+        "lesson": "t:event.friend_borrow.01.c.lesson",
+        "rating": "ok"
+      }
+    ],
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "event.hospital.01",
+    "pillar": "save_manage",
+    "concept": "surprise",
+    "personas": [
+      "ravi",
+      "sana",
+      "kiran",
+      "lakshmi"
+    ],
+    "levels": [
+      "explorer",
+      "planner"
+    ],
+    "weight": 2,
+    "text": "t:event.hospital.01.story",
+    "choices": [
+      {
+        "id": "a",
+        "label": "t:event.hospital.01.a.label",
+        "icon": "shield",
+        "effects": {
+          "jars": {
+            "savings": -300
+          }
+        },
+        "lesson": "t:event.hospital.01.a.lesson",
+        "rating": "best"
+      },
+      {
+        "id": "b",
+        "label": "t:event.hospital.01.b.label",
+        "icon": "share",
+        "effects": {
+          "debt": 300
+        },
+        "delayed": [
+          {
+            "afterWeeks": 4,
+            "effects": {
+              "jars": {
+                "needs": -300
+              },
+              "debt": -300
+            },
+            "note": "t:event.hospital.01.b.later"
+          }
+        ],
+        "lesson": "t:event.hospital.01.b.lesson",
+        "rating": "ok"
+      },
+      {
+        "id": "c",
+        "label": "t:event.hospital.01.c.label",
+        "icon": "wait",
+        "effects": {},
+        "delayed": [
+          {
+            "afterWeeks": 1,
+            "effects": {
+              "jars": {
+                "needs": -600
+              }
+            },
+            "note": "t:event.hospital.01.c.later"
+          }
+        ],
+        "lesson": "t:event.hospital.01.c.lesson",
+        "rating": "risky"
+      }
+    ],
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "event.prices_rise.01",
+    "pillar": "plan_budget",
+    "concept": "surprise",
+    "personas": [
+      "ravi",
+      "sana",
+      "kiran",
+      "lakshmi"
+    ],
+    "levels": [
+      "starter",
+      "explorer",
+      "planner"
+    ],
+    "weight": 3,
+    "text": "t:event.prices_rise.01.story",
+    "choices": [
+      {
+        "id": "a",
+        "label": "t:event.prices_rise.01.a.label",
+        "icon": "basket",
+        "effects": {
+          "jars": {
+            "wants": -100
+          }
+        },
+        "lesson": "t:event.prices_rise.01.a.lesson",
+        "rating": "best"
+      },
+      {
+        "id": "b",
+        "label": "t:event.prices_rise.01.b.label",
+        "icon": "piggy",
+        "effects": {
+          "jars": {
+            "savings": -100
+          }
+        },
+        "lesson": "t:event.prices_rise.01.b.lesson",
+        "rating": "ok"
+      },
+      {
+        "id": "c",
+        "label": "t:event.prices_rise.01.c.label",
+        "icon": "loan",
+        "effects": {
+          "debt": 100
+        },
+        "delayed": [
+          {
+            "afterWeeks": 3,
+            "effects": {
+              "jars": {
+                "needs": -120
+              },
+              "debt": -100
+            },
+            "note": "t:event.prices_rise.01.c.later"
+          }
+        ],
+        "lesson": "t:event.prices_rise.01.c.lesson",
+        "rating": "risky"
+      }
+    ],
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "event.rain_stock.01",
+    "pillar": "save_manage",
+    "concept": "surprise",
+    "personas": [
+      "ravi"
+    ],
+    "levels": [
+      "starter",
+      "explorer",
+      "planner"
+    ],
+    "weight": 2,
+    "text": "t:event.rain_stock.01.story",
+    "choices": [
+      {
+        "id": "a",
+        "label": "t:event.rain_stock.01.a.label",
+        "icon": "piggy",
+        "effects": {
+          "jars": {
+            "savings": -300
+          }
+        },
+        "lesson": "t:event.rain_stock.01.a.lesson",
+        "rating": "ok"
+      },
+      {
+        "id": "b",
+        "label": "t:event.rain_stock.01.b.label",
+        "icon": "bike",
+        "effects": {
+          "jars": {
+            "goals": -300
+          }
+        },
+        "lesson": "t:event.rain_stock.01.b.lesson",
+        "rating": "ok"
+      },
+      {
+        "id": "c",
+        "label": "t:event.rain_stock.01.c.label",
+        "icon": "shield",
+        "effects": {
+          "jars": {
+            "needs": -150
+          }
+        },
+        "delayed": [
+          {
+            "afterWeeks": 6,
+            "effects": {
+              "jars": {
+                "savings": 300
+              }
+            },
+            "note": "t:event.rain_stock.01.c.later"
+          }
+        ],
+        "lesson": "t:event.rain_stock.01.c.lesson",
+        "rating": "best"
+      }
+    ],
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "event.screen_crack.01",
+    "pillar": "save_manage",
+    "concept": "surprise",
+    "personas": [
+      "ravi",
+      "sana",
+      "kiran"
+    ],
+    "levels": [
+      "starter",
+      "explorer",
+      "planner"
+    ],
+    "weight": 3,
+    "text": "t:event.screen_crack.01.story",
+    "choices": [
+      {
+        "id": "a",
+        "label": "t:event.screen_crack.01.a.label",
+        "icon": "piggy",
+        "effects": {
+          "jars": {
+            "savings": -800
+          }
+        },
+        "lesson": "t:event.screen_crack.01.a.lesson",
+        "rating": "best"
+      },
+      {
+        "id": "b",
+        "label": "t:event.screen_crack.01.b.label",
+        "icon": "wait",
+        "effects": {
+          "jars": {
+            "wants": -150
+          }
+        },
+        "delayed": [
+          {
+            "afterWeeks": 4,
+            "effects": {
+              "jars": {
+                "savings": -900
+              }
+            },
+            "note": "t:event.screen_crack.01.b.later"
+          }
+        ],
+        "lesson": "t:event.screen_crack.01.b.lesson",
+        "rating": "risky"
+      },
+      {
+        "id": "c",
+        "label": "t:event.screen_crack.01.c.label",
+        "icon": "coins",
+        "effects": {
+          "jars": {
+            "savings": -550
+          }
+        },
+        "lesson": "t:event.screen_crack.01.c.lesson",
+        "rating": "best"
+      }
+    ],
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "event.slow_week.01",
+    "pillar": "save_manage",
+    "concept": "surprise",
+    "personas": [
+      "kiran"
+    ],
+    "levels": [
+      "explorer",
+      "planner"
+    ],
+    "weight": 2,
+    "text": "t:event.slow_week.01.story",
+    "choices": [
+      {
+        "id": "a",
+        "label": "t:event.slow_week.01.a.label",
+        "icon": "shield",
+        "effects": {
+          "jars": {
+            "savings": -300
+          }
+        },
+        "lesson": "t:event.slow_week.01.a.lesson",
+        "rating": "best"
+      },
+      {
+        "id": "b",
+        "label": "t:event.slow_week.01.b.label",
+        "icon": "wait",
+        "effects": {
+          "jars": {
+            "wants": -200
+          }
+        },
+        "lesson": "t:event.slow_week.01.b.lesson",
+        "rating": "ok"
+      },
+      {
+        "id": "c",
+        "label": "t:event.slow_week.01.c.label",
+        "icon": "loan",
+        "effects": {
+          "debt": 300
+        },
+        "delayed": [
+          {
+            "afterWeeks": 1,
+            "effects": {
+              "jars": {
+                "needs": -300
+              },
+              "debt": -300
+            },
+            "note": "t:event.slow_week.01.c.later"
+          }
+        ],
+        "lesson": "t:event.slow_week.01.c.lesson",
+        "rating": "risky"
+      }
+    ],
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  }
+]

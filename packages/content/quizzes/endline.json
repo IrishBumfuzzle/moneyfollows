@@ -1,0 +1,109 @@
+[
+  {
+    "id": "quiz.budget.needs.endline",
+    "quiz": "endline",
+    "pillar": "plan_budget",
+    "concept": "needs_vs_wants",
+    "text": "t:quiz.budget.needs.endline.q",
+    "options": [
+      "t:quiz.budget.needs.endline.o1",
+      "t:quiz.budget.needs.endline.o2",
+      "t:quiz.budget.needs.endline.o3"
+    ],
+    "answer": 2,
+    "explanation": "t:quiz.budget.needs.endline.why",
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "quiz.budget.plan.endline",
+    "quiz": "endline",
+    "pillar": "plan_budget",
+    "concept": "pay_goal_first",
+    "text": "t:quiz.budget.plan.endline.q",
+    "options": [
+      "t:quiz.budget.plan.endline.o1",
+      "t:quiz.budget.plan.endline.o2",
+      "t:quiz.budget.plan.endline.o3"
+    ],
+    "answer": 0,
+    "explanation": "t:quiz.budget.plan.endline.why",
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "quiz.save.emergency.endline",
+    "quiz": "endline",
+    "pillar": "save_manage",
+    "concept": "emergency_fund",
+    "text": "t:quiz.save.emergency.endline.q",
+    "options": [
+      "t:quiz.save.emergency.endline.o1",
+      "t:quiz.save.emergency.endline.o2",
+      "t:quiz.save.emergency.endline.o3"
+    ],
+    "answer": 0,
+    "explanation": "t:quiz.save.emergency.endline.why",
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "quiz.invest.compound.endline",
+    "quiz": "endline",
+    "pillar": "understand_investing",
+    "concept": "compounding",
+    "text": "t:quiz.invest.compound.endline.q",
+    "options": [
+      "t:quiz.invest.compound.endline.o1",
+      "t:quiz.invest.compound.endline.o2",
+      "t:quiz.invest.compound.endline.o3"
+    ],
+    "answer": 0,
+    "explanation": "t:quiz.invest.compound.endline.why",
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "quiz.safe.otp.endline",
+    "quiz": "endline",
+    "pillar": "stay_safe",
+    "concept": "never_share_otp",
+    "text": "t:quiz.safe.otp.endline.q",
+    "options": [
+      "t:quiz.safe.otp.endline.o1",
+      "t:quiz.safe.otp.endline.o2",
+      "t:quiz.safe.otp.endline.o3"
+    ],
+    "answer": 1,
+    "explanation": "t:quiz.safe.otp.endline.why",
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "quiz.safe.collect.endline",
+    "quiz": "endline",
+    "pillar": "stay_safe",
+    "concept": "upi_collect",
+    "text": "t:quiz.safe.collect.endline.q",
+    "options": [
+      "t:quiz.safe.collect.endline.o1",
+      "t:quiz.safe.collect.endline.o2"
+    ],
+    "answer": 0,
+    "explanation": "t:quiz.safe.collect.endline.why",
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  }
+]

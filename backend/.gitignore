@@ -1,6 +1,0 @@
-node_modules/
-dist/
-coverage/
-content/dist/
-.env
-*.log

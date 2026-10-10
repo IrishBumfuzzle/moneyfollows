@@ -1,0 +1,438 @@
+[
+  {
+    "id": "save.account.01",
+    "pillar": "save_manage",
+    "concept": "savings_account",
+    "personas": [
+      "ravi",
+      "sana",
+      "kiran",
+      "lakshmi"
+    ],
+    "difficulty": 2,
+    "text": "t:save.account.01.story",
+    "choices": [
+      {
+        "id": "a",
+        "label": "t:save.account.01.a.label",
+        "icon": "piggy",
+        "effects": {},
+        "delayed": [
+          {
+            "afterWeeks": 12,
+            "effects": {
+              "jars": {
+                "savings": 3
+              }
+            },
+            "note": "t:save.account.01.a.later"
+          }
+        ],
+        "lesson": "t:save.account.01.a.lesson",
+        "rating": "best"
+      },
+      {
+        "id": "b",
+        "label": "t:save.account.01.b.label",
+        "icon": "coins",
+        "effects": {},
+        "delayed": [
+          {
+            "afterWeeks": 3,
+            "effects": {
+              "jars": {
+                "savings": -100
+              }
+            },
+            "note": "t:save.account.01.b.later"
+          }
+        ],
+        "lesson": "t:save.account.01.b.lesson",
+        "rating": "risky"
+      },
+      {
+        "id": "c",
+        "label": "t:save.account.01.c.label",
+        "icon": "wait",
+        "effects": {},
+        "delayed": [
+          {
+            "afterWeeks": 12,
+            "effects": {
+              "jars": {
+                "savings": 2
+              }
+            },
+            "note": "t:save.account.01.c.later"
+          }
+        ],
+        "lesson": "t:save.account.01.c.lesson",
+        "rating": "ok"
+      }
+    ],
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "save.borrow.01",
+    "pillar": "save_manage",
+    "concept": "borrowing_safely",
+    "personas": [
+      "ravi",
+      "sana",
+      "kiran",
+      "lakshmi"
+    ],
+    "difficulty": 2,
+    "text": "t:save.borrow.01.story",
+    "choices": [
+      {
+        "id": "a",
+        "label": "t:save.borrow.01.a.label",
+        "icon": "share",
+        "effects": {
+          "debt": 300
+        },
+        "delayed": [
+          {
+            "afterWeeks": 4,
+            "effects": {
+              "jars": {
+                "wants": -300
+              },
+              "debt": -300
+            },
+            "note": "t:save.borrow.01.a.later"
+          }
+        ],
+        "lesson": "t:save.borrow.01.a.lesson",
+        "rating": "best"
+      },
+      {
+        "id": "b",
+        "label": "t:save.borrow.01.b.label",
+        "icon": "loan",
+        "effects": {
+          "debt": 300
+        },
+        "delayed": [
+          {
+            "afterWeeks": 1,
+            "effects": {
+              "jars": {
+                "needs": -400
+              },
+              "debt": -300
+            },
+            "note": "t:save.borrow.01.b.later"
+          }
+        ],
+        "lesson": "t:save.borrow.01.b.lesson",
+        "rating": "risky"
+      },
+      {
+        "id": "c",
+        "label": "t:save.borrow.01.c.label",
+        "icon": "book",
+        "effects": {
+          "jars": {
+            "needs": -150
+          }
+        },
+        "lesson": "t:save.borrow.01.c.lesson",
+        "rating": "ok"
+      }
+    ],
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "save.emergency.01",
+    "pillar": "save_manage",
+    "concept": "emergency_fund",
+    "personas": [
+      "ravi",
+      "sana",
+      "kiran",
+      "lakshmi"
+    ],
+    "difficulty": 1,
+    "text": "t:save.emergency.01.story",
+    "choices": [
+      {
+        "id": "a",
+        "label": "t:save.emergency.01.a.label",
+        "icon": "shield",
+        "effects": {
+          "jars": {
+            "wants": -100,
+            "savings": 100
+          },
+          "flags": [
+            "rainy_fund"
+          ]
+        },
+        "lesson": "t:save.emergency.01.a.lesson",
+        "rating": "best"
+      },
+      {
+        "id": "b",
+        "label": "t:save.emergency.01.b.label",
+        "icon": "wait",
+        "effects": {},
+        "lesson": "t:save.emergency.01.b.lesson",
+        "rating": "ok"
+      },
+      {
+        "id": "c",
+        "label": "t:save.emergency.01.c.label",
+        "icon": "coins",
+        "effects": {},
+        "delayed": [
+          {
+            "afterWeeks": 2,
+            "effects": {
+              "jars": {
+                "wants": -100
+              }
+            },
+            "note": "t:save.emergency.01.c.later"
+          }
+        ],
+        "lesson": "t:save.emergency.01.c.lesson",
+        "rating": "risky"
+      }
+    ],
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "save.impulse.01",
+    "pillar": "save_manage",
+    "concept": "impulse_buy",
+    "personas": [
+      "ravi",
+      "sana",
+      "kiran",
+      "lakshmi"
+    ],
+    "difficulty": 1,
+    "text": "t:save.impulse.01.story",
+    "choices": [
+      {
+        "id": "a",
+        "label": "t:save.impulse.01.a.label",
+        "icon": "festival",
+        "effects": {
+          "jars": {
+            "wants": -60
+          }
+        },
+        "lesson": "t:save.impulse.01.a.lesson",
+        "rating": "ok"
+      },
+      {
+        "id": "b",
+        "label": "t:save.impulse.01.b.label",
+        "icon": "basket",
+        "effects": {
+          "jars": {
+            "wants": -250
+          }
+        },
+        "delayed": [
+          {
+            "afterWeeks": 3,
+            "effects": {},
+            "note": "t:save.impulse.01.b.later"
+          }
+        ],
+        "lesson": "t:save.impulse.01.b.lesson",
+        "rating": "risky"
+      },
+      {
+        "id": "c",
+        "label": "t:save.impulse.01.c.label",
+        "icon": "wait",
+        "effects": {
+          "jars": {
+            "wants": -60
+          }
+        },
+        "lesson": "t:save.impulse.01.c.lesson",
+        "rating": "best"
+      }
+    ],
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "save.rainy_day.01",
+    "pillar": "save_manage",
+    "concept": "emergency_fund",
+    "personas": [
+      "ravi",
+      "sana",
+      "kiran",
+      "lakshmi"
+    ],
+    "difficulty": 2,
+    "text": "t:save.rainy_day.01.story",
+    "requiresFlag": "rainy_fund",
+    "choices": [
+      {
+        "id": "a",
+        "label": "t:save.rainy_day.01.a.label",
+        "icon": "shield",
+        "effects": {
+          "jars": {
+            "savings": -200
+          }
+        },
+        "delayed": [
+          {
+            "afterWeeks": 4,
+            "effects": {
+              "jars": {
+                "wants": -100,
+                "savings": 100
+              }
+            },
+            "note": "t:save.rainy_day.01.a.later"
+          }
+        ],
+        "lesson": "t:save.rainy_day.01.a.lesson",
+        "rating": "best"
+      },
+      {
+        "id": "b",
+        "label": "t:save.rainy_day.01.b.label",
+        "icon": "share",
+        "effects": {
+          "debt": 200
+        },
+        "delayed": [
+          {
+            "afterWeeks": 4,
+            "effects": {
+              "jars": {
+                "needs": -200
+              },
+              "debt": -200
+            },
+            "note": "t:save.rainy_day.01.b.later"
+          }
+        ],
+        "lesson": "t:save.rainy_day.01.b.lesson",
+        "rating": "ok"
+      },
+      {
+        "id": "c",
+        "label": "t:save.rainy_day.01.c.label",
+        "icon": "wait",
+        "effects": {},
+        "delayed": [
+          {
+            "afterWeeks": 1,
+            "effects": {
+              "jars": {
+                "needs": -350
+              }
+            },
+            "note": "t:save.rainy_day.01.c.later"
+          }
+        ],
+        "lesson": "t:save.rainy_day.01.c.lesson",
+        "rating": "risky"
+      }
+    ],
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "save.track.01",
+    "pillar": "save_manage",
+    "concept": "tracking_spending",
+    "personas": [
+      "ravi",
+      "sana",
+      "kiran",
+      "lakshmi"
+    ],
+    "difficulty": 1,
+    "text": "t:save.track.01.story",
+    "choices": [
+      {
+        "id": "a",
+        "label": "t:save.track.01.a.label",
+        "icon": "book",
+        "effects": {},
+        "delayed": [
+          {
+            "afterWeeks": 2,
+            "effects": {
+              "jars": {
+                "savings": 50
+              }
+            },
+            "note": "t:save.track.01.a.later"
+          }
+        ],
+        "lesson": "t:save.track.01.a.lesson",
+        "rating": "best"
+      },
+      {
+        "id": "b",
+        "label": "t:save.track.01.b.label",
+        "icon": "wait",
+        "effects": {},
+        "delayed": [
+          {
+            "afterWeeks": 3,
+            "effects": {
+              "jars": {
+                "wants": -80
+              }
+            },
+            "note": "t:save.track.01.b.later"
+          }
+        ],
+        "lesson": "t:save.track.01.b.lesson",
+        "rating": "risky"
+      },
+      {
+        "id": "c",
+        "label": "t:save.track.01.c.label",
+        "icon": "phone",
+        "effects": {},
+        "delayed": [
+          {
+            "afterWeeks": 1,
+            "effects": {
+              "jars": {
+                "savings": 30
+              }
+            },
+            "note": "t:save.track.01.c.later"
+          }
+        ],
+        "lesson": "t:save.track.01.c.lesson",
+        "rating": "ok"
+      }
+    ],
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  }
+]

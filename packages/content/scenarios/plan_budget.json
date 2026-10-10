@@ -1,0 +1,410 @@
+[
+  {
+    "id": "budget.bus_pass.01",
+    "pillar": "plan_budget",
+    "concept": "planning_ahead",
+    "personas": [
+      "ravi",
+      "sana",
+      "kiran"
+    ],
+    "difficulty": 1,
+    "text": "t:budget.bus_pass.01.story",
+    "choices": [
+      {
+        "id": "a",
+        "label": "t:budget.bus_pass.01.a.label",
+        "icon": "bus",
+        "effects": {
+          "jars": {
+            "needs": -400
+          }
+        },
+        "lesson": "t:budget.bus_pass.01.a.lesson",
+        "rating": "best"
+      },
+      {
+        "id": "b",
+        "label": "t:budget.bus_pass.01.b.label",
+        "icon": "auto",
+        "effects": {
+          "jars": {
+            "needs": -150
+          }
+        },
+        "delayed": [
+          {
+            "afterWeeks": 2,
+            "effects": {
+              "jars": {
+                "needs": -200
+              }
+            },
+            "note": "t:budget.bus_pass.01.b.later"
+          },
+          {
+            "afterWeeks": 3,
+            "effects": {
+              "jars": {
+                "needs": -150
+              }
+            },
+            "note": "t:budget.bus_pass.01.b.later2"
+          }
+        ],
+        "lesson": "t:budget.bus_pass.01.b.lesson",
+        "rating": "risky"
+      },
+      {
+        "id": "c",
+        "label": "t:budget.bus_pass.01.c.label",
+        "icon": "share",
+        "effects": {},
+        "delayed": [
+          {
+            "afterWeeks": 3,
+            "effects": {
+              "jars": {
+                "needs": -150
+              }
+            },
+            "note": "t:budget.bus_pass.01.c.later"
+          }
+        ],
+        "lesson": "t:budget.bus_pass.01.c.lesson",
+        "rating": "ok"
+      }
+    ],
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "budget.festival.01",
+    "pillar": "plan_budget",
+    "concept": "festival_budget",
+    "personas": [
+      "ravi",
+      "sana",
+      "kiran",
+      "lakshmi"
+    ],
+    "difficulty": 2,
+    "text": "t:budget.festival.01.story",
+    "choices": [
+      {
+        "id": "a",
+        "label": "t:budget.festival.01.a.label",
+        "icon": "festival",
+        "effects": {
+          "jars": {
+            "wants": -200
+          }
+        },
+        "lesson": "t:budget.festival.01.a.lesson",
+        "rating": "ok"
+      },
+      {
+        "id": "b",
+        "label": "t:budget.festival.01.b.label",
+        "icon": "piggy",
+        "effects": {
+          "jars": {
+            "wants": -200,
+            "goals": 80
+          }
+        },
+        "lesson": "t:budget.festival.01.b.lesson",
+        "rating": "best"
+      },
+      {
+        "id": "c",
+        "label": "t:budget.festival.01.c.label",
+        "icon": "loan",
+        "effects": {
+          "debt": 200
+        },
+        "delayed": [
+          {
+            "afterWeeks": 4,
+            "effects": {
+              "jars": {
+                "wants": -240
+              },
+              "debt": -200
+            },
+            "note": "t:budget.festival.01.c.later"
+          }
+        ],
+        "lesson": "t:budget.festival.01.c.lesson",
+        "rating": "risky"
+      }
+    ],
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "budget.friend_treat.01",
+    "pillar": "plan_budget",
+    "concept": "wants_budget",
+    "personas": [
+      "ravi",
+      "sana",
+      "kiran",
+      "lakshmi"
+    ],
+    "difficulty": 1,
+    "text": "t:budget.friend_treat.01.story",
+    "choices": [
+      {
+        "id": "a",
+        "label": "t:budget.friend_treat.01.a.label",
+        "icon": "food",
+        "effects": {
+          "jars": {
+            "wants": -150
+          }
+        },
+        "lesson": "t:budget.friend_treat.01.a.lesson",
+        "rating": "ok"
+      },
+      {
+        "id": "b",
+        "label": "t:budget.friend_treat.01.b.label",
+        "icon": "coins",
+        "effects": {
+          "jars": {
+            "wants": -60
+          }
+        },
+        "lesson": "t:budget.friend_treat.01.b.lesson",
+        "rating": "best"
+      },
+      {
+        "id": "c",
+        "label": "t:budget.friend_treat.01.c.label",
+        "icon": "loan",
+        "effects": {
+          "debt": 300
+        },
+        "delayed": [
+          {
+            "afterWeeks": 4,
+            "effects": {
+              "jars": {
+                "wants": -350
+              },
+              "debt": -300
+            },
+            "note": "t:budget.friend_treat.01.c.later"
+          }
+        ],
+        "lesson": "t:budget.friend_treat.01.c.lesson",
+        "rating": "risky"
+      }
+    ],
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "budget.goal.01",
+    "pillar": "plan_budget",
+    "concept": "goal_setting",
+    "personas": [
+      "ravi",
+      "sana",
+      "kiran",
+      "lakshmi"
+    ],
+    "difficulty": 2,
+    "text": "t:budget.goal.01.story",
+    "choices": [
+      {
+        "id": "a",
+        "label": "t:budget.goal.01.a.label",
+        "icon": "piggy",
+        "effects": {
+          "jars": {
+            "wants": -100,
+            "goals": 100
+          }
+        },
+        "lesson": "t:budget.goal.01.a.lesson",
+        "rating": "best"
+      },
+      {
+        "id": "b",
+        "label": "t:budget.goal.01.b.label",
+        "icon": "wait",
+        "effects": {},
+        "delayed": [
+          {
+            "afterWeeks": 4,
+            "effects": {},
+            "note": "t:budget.goal.01.b.later"
+          }
+        ],
+        "lesson": "t:budget.goal.01.b.lesson",
+        "rating": "risky"
+      },
+      {
+        "id": "c",
+        "label": "t:budget.goal.01.c.label",
+        "icon": "coins",
+        "effects": {
+          "jars": {
+            "wants": -30,
+            "goals": 30
+          }
+        },
+        "lesson": "t:budget.goal.01.c.lesson",
+        "rating": "ok"
+      }
+    ],
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "budget.recharge.01",
+    "pillar": "plan_budget",
+    "concept": "needs_vs_wants",
+    "personas": [
+      "ravi",
+      "sana",
+      "kiran"
+    ],
+    "difficulty": 1,
+    "text": "t:budget.recharge.01.story",
+    "choices": [
+      {
+        "id": "a",
+        "label": "t:budget.recharge.01.a.label",
+        "icon": "phone",
+        "effects": {
+          "jars": {
+            "needs": -199
+          }
+        },
+        "lesson": "t:budget.recharge.01.a.lesson",
+        "rating": "best"
+      },
+      {
+        "id": "b",
+        "label": "t:budget.recharge.01.b.label",
+        "icon": "headphones",
+        "effects": {
+          "jars": {
+            "needs": -199,
+            "wants": -299
+          }
+        },
+        "delayed": [
+          {
+            "afterWeeks": 2,
+            "effects": {
+              "jars": {
+                "wants": -150
+              }
+            },
+            "note": "t:budget.recharge.01.b.later"
+          }
+        ],
+        "lesson": "t:budget.recharge.01.b.lesson",
+        "rating": "risky"
+      },
+      {
+        "id": "c",
+        "label": "t:budget.recharge.01.c.label",
+        "icon": "wait",
+        "effects": {
+          "jars": {
+            "needs": -199,
+            "wants": -100,
+            "savings": 100
+          }
+        },
+        "lesson": "t:budget.recharge.01.c.lesson",
+        "rating": "ok"
+      }
+    ],
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "budget.split.01",
+    "pillar": "plan_budget",
+    "concept": "simple_budget_split",
+    "personas": [
+      "ravi",
+      "sana",
+      "kiran",
+      "lakshmi"
+    ],
+    "difficulty": 2,
+    "text": "t:budget.split.01.story",
+    "choices": [
+      {
+        "id": "a",
+        "label": "t:budget.split.01.a.label",
+        "icon": "coins",
+        "effects": {
+          "jars": {
+            "wants": 60,
+            "goals": 120,
+            "savings": 120
+          }
+        },
+        "lesson": "t:budget.split.01.a.lesson",
+        "rating": "best"
+      },
+      {
+        "id": "b",
+        "label": "t:budget.split.01.b.label",
+        "icon": "basket",
+        "effects": {
+          "jars": {
+            "wants": 300
+          }
+        },
+        "delayed": [
+          {
+            "afterWeeks": 2,
+            "effects": {
+              "jars": {
+                "wants": -300
+              }
+            },
+            "note": "t:budget.split.01.b.later"
+          }
+        ],
+        "lesson": "t:budget.split.01.b.lesson",
+        "rating": "risky"
+      },
+      {
+        "id": "c",
+        "label": "t:budget.split.01.c.label",
+        "icon": "rocket",
+        "effects": {
+          "jars": {
+            "goals": 300
+          }
+        },
+        "lesson": "t:budget.split.01.c.lesson",
+        "rating": "ok"
+      }
+    ],
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  }
+]
