@@ -439,11 +439,13 @@ enabled = true
 [remotes.production]
 project_id = "verbvywwsxggqycpykec"
 
-# TODO: switch site_url and the redirect list to the deployed dashboard URL (https only) before
-# the first real invite. Until then invite links point at localhost and fail. For example:
-# [remotes.production.auth]
-# site_url = "https://<dashboard>.vercel.app"
-# additional_redirect_urls = ["https://<dashboard>.vercel.app"]
+# Sign-in and invite emails link to the deployed dashboard: set DASHBOARD_URL in .env (https, no
+# trailing slash, e.g. https://<dashboard>.vercel.app) before `config push`. If it is unset the CLI
+# only prints "WARN: environment variable is unset: DASHBOARD_URL" and would push the literal
+# text "env(DASHBOARD_URL)" as the site URL, breaking every email link: stop if you see that.
+[remotes.production.auth]
+site_url = "env(DASHBOARD_URL)"
+additional_redirect_urls = ["env(DASHBOARD_URL)"]
 
 # Never load seed.sql (known demo password) into the hosted project, even via db reset --linked.
 # The hosted demo class comes from `pnpm seed -- --hosted-demo` instead (README, step 4).

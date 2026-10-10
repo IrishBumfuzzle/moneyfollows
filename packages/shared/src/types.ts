@@ -358,6 +358,14 @@ export interface ClassProgressRow {
   pillars: Record<Pillar, number>;
   baseline_score: number | null;
   endline_score: number | null;
+  /** Distinct (month, week) slots the student slept through. */
+  weeks_played: number;
+  /** Distinct Paisa Times editions completed. */
+  news_editions: number;
+  /** Latest persona_selected (a PersonaId as the app sent it), or null. */
+  persona: string | null;
+  /** Best classroom quiz score (0–100), or null before the first finished round. */
+  classroom_best: number | null;
 }
 
 export interface LearningGainRow {
@@ -366,4 +374,32 @@ export interface LearningGainRow {
   endline_avg: number | null;
   baseline_n: number;
   endline_n: number;
+}
+
+/** classroom_quiz_summary: one row per classroom question the class answered (API.md 5.2). */
+export interface ClassroomQuizSummaryRow {
+  question_id: string;
+  pillar: Pillar;
+  /** Answers from the class; every round counts. */
+  attempts: number;
+  /** Distinct students who answered it. */
+  students: number;
+  /** Percent of answers that were right, one decimal. */
+  correct_pct: number;
+  /** Most-picked wrong option (content order, like QuizAnswer.choice); ties go to the lowest. */
+  top_wrong_choice: number | null;
+}
+
+/** class_wellbeing: one row per student, from the life events. */
+export interface ClassWellbeingRow {
+  anon_id: string;
+  nickname: string;
+  necessity_purchases: number;
+  want_purchases: number;
+  /** Rupees spent on wants. */
+  want_spend: number;
+  /** Weeks with a work shift. */
+  work_shifts: number;
+  /** Weeks with a school day. */
+  school_days: number;
 }
