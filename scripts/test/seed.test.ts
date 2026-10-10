@@ -2,6 +2,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createTestDb, skipDbTests, type TestDb } from '../../supabase/tests/db';
 import { buildSeedSql, DEMO, seedTargetProblem } from '../seed-data';
 
+const hosted = (email: string) => buildSeedSql(undefined, { facilitatorEmail: email });
+
 describe('demo seed', () => {
   it('is deterministic', () => {
     expect(buildSeedSql()).toBe(buildSeedSql());
@@ -26,6 +28,20 @@ describe('demo seed', () => {
     expect(seedTargetProblem(remote, [])).toMatch(/Refusing/);
     expect(seedTargetProblem(remote, ['--allow-remote-demo'])).toBeNull();
     expect(seedTargetProblem('not a url', [])).toMatch(/not a valid URL/);
+  });
+
+  it('hosted mode creates no auth user or password and keeps the demo class and students', () => {
+    const sql = hosted('Lead@NGO.org');
+    expect(sql).toContain('DEMO DATA');
+    expect(sql).not.toContain(DEMO.password);
+    expect(sql).not.toContain(DEMO.email);
+    expect(sql).not.toMatch(/(insert into|delete from) auth\./);
+    expect(sql).toContain(`insert into public.staff (email) values ('lead@ngo.org') on conflict (email) do nothing`);
+    expect(sql).toContain(`'${DEMO.classCode}'`);
+    // Same students, events and quizzes as the local seed.
+    const body = (s: string) => s.slice(s.indexOf('insert into public.students'));
+    expect(body(sql)).toBe(body(buildSeedSql()));
+    expect(() => hosted('not-an-email')).toThrow(/Not an email/);
   });
 });
 
@@ -57,5 +73,23 @@ describe.skipIf(skipDbTests)('demo seed in the database', () => {
       { code: string },
     ];
     expect(code).toBe('HYD234');
+  });
+
+  it('hosted mode needs an invited account, then gives it the demo class (re-runnable)', async () => {
+    const email = 'lead.facilitator@example.org';
+    const conn = await db.sql.reserve();
+    try {
+      await expect(conn.unsafe(hosted(email))).rejects.toThrow(/Invite lead.facilitator@example.org first/);
+      await conn.unsafe('rollback');
+      // Invited (an auth user) but not yet on the allowlist: the seed adds them.
+      const lead = await db.createFacilitator(email, false);
+      await conn.unsafe(hosted(email));
+      await conn.unsafe(hosted(email));
+      const progress = await db.asUser(lead, (tx) => tx`select * from class_progress(${DEMO.classId})`);
+      expect(progress).toHaveLength(24);
+      expect(await db.sql`select 1 from auth.users where id = ${lead}`).toHaveLength(1);
+    } finally {
+      conn.release();
+    }
   });
 });

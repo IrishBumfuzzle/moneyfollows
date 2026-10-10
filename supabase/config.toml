@@ -430,3 +430,23 @@ enabled = true
 # formatted with uppercase keywords, indent 2, max width 180, trailing commas,
 # and column/key alignment. Set to "null" to emit raw, unformatted SQL.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":180,\"commaStyle\":\"trailing\"}"
+
+# Hosted project (ap-south-1). `npx supabase config push` sends this whole file, so
+# without these overrides the hosted project would get the localhost site_url and no
+# SMTP. Uncomment after creating the project, with its ref and the deployed dashboard
+# URL (README, "Deploy"). The ref is not a secret; SMTP values come from env().
+# [remotes.production]
+# project_id = "<project-ref>"
+#
+# [remotes.production.auth]
+# site_url = "https://<dashboard>.vercel.app"
+# additional_redirect_urls = ["https://<dashboard>.vercel.app"]
+#
+# [remotes.production.auth.email.smtp]
+# enabled = true
+# host = "env(SUPABASE_SMTP_HOST)"
+# port = 587
+# user = "env(SUPABASE_SMTP_USER)"
+# pass = "env(SUPABASE_SMTP_PASS)"
+# admin_email = "env(SUPABASE_SMTP_ADMIN_EMAIL)"
+# sender_name = "env(SUPABASE_SMTP_SENDER_NAME)"

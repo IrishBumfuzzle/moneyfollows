@@ -24,8 +24,24 @@ Put the `API URL` and `anon key` that `supabase start` prints into `.env` as `VI
 ### Hosted project
 
 1. Create the Supabase project in region **ap-south-1 (South Asia, Mumbai)**. The region is fixed at creation and cannot be set in `config.toml`. Verify it under Project Settings → General ("Region: South Asia (Mumbai)"), or with `npx supabase projects list`.
-2. `npx supabase link --project-ref <ref>`, then `npx supabase db push` (migrations only; do not load `seed.sql` there).
-3. Email: fill the `SUPABASE_SMTP_*` variables from `.env.example` in your shell, set `[auth.email.smtp] enabled = true` and run `npx supabase config push`. Sign-up is off, email confirmation is on and sign-in codes expire after 10 minutes.
+2. `npx supabase login`, `npx supabase link --project-ref <ref>`, then `npx supabase db push` (migrations only; never load `seed.sql` there, it has a known password).
+3. Auth and email: uncomment the `[remotes.production]` block at the end of `supabase/config.toml`, fill in the ref and the dashboard URL, export the `SUPABASE_SMTP_*` variables from `.env` in your shell, and run `npx supabase config push`. Without that block the push would set the localhost `site_url` and leave SMTP off. Then check Authentication → URL Configuration and → Emails → SMTP in the dashboard. Sign-up is off, email confirmation is on and sign-in codes expire after 10 minutes.
+4. Invite yourself as staff (below), then load the demo class: `SUPABASE_DB_URL=<hosted connection string> pnpm seed -- --hosted-demo you@team.org`. It loads class `HYD234` with 24 demo students and gives it to that invited account. It creates no user and no password, and re-running it replaces the demo class.
+
+### Deploy (Vercel)
+
+One Vercel project per app, both from this repository:
+
+| Project | Root Directory | Environment variables |
+| --- | --- | --- |
+| student | `apps/student` | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_SHOW_DRAFT_LANGS=false` |
+| dashboard | `apps/dashboard` | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` |
+
+Each app's `vercel.json` sets the rest: install at the workspace root with the frozen lockfile, `pnpm run build`, output `dist`, single-page rewrites, no caching of the service worker and manifest, and security headers. Keep "Include files outside the Root Directory" on (the default), because the apps import `packages/*`.
+
+Preview deploys: connect the repository with the Vercel GitHub integration. Every pull request then gets a preview URL per app. Previews use the Preview environment variables, so point those at the same hosted project (only the demo class) or at a separate one.
+
+Demo mode: `https://<student>.vercel.app/?demo=1` loads the engine's seeded save (`createDemoGame`), and class code `HYD234` joins the hosted demo class from step 4.
 
 ### Staff accounts
 
