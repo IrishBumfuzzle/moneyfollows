@@ -36,12 +36,21 @@ describe.skipIf(skipDbTests)('database', () => {
       async (tx) => (await tx`select push_events(${tx.json(events as never)}) as r`)[0]!.r as { accepted: number },
     );
 
+  // The map and news types (5.5) until BE-1's contracts PR adds them to SyncEvent['type'].
+  type EventType =
+    | SyncEvent['type']
+    | 'map_opened'
+    | 'location_selected'
+    | 'week_slept'
+    | 'glossary_term_opened'
+    | 'news_question_answered'
+    | 'news_edition_completed';
   const ev = (
     s: JoinClassResult,
-    type: SyncEvent['type'],
+    type: EventType,
     payload: Record<string, unknown> = {},
     ts = '2026-10-10T10:00:00+05:30',
-  ): SyncEvent => ({
+  ): Omit<SyncEvent, 'type'> & { type: EventType } => ({
     event_id: randomUUID(),
     anon_id: s.anon_id,
     class_id: s.class_id,
@@ -376,6 +385,39 @@ describe.skipIf(skipDbTests)('database', () => {
       ).toBe(0);
     });
 
+    it('accepts the map and news events with exactly their 5.5 payload keys and values', async () => {
+      // Each payload also carries a key from another type, a camelCase spelling and a free-text value.
+      const events = [
+        ev(student, 'map_opened', { location_id: 'home' }),
+        ev(student, 'location_selected', { location_id: 'convenience.phone_shop', locationId: 'bank' }),
+        ev(student, 'week_slept', { month: 2, week: 4, edition: '2026-W41' }),
+        ev(student, 'glossary_term_opened', { term_id: 'inflation', article_id: 'upi_fraud', termId: 'x' }),
+        ev(student, 'news_question_answered', {
+          edition: '2026-W41',
+          article_id: 'upi_fraud',
+          correct: false,
+          attempt: 2,
+          answer: 'I think it is the bank',
+        }),
+        ev(student, 'news_edition_completed', { edition: '2026-W41', correct_count: 4, score: 80 }),
+        ev(student, 'glossary_term_opened', { term_id: 'call 98765 43210', article_id: 'upi_fraud' }),
+      ];
+      expect(await push(events)).toEqual({ accepted: events.length });
+      const rows = await db.sql`select event_id, type, payload from events where event_id in ${db.sql(
+        events.map((e) => e.event_id),
+      )}`;
+      const byId = Object.fromEntries(rows.map((r) => [r.event_id, r]));
+      expect(events.map((e) => [byId[e.event_id]!.type, byId[e.event_id]!.payload])).toEqual([
+        ['map_opened', {}],
+        ['location_selected', { location_id: 'convenience.phone_shop' }],
+        ['week_slept', { month: 2, week: 4 }],
+        ['glossary_term_opened', { term_id: 'inflation', article_id: 'upi_fraud' }],
+        ['news_question_answered', { edition: '2026-W41', article_id: 'upi_fraud', correct: false, attempt: 2 }],
+        ['news_edition_completed', { edition: '2026-W41', correct_count: 4 }],
+        ['glossary_term_opened', { article_id: 'upi_fraud' }],
+      ]);
+    });
+
     it('caps a batch at 500 events', async () => {
       const many = Array.from({ length: 501 }, () => ev(student, 'app_open'));
       await expect(push(many)).rejects.toMatchObject({ code: 'PT413' });
@@ -469,6 +511,31 @@ describe.skipIf(skipDbTests)('database', () => {
         baseline_score: 25,
         endline_score: null,
       });
+    });
+
+    it('counts weeks played and news editions completed, once each', async () => {
+      const deepa = await join(cls.class_code, 'Deepa');
+      await push([
+        ev(deepa, 'week_slept', { month: 1, week: 1 }),
+        ev(deepa, 'week_slept', { month: 1, week: 1 }), // re-sent with a new id: still one week
+        ev(deepa, 'week_slept', { month: 1, week: 2 }),
+        ev(deepa, 'week_slept', { month: 2, week: 1 }),
+        ev(deepa, 'week_slept', {}), // no slot: not a week
+        ev(deepa, 'news_edition_completed', { edition: '2026-W41', correct_count: 5 }),
+        ev(deepa, 'news_edition_completed', { edition: '2026-W41', correct_count: 3 }),
+        ev(deepa, 'news_edition_completed', { correct_count: 2 }), // no edition: not counted
+      ]);
+      const rows = await progress(facilitator, cls.id);
+      expect(rows.find((r) => r.nickname === 'Deepa')).toMatchObject({
+        weeks_played: 3,
+        news_editions: 1,
+        decisions: 0,
+      });
+      expect(rows.find((r) => r.nickname === 'Asha')).toMatchObject({ weeks_played: 0, news_editions: 0 });
+    });
+
+    it('is callable by facilitators only, after its return type changed', async () => {
+      await expect(db.asAnon((tx) => tx`select * from class_progress(${cls.id})`)).rejects.toThrow(/permission denied/);
     });
 
     it('compares matched students only, by pillar, from each student’s first attempt', async () => {
