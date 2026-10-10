@@ -312,7 +312,7 @@ describe('createSyncQueue', () => {
 });
 
 describe('isRetryableError', () => {
-  it('retries network trouble, 5xx, 408 and 429, and nothing else from the server', () => {
+  it('retries network trouble, 5xx, 408, 429 and unknown 4xx from proxies, not malformed requests', () => {
     expect(isRetryableError(new TypeError('Failed to fetch'))).toBe(true);
     expect(isRetryableError(new ApiError('network'))).toBe(true);
     expect(isRetryableError(new ApiError('timeout'))).toBe(true);
@@ -321,5 +321,27 @@ describe('isRetryableError', () => {
     expect(isRetryableError(new ApiError('unknown', 'x', 400))).toBe(false);
     expect(isRetryableError(toApiError({ message: 'too_many_events', code: 'PT413' }))).toBe(false);
     expect(isRetryableError(new ApiError('too_many_events'))).toBe(false);
+    // Something in between answered, not the server about these events: keep them queued.
+    for (const status of [401, 403, 404, 407]) expect(isRetryableError(new ApiError('unknown', 'x', status))).toBe(true);
+    expect(isRetryableError(new ApiError('unknown', 'x', 422))).toBe(false);
+    // The server's own codes stay permanent whatever their status.
+    expect(isRetryableError(toApiError({ message: 'class_closed', code: 'PT403' }))).toBe(false);
+    expect(isRetryableError(toApiError({ message: 'rejoin_failed', code: 'PT404' }))).toBe(false);
+  });
+
+  it('keeps an offline backlog queued when a proxy answers 403 instead of dead-lettering it', async () => {
+    const storage = memory();
+    let blocked = true;
+    const push = vi.fn(async (events: SyncEvent[]) => {
+      if (blocked) throw new ApiError('unknown', 'Forbidden', 403);
+      return { accepted: events.length };
+    });
+    const queue = createSyncQueue({ storage, push, batchSize: 1, maxRetries: 0 });
+    await queue.enqueue(event());
+    await queue.enqueue(event());
+    expect(await queue.flush()).toMatchObject({ sent: 0, remaining: 2 });
+    expect(await queue.deadLetters()).toEqual([]);
+    blocked = false;
+    expect(await queue.flush()).toMatchObject({ sent: 2, remaining: 0 });
   });
 });
