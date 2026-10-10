@@ -286,8 +286,9 @@ export interface EventContext {
 }
 
 /**
- * Payloads of the map and news events, with exactly the CLAUDE.md 5.5 keys (snake_case).
- * push_events drops any other key. Other event types stay free-form.
+ * Payloads of the map, news and life events, with exactly the keys push_events keeps
+ * (CLAUDE.md 5.5; docs/life-meters-api.md section 5). push_events drops any other key.
+ * Other event types stay free-form.
  */
 export interface SyncEventPayloads {
   map_opened: Record<string, never>;
@@ -297,6 +298,18 @@ export interface SyncEventPayloads {
   glossary_term_opened: { term_id: string; article_id: string };
   news_question_answered: { edition: string; article_id: string; correct: boolean; attempt: number };
   news_edition_completed: { edition: string; correct_count: number };
+  /** health and sanity are the clamped changes (may be negative); price is whole rupees. */
+  shop_purchase: {
+    kind: 'necessity' | 'want';
+    price: number;
+    health: number;
+    sanity: number;
+    month: number;
+    week: number;
+  };
+  /** wage is whole rupees, earned (never free money). */
+  work_shift: { wage: number; health: number; sanity: number; month: number; week: number };
+  school_attended: { health: number; sanity: number; month: number; week: number };
 }
 
 export type SyncEventPayload<T extends SyncEventType> = T extends keyof SyncEventPayloads
@@ -309,8 +322,21 @@ type MakeEventArgs<T extends SyncEventType> =
     ? [payload?: SyncEventPayload<T>, now?: Date, id?: string]
     : [payload: SyncEventPayload<T>, now?: Date, id?: string];
 
+/**
+ * A v4 uuid. crypto.randomUUID exists only in secure contexts, so a phone testing against
+ * http://192.168.x.x falls back to crypto.getRandomValues, which works everywhere.
+ */
+export function randomId(): string {
+  if (typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+  const b = crypto.getRandomValues(new Uint8Array(16));
+  b[6] = (b[6]! & 0x0f) | 0x40;
+  b[8] = (b[8]! & 0x3f) | 0x80;
+  const h = Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('');
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+}
+
 /** Builds a SyncEvent with a device-generated id and timestamp. */
 export function makeEvent<T extends SyncEventType>(ctx: EventContext, type: T, ...args: MakeEventArgs<T>): SyncEvent {
-  const [payload = {}, now = new Date(), id = crypto.randomUUID()] = args;
+  const [payload = {}, now = new Date(), id = randomId()] = args;
   return { event_id: id, ...ctx, type, payload: payload as Record<string, unknown>, client_ts: now.toISOString() };
 }
