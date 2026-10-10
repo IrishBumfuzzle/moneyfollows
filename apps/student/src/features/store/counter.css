@@ -1,0 +1,154 @@
+/* Counter Shift. Same Kenney panels and buttons as the classroom and the store sheet; text is
+   real DOM text, 16 px, Pixelify with Noto for digits and Hindi (the 'Paisa Digits' face is
+   declared in life.css). */
+.ct-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 8px 0 24px;
+  box-sizing: border-box;
+  background: #2b1b3d; /* same purple letterbox as the main screen */
+  font: 16px/1.3 "Paisa Digits", "Pixelify Sans", "Noto Sans Devanagari", "Noto Sans Telugu", sans-serif;
+  font-variant-ligatures: none;
+}
+.ct-screen:lang(hi) { line-height: 1.45; }
+.ct-screen p, .ct-screen h1, .ct-screen h2, .ct-screen ul, .ct-screen ol, .ct-screen figure { margin: 0; padding: 0; }
+.ct-screen ul, .ct-screen ol { list-style: none; }
+
+.ct-card {
+  width: min(352px, calc(100vw - 8px));
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 4px 8px;
+}
+
+.ct-head { display: flex; align-items: center; gap: 8px; }
+.ct-title { flex: 1; min-width: 0; font: inherit; font-size: 16px; }
+.ct-earned { flex: none; color: #2f7a2a; }
+
+.ct-pips { display: flex; justify-content: center; gap: 8px; }
+
+.ct-body { display: flex; flex-direction: column; gap: 8px; }
+.ct-body h2 { font-size: 20px; font-weight: normal; outline: none; }
+.ct-note { color: #7a4a2a; }
+.ct-main { min-height: 56px; font-size: 18px; }
+
+.ct-who { display: flex; align-items: center; gap: 8px; }
+
+/* ---- The bill: a paper slip ---- */
+.ct-bill {
+  padding: 8px;
+  background: #fff8e8;
+  box-shadow: inset 0 0 0 2px #c9a77c;
+}
+.ct-bill li, .ct-total { display: flex; justify-content: space-between; gap: 8px; }
+.ct-total { margin-top: 4px; padding-top: 4px; border-top: 2px dashed #c9a77c; font-size: 18px; }
+.ct-num { flex: none; text-align: right; }
+
+/* ---- Cash: drawer of notes and coins ---- */
+.ct-cash, .ct-upi { display: flex; flex-direction: column; gap: 8px; }
+.ct-paid, .ct-wage { display: flex; align-items: center; gap: 8px; }
+.ct-given { font-size: 18px; }
+
+.ct-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.ct-chip {
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0 8px;
+  border: 2px solid #4a2b17;
+  font: inherit;
+  color: #4a2b17;
+  cursor: pointer;
+}
+.ct-chip.is-note { background: #bfe3b4; }
+.ct-chip.is-coin { background: #e8d27a; border-radius: 24px; }
+.ct-chip:disabled { cursor: default; }
+
+.ct-drawer { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.ct-denom { justify-content: center; padding: 2px; font-size: 16px; }
+.ct-denom.is-coin { color: #6b4a00; }
+
+.ct-actions { display: flex; gap: 8px; }
+.ct-actions > * { flex: 1; justify-content: center; }
+.ct-clear { flex: 0 0 auto; }
+.ct-screen .k-btn:disabled { opacity: 0.6; }
+
+/* ---- UPI: the customer's phone next to the shop's own phone ---- */
+.ct-says { font-style: italic; }
+.ct-phones { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ct-phone { display: flex; flex-direction: column; gap: 4px; }
+.ct-phone figcaption { font-size: 14px; color: #7a4a2a; }
+.ct-phone.is-yours figcaption { color: #4a2b17; font-weight: bold; }
+.ct-phone-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 96px;
+  padding: 8px;
+  border: 4px solid #3d4a5c;
+  border-radius: 8px;
+  text-align: center;
+  color: #1f2a38;
+}
+.ct-phone-screen.is-received { background: #d6f0d0; }
+.ct-phone-screen.is-none { background: #e4e4e4; }
+.ct-phone-screen.is-request { background: #ffe0b8; }
+.ct-choice { gap: 8px; }
+
+/* ---- Feedback after each customer ---- */
+.ct-feedback { display: flex; flex-direction: column; gap: 8px; }
+.ct-feedback-title { font-size: 18px; }
+.ct-feedback.is-right .ct-feedback-title { color: #2f7a2a; }
+.ct-feedback.is-wrong .ct-feedback-title { color: #8a4b12; }
+
+.ct-done { text-align: center; align-items: center; }
+.ct-done .ct-main { align-self: stretch; }
+
+/* Data saver (<html data-saver>) and reduced motion both keep things still. */
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-saver]) .ct-feedback { animation: ct-rise 180ms ease-out; }
+  :root:not([data-saver]) .ct-chip { animation: ct-drop 150ms ease-out; }
+}
+@keyframes ct-rise { from { transform: translateY(16px); opacity: 0; } }
+@keyframes ct-drop { from { transform: translateY(-8px); opacity: 0; } }
+
+/* ---- Kirana Run: Ammi's list, two shelves, a basket that stays in thumb reach ---- */
+.kr-list li { align-items: baseline; }
+.kr-shelf { display: flex; flex-direction: column; gap: 4px; }
+.kr-shelf-title { display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: normal; }
+.kr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.kr-item {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 2px;
+  min-height: 96px;
+  padding: 4px 6px;
+}
+.kr-item-name { line-height: 1.2; }
+.kr-item-price { font-size: 18px; }
+.kr-item-fx { display: flex; flex-wrap: wrap; gap: 2px 8px; font-size: 14px; }
+.kr-tag { font-size: 14px; padding: 0 4px; background: #fff3dc; color: #4a2b17; }
+.kr-item.is-correct .kr-item-fx { color: #fff; }
+.kr-got { color: #2f7a2a; }
+.kr-over { color: #b0362f; }
+.kr-basket {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px;
+}
+.kr-basket-sum { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 8px; font-size: 18px; }
+.kr-fx { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 18px; }
+.kr-checks { display: flex; flex-direction: column; gap: 4px; }

@@ -20,24 +20,37 @@ export interface ShopOption {
   sanity: number;
 }
 
-// Both options spend from the one common wallet. Necessities cost little and lift sanity a
-// little; wants cost a lot and lift it a lot.
+// Satisfaction scales with what you spend. Needs give more sanity per rupee; wants cost more,
+// so each one lifts sanity more, but at a lower rate per rupee. Needs also keep you healthy.
+export const SANITY_PER_100: Record<ShopKind, number> = { necessity: 4, want: 3 };
+export const NEED_HEALTH = 5;
+/**
+ * Sanity an item of this kind and price gives: whole points, at least 1. Needs round up and
+ * wants round down, so every need's rate per rupee stays above every want's.
+ */
+export const sanityFor = (kind: ShopKind, price: number) => {
+  const exact = (price * SANITY_PER_100[kind]) / 100;
+  return Math.max(1, kind === 'necessity' ? Math.ceil(exact) : Math.floor(exact));
+};
+export const healthFor = (kind: ShopKind) => (kind === 'necessity' ? NEED_HEALTH : 0);
+
+// Both options spend from the one common wallet, by the rates above.
 export const SHOP: Record<ShopKind, ShopOption> = {
   necessity: {
     label: 't:life.shop.necessity.label',
     hint: 't:life.shop.necessity.hint',
     icon: 'sack',
     price: 100,
-    health: 0,
-    sanity: 3,
+    health: healthFor('necessity'),
+    sanity: sanityFor('necessity', 100),
   },
   want: {
     label: 't:life.shop.want.label',
     hint: 't:life.shop.want.hint',
     icon: 'headphones',
     price: 400,
-    health: 0,
-    sanity: 12,
+    health: healthFor('want'),
+    sanity: sanityFor('want', 400),
   },
 };
 
