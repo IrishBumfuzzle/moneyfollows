@@ -1,0 +1,13 @@
+{
+  "main.week": "Month {{month}} · Week {{week}}",
+  "main.money": "Money",
+  "main.greeting": "Hi, {{nickname}}!",
+  "main.persona": "You are playing as {{name}}.",
+  "main.news": "Paisa Times",
+  "main.news.open": "Open Paisa Times",
+  "main.new": "New",
+  "main.play": "Play",
+  "main.back": "Back",
+  "persona.sana.name": "Sana",
+  "persona.ravi.name": "Ravi"
+}

@@ -1,0 +1,248 @@
+/* Paisa Times: newsprint look. Off-white paper, dark ink, thin rules; readable, not fancy.
+   Body text is Noto Sans (the Devanagari face's Latin set) at 16 px+; only the masthead uses
+   the pixel font. Kenney buttons for answers and the back button, like the rest of the app. */
+
+@font-face {
+  font-family: 'Paisa Digits';
+  src: url('@fontsource/noto-sans-devanagari/files/noto-sans-devanagari-latin-400-normal.woff2') format('woff2');
+  unicode-range: U+0030-0039, U+0025, U+20B9, U+002B, U+2212, U+002C;
+}
+
+.nt-screen {
+  --nt-paper: #f6f1e3;
+  --nt-ink: #23201b;
+  --nt-muted: #5c554a;
+  --nt-rule: #2f2a22;
+  --nt-marigold: #e8960c;
+  --nt-right: #2f7a2a;
+  --nt-wrong: #a2412f;
+  min-height: 100dvh;
+  background: var(--nt-paper);
+  color: var(--nt-ink);
+  font: 16px/1.55 "Noto Sans Devanagari", sans-serif;
+}
+.nt-screen p, .nt-screen h1, .nt-screen h2, .nt-screen h3, .nt-screen ol, .nt-screen ul { margin: 0; padding: 0; }
+.nt-screen ol, .nt-screen ul { list-style: none; }
+
+/* ---- top bar ---- */
+.nt-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: var(--nt-paper);
+  border-bottom: 2px solid var(--nt-rule);
+}
+.nt-wallet-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 2px solid var(--nt-rule);
+  font-family: "Paisa Digits", "Noto Sans Devanagari", sans-serif;
+  font-size: 18px;
+}
+.nt-chip-coin, .nt-coin {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #f2c230;
+  box-shadow: inset 0 0 0 2px #c98a1b, 0 0 0 1px #4a2b17;
+}
+.nt-coin { position: fixed; z-index: 50; margin: -7px 0 0 -7px; pointer-events: none; }
+.nt-chip-pop {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 4px;
+  padding: 0 6px;
+  background: var(--nt-right);
+  color: #fff;
+  font-size: 14px;
+  opacity: 0;
+}
+
+/* ---- paper column ---- */
+.nt-paper { max-width: 560px; margin: 0 auto; padding: 16px 16px 96px; }
+
+.nt-masthead { text-align: center; border-bottom: 4px double var(--nt-rule); padding-bottom: 8px; }
+.nt-title {
+  font: 40px/1.1 "Pixelify Sans", "Noto Sans Devanagari", sans-serif;
+  font-variant-ligatures: none;
+  letter-spacing: 1px;
+}
+.nt-dateline { font-size: 14px; color: var(--nt-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.nt-shift { margin-top: 12px; }
+.nt-progress { margin-top: 4px; color: var(--nt-muted); font-family: "Paisa Digits", "Noto Sans Devanagari", sans-serif; }
+
+.nt-finished { margin-top: 12px; display: flex; flex-direction: column; gap: 4px; }
+
+.nt-headlines { margin-top: 12px; border-top: 1px solid var(--nt-rule); }
+.nt-headlines li { border-bottom: 1px solid var(--nt-rule); }
+.nt-card {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  min-height: 64px;
+  padding: 12px 0;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.nt-card:focus-visible, .nt-word:focus-visible, .nt-wallet-item:focus-visible, .nt-icon-btn:focus-visible { outline: 3px solid #ffd23f; outline-offset: 2px; }
+.nt-card:active { background: rgba(0, 0, 0, 0.05); }
+.nt-card-num {
+  flex: none;
+  width: 32px;
+  font: 28px/1.1 "Paisa Digits", "Pixelify Sans", sans-serif;
+  color: var(--nt-muted);
+}
+.nt-card-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.nt-card-head { font-size: 19px; line-height: 1.35; }
+.nt-card-state { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--nt-muted); font-family: "Paisa Digits", "Noto Sans Devanagari", sans-serif; }
+.nt-card-state.is-done { color: var(--nt-right); }
+
+.nt-wallet-btn { margin-top: 16px; width: 100%; justify-content: center; }
+
+/* ---- article ---- */
+.nt-kicker { font-size: 14px; color: var(--nt-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.nt-headline { font-size: 24px; line-height: 1.3; font-weight: 400; outline: none; }
+.nt-figure {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 96px;
+  margin: 12px 0;
+  border: 1px solid var(--nt-rule);
+  background: repeating-linear-gradient(45deg, transparent 0 6px, rgba(0, 0, 0, 0.05) 6px 7px);
+}
+.nt-figure-num { font: 40px "Pixelify Sans", sans-serif; color: var(--nt-muted); }
+.nt-body { font-size: 17px; }
+.nt-screen:lang(hi) .nt-body { line-height: 1.75; }
+
+/* [[term]] words: dotted marigold underline; 48 px tap area without changing the line height. */
+.nt-word {
+  position: relative;
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline dotted var(--nt-marigold);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+.nt-word::after { content: ''; position: absolute; left: -4px; right: -4px; top: 50%; height: 48px; transform: translateY(-50%); }
+.nt-word:active { background: rgba(232, 150, 12, 0.2); }
+
+.nt-rule { border: 0; border-top: 1px solid var(--nt-rule); margin: 20px 0 16px; }
+
+/* ---- question ---- */
+.nt-question { display: flex; flex-direction: column; gap: 8px; }
+.nt-q-prompt { font-size: 19px; line-height: 1.4; font-weight: 400; }
+.nt-q-wage { color: var(--nt-muted); font-size: 14px; font-family: "Paisa Digits", "Noto Sans Devanagari", sans-serif; }
+.nt-options { display: flex; flex-direction: column; gap: 8px; }
+.nt-option { min-height: 56px; width: 100%; font-family: "Paisa Digits", "Noto Sans Devanagari", sans-serif; }
+.nt-letter { flex: none; min-width: 14px; font-family: "Pixelify Sans", sans-serif; color: #a0603a; }
+.k-btn.is-correct .nt-letter, .k-btn.is-wrong .nt-letter { color: inherit; }
+.nt-feedback { display: flex; flex-direction: column; gap: 6px; font-family: "Paisa Digits", "Noto Sans Devanagari", sans-serif; }
+.nt-verdict { font-size: 20px; }
+.nt-verdict.is-right { color: var(--nt-right); }
+.nt-verdict.is-wrong { color: var(--nt-wrong); }
+.nt-hint { color: #6b4a2e; }
+
+/* ---- thought cloud ---- */
+.nt-cloud-wrap { z-index: 40; width: min(300px, calc(100vw - 16px)); }
+.nt-cloud {
+  position: relative;
+  padding: 12px 14px;
+  background: #fff;
+  color: var(--nt-ink);
+  border: 2px solid var(--nt-rule);
+  border-radius: 28px;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.12);
+  font: 16px/1.5 "Noto Sans Devanagari", sans-serif;
+}
+.nt-cloud p { margin: 0; }
+.nt-cloud-head { display: flex; align-items: center; gap: 4px; }
+.nt-cloud-word { flex: 1; margin: 0; font-size: 20px; font-weight: 400; }
+.nt-cloud-simple { margin-top: 4px; }
+.nt-cloud-example { margin-top: 6px; color: var(--nt-muted); }
+.nt-cloud-label { color: var(--nt-ink); }
+.nt-cloud-saved { margin-top: 8px; font-size: 14px; color: var(--nt-right); }
+.nt-icon-btn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin: -8px -6px -8px 0;
+  border: 0;
+  background: none;
+  color: var(--nt-ink);
+  cursor: pointer;
+}
+.nt-tail { position: absolute; width: 0; height: 0; }
+.nt-tail.is-above { top: 100%; }
+.nt-tail.is-below { bottom: 100%; }
+.nt-puff { position: absolute; background: #fff; border: 2px solid var(--nt-rule); border-radius: 50%; }
+.nt-puff-big { width: 14px; height: 14px; left: -7px; }
+.nt-puff-small { width: 8px; height: 8px; left: -4px; }
+.nt-tail.is-above .nt-puff-big { top: 0; }
+.nt-tail.is-above .nt-puff-small { top: 14px; }
+.nt-tail.is-below .nt-puff-big { bottom: 0; }
+.nt-tail.is-below .nt-puff-small { bottom: 14px; }
+
+/* ---- word wallet ---- */
+.nt-wallet { display: flex; flex-direction: column; gap: 8px; }
+.nt-empty { padding: 24px 0; color: var(--nt-muted); }
+.nt-wallet-list { border-top: 1px solid var(--nt-rule); }
+.nt-wallet-list li { border-bottom: 1px solid var(--nt-rule); }
+.nt-wallet-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  min-height: 56px;
+  padding: 10px 0;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.nt-wallet-word { font-size: 18px; text-decoration: underline dotted var(--nt-marigold); text-decoration-thickness: 3px; text-underline-offset: 4px; }
+.nt-wallet-simple { color: var(--nt-muted); }
+
+/* ---- toast ---- */
+.nt-toast-slot { position: fixed; left: 0; right: 0; bottom: 16px; z-index: 45; display: flex; justify-content: center; pointer-events: none; }
+.nt-toast {
+  max-width: calc(100vw - 32px);
+  padding: 10px 16px;
+  background: var(--nt-ink);
+  color: #fff;
+  font-family: "Paisa Digits", "Noto Sans Devanagari", sans-serif;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .nt-cloud-wrap .nt-cloud { animation: nt-pop 150ms ease-out; }
+  .nt-chip-pop { animation: nt-chip 1400ms ease-out; }
+  .nt-toast { animation: nt-rise 200ms ease-out; }
+  .nt-feedback { animation: nt-rise 160ms ease-out; }
+  @keyframes nt-pop { from { transform: scale(0.85); opacity: 0; } }
+  @keyframes nt-chip { 0% { opacity: 0; transform: translateY(-4px); } 15%, 75% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+  @keyframes nt-rise { from { transform: translateY(12px); opacity: 0; } }
+}
+@media (prefers-reduced-motion: reduce) { .nt-chip-pop { opacity: 1; } }
