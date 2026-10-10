@@ -19,3 +19,4 @@ export {
   type SyncQueueOptions,
 } from './sync-queue';
 export { ApiError, isRetryableError, toApiError, type ApiErrorCode } from './errors';
+export { createTracker, type Tracker, type TrackerContext, type TrackerOptions } from './tracker';

@@ -320,7 +320,11 @@ export type SyncEventType =
   | 'week_slept'
   | 'glossary_term_opened'
   | 'news_question_answered'
-  | 'news_edition_completed';
+  | 'news_edition_completed'
+  // Additive: life meters (docs/life-meters-api.md section 5 on main).
+  | 'shop_purchase'
+  | 'work_shift'
+  | 'school_attended';
 
 export interface SyncEvent {
   event_id: string; // uuid, generated on device

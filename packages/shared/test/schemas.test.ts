@@ -288,6 +288,9 @@ describe('map and Paisa Times contracts (5.1, 5.5, 5.7)', () => {
       'glossary_term_opened',
       'news_question_answered',
       'news_edition_completed',
+      'shop_purchase',
+      'work_shift',
+      'school_attended',
     ])
       expect(SyncEventSchema.safeParse({ ...base, type }).success, type).toBe(true);
   });

@@ -121,8 +121,8 @@ Event types `push_events` accepts, with the payload keys it keeps (any other key
 | `type`                   | Payload keys                                                                      |
 | ------------------------ | --------------------------------------------------------------------------------- |
 | `app_open`, `map_opened` | none                                                                              |
-| `onboarding_complete`    | `level`, `lang`                                                                   |
-| `persona_selected`       | `personaId`, `level`                                                              |
+| `onboarding_complete`    | `level`, `lang`, `persona_id` (as onboarding sends it), `personaId`               |
+| `persona_selected`       | `persona_id` (as onboarding sends it), `personaId`, `level`                       |
 | `decision_made`          | `scenarioId`, `choiceId`, `pillar`, `month`, `week`                               |
 | `rewind_used`            | `scenarioId`, `month`, `week`, `tokensLeft`                                       |
 | `event_triggered`        | `eventId`, `choiceId`, `month`, `week`                                            |
@@ -137,11 +137,17 @@ Event types `push_events` accepts, with the payload keys it keeps (any other key
 | `glossary_term_opened`   | `term_id`, `article_id`                                                           |
 | `news_question_answered` | `edition`, `article_id`, `correct`, `attempt`                                     |
 | `news_edition_completed` | `edition`, `correct_count`                                                        |
+| `shop_purchase`          | `kind` (`necessity` or `want`), `price`, `health`, `sanity`, `month`, `week`      |
+| `work_shift`             | `wage`, `health`, `sanity`, `month`, `week`                                       |
+| `school_attended`        | `health`, `sanity`, `month`, `week`                                               |
+
+For the life events, `health` and `sanity` are the clamped changes (they can be negative), and `price` and `wage` are whole rupees.
 
 For the UI teams:
 
 - **Translation keys.** i18n files are flat maps with dotted keys and no `t:` prefix, so configure react-i18next with `keySeparator: false`. To resolve a `TKey`, drop the `t:` prefix.
 - **Month end.** After the month-end card, call `choose(state, content, CONTINUE)` to start the next month.
 - **Quizzes.** Score with `scoreQuiz` from the engine, then queue a `quiz_submitted` event whose payload is `{ quiz_type, quiz_id?, answers, score }`.
-- **Events.** Build them with `makeEvent(ctx, type, payload)`; the map and news types are checked against the keys above at compile time.
+- **Events.** Build them with `makeEvent(ctx, type, payload)`; the map, news and life types are checked against the keys above at compile time.
 - **Offline.** `createSyncQueue({ storage: idbKeyval, push: api.pushEvents })` keeps events in IndexedDB and sends them in batches when the phone is back online.
+- **Tracking, including before joining.** `createTracker({ queue, storage: idbKeyval, contentVersion })` sits in front of the queue. `tracker.track(type, payload)` has the same shape as `apps/student/src/api/track.ts`, so that stub's body becomes `tracker.track(type, payload)`. Events tracked before `join_class` returns (onboarding's `language_changed`) are held on the device with their own id and time, up to 100. Call `tracker.setContext({ anon_id, class_id })` after `join_class`, and again on every app start with the saved profile (it is safe to repeat): held events then move into the queue in order. Call `tracker.flush()` on app open and on the browser's `online` event. `clearContext()` is for a profile switch. `track` never throws; pass `onError` to see failed writes.
