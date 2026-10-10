@@ -78,7 +78,7 @@ export function ProgressTable({ rows, lang, sort, onSort, now }: Props) {
               <th scope="row">{r.nickname}</th>
               <td>{persona(r.persona)}</td>
               <td>{language(r.lang)}</td>
-              <td>
+              <td className="progress-last-cell">
                 <div className="progress-last">
                   <span>{formatDate(r.last_active, lang)}</span>
                   {isInactive(r.last_active, now) && (

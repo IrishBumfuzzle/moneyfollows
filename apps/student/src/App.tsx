@@ -12,7 +12,8 @@ import type { ClassroomConfig } from './features/classroom/config';
 import { PhoneLayer, SuddenEventSheet, triggerEvent, useEvents } from './features/events';
 import { IncomingCall, PhoneScreen } from './features/phone';
 import type { PhoneNav } from './features/phone';
-import { lifeApi, workSourceId } from './features/life/life';
+import { HomeSheet, RestScene } from './features/home';
+import { lifeApi, schoolToday, workedToday } from './features/life/life';
 import { MetersBar } from './features/life/MetersBar';
 import { StoreSheet } from './features/life/StoreSheet';
 import { trackLife } from './features/life/track';
@@ -27,13 +28,14 @@ import { OfflineBanner } from './features/sync/OfflineBanner';
 import type { Profile } from './features/onboarding';
 import { useStoresHydrated } from './game/hydration';
 import { useGame } from './game/useGame';
+import type { LifeDelta } from './features/life/types';
 import { LocationScreen } from './screens/LocationScreen';
 import './design/kenney.css';
 
-type Screen = 'main' | 'map' | 'classroom' | 'store' | 'kirana' | 'counter' | 'news' | 'phone' | 'learn';
-const SCREENS: Screen[] = ['main', 'map', 'classroom', 'store', 'kirana', 'counter', 'news', 'phone', 'learn'];
+type Screen = 'main' | 'map' | 'classroom' | 'home' | 'rest' | 'store' | 'kirana' | 'counter' | 'news' | 'phone' | 'learn';
+const SCREENS: Screen[] = ['main', 'map', 'classroom', 'home', 'rest', 'store', 'kirana', 'counter', 'news', 'phone', 'learn'];
 
-// No router or language picker yet: ?lang=hi switches language, ?screen=map|classroom|store|kirana|counter|news|phone
+// No router or language picker yet: ?lang=hi switches language, ?screen=map|classroom|home|store|kirana|counter|news|phone
 // opens that screen directly, ?seed=N fixes the quiz, ?event=<id> fires an event (demo / tests).
 // Learn (guides, progress, Notebook) loads when first opened; its store and recording stay eager.
 const LearnScreen = lazy(() => import('./features/learn/LearnScreen').then((m) => ({ default: m.LearnScreen })));
@@ -85,10 +87,10 @@ function Game({
   const hydrated = useStoresHydrated();
   const endlineOpen = useClassStatus((s) => s.endlineOpen);
 
-  // map_opened each time the map is shown (CLAUDE.md 5.5); closing the store sheet over it doesn't count.
+  // map_opened each time the map is shown (CLAUDE.md 5.5); closing the store or home sheet over it doesn't count.
   const prevScreen = useRef<Screen | null>(null);
   useEffect(() => {
-    if (screen === 'map' && profile && prevScreen.current !== 'store') track('map_opened');
+    if (screen === 'map' && profile && prevScreen.current !== 'store' && prevScreen.current !== 'home') track('map_opened');
     prevScreen.current = screen;
   }, [screen, profile]);
 
@@ -110,12 +112,19 @@ function Game({
     return () => window.removeEventListener('popstate', on);
   }, []);
 
+  // Each entry records how many levels it sits above the first one, so the Home sheet's
+  // "Back to the menu" can step all the way back without leaving the app.
+  const depthOf = (state: unknown) => (state as { depth?: number } | null)?.depth ?? 0;
   const open = (s: Screen) => {
-    window.history.pushState({ screen: s }, '');
+    window.history.pushState({ screen: s, depth: depthOf(window.history.state) + 1 }, '');
     setScreen(s);
   };
   const parentOf = (s: Screen): Screen =>
-    s === 'counter' || s === 'kirana' ? 'store' : s === 'store' || s === 'classroom' ? 'map' : 'main';
+    s === 'counter' || s === 'kirana'
+      ? 'store'
+      : s === 'store' || s === 'classroom' || s === 'home' || s === 'rest'
+        ? 'map'
+        : 'main';
   const back = useCallback(() => {
     const from = screenOf(window.history.state);
     if (!(window.history.state as { screen?: Screen } | null)?.screen) return setScreen((s) => parentOf(s));
@@ -128,6 +137,29 @@ function Game({
       if (pops.current === before) setScreen(parentOf(from));
     }, 400);
   }, []);
+
+  /** Back to the main screen from anywhere opened with open(): steps back to the first entry. */
+  const toMain = () => {
+    const depth = depthOf(window.history.state);
+    if (depth > 0) window.history.go(-depth);
+    else setScreen('main');
+  };
+
+  // What the last rest changed, for the morning card.
+  const [restDelta, setRestDelta] = useState<LifeDelta | null>(null);
+  /** Sleep until tomorrow: the rest scene replaces the Home sheet, so waking goes back to the map. */
+  const rest = () => {
+    const before = useGame.getState().life;
+    const out = lifeApi.rest(before);
+    trackLife({ kind: 'rest' }, before, out);
+    apply(out);
+    setRestDelta(out.delta);
+    if (out.state.week !== before.week || out.state.month !== before.month) {
+      track('week_slept', { month: before.month, week: before.week });
+    }
+    window.history.replaceState({ ...(window.history.state as object | null), screen: 'rest' }, '');
+    setScreen('rest');
+  };
 
   // First launch shows onboarding; afterwards the saved profile skips it. undefined = still reading IndexedDB.
   // useBackendSync (App) tells the tracker who the student is once the profile is set.
@@ -214,11 +246,29 @@ function Game({
           track('quiz_submitted', quizSubmittedPayload(r));
           learnFromQuiz(r);
           void flush();
+          // A finished round is today's school (once a day); work opens after it.
+          const before = useGame.getState().life;
+          const out = lifeApi.attendSchool(before);
+          trackLife({ kind: 'school' }, before, out);
+          apply(out);
         }}
       />
     );
   }
-  const worked = life.earned.includes(workSourceId(life));
+  if (screen === 'rest') {
+    return (
+      <RestScene
+        lang={lang}
+        day={life.day}
+        week={life.week}
+        month={life.month}
+        delta={restDelta ?? { money: 0, health: 0, sanity: 0 }}
+        onWake={back}
+      />
+    );
+  }
+  const worked = workedToday(life);
+  const daySeed = (SEED + life.month * 64 + life.week * 8 + life.day) >>> 0;
   // Pays for a Kirana Run basket: money out, sanity and health in. One shop_purchase per kind.
   const payBasket = (r: Receipt) => {
     const before = useGame.getState().life;
@@ -233,14 +283,17 @@ function Game({
     }
     apply(out);
     tick();
+    // The trip's two checks: everything on Ammi's list, and within the plan.
+    const correct = Number(r.listDone) + Number(r.withinPlan);
+    track('minigame_complete', { game: 'kirana_run', correct, total: 2, score: correct * 50 });
     return true;
   };
   if (screen === 'kirana') {
     return (
       <KiranaRun
         lang={lang}
-        // This week's list and shelves; ?seed= fixes them for demos and tests.
-        seed={(SEED + life.month * 8 + life.week) >>> 0}
+        // Today's list and shelves; ?seed= fixes them for demos and tests.
+        seed={daySeed}
         money={life.money}
         onPay={payBasket}
         onExit={back}
@@ -251,12 +304,18 @@ function Game({
     return (
       <CounterShift
         lang={lang}
-        // A new customer queue each week; ?seed= fixes it for demos and tests.
-        seed={(SEED + life.month * 8 + life.week) >>> 0}
+        // A new customer queue each day; ?seed= fixes it for demos and tests.
+        seed={daySeed}
         practice={worked}
-        onFinish={(wage) => {
-          // One paid shift a week (lifeApi.work blocks a second); practice pays nothing.
-          if (!worked) apply(lifeApi.work(useGame.getState().life, wage));
+        onFinish={({ wage, correct, total }) => {
+          // One paid shift a day, after school (lifeApi.work blocks the rest); practice pays nothing.
+          if (!worked) {
+            const before = useGame.getState().life;
+            const out = lifeApi.work(before, wage);
+            trackLife({ kind: 'work' }, before, out);
+            apply(out);
+          }
+          track('minigame_complete', { game: 'counter_shift', correct, total, score: Math.round((100 * correct) / total) });
         }}
         onExit={back}
       />
@@ -270,16 +329,18 @@ function Game({
           tick();
           if (id === 'school') open('classroom');
           else if (id === 'convenience') open('store');
+          else if (id === 'home') open('home');
           else console.log('go to', id);
         }}
       />
       <MetersBar lang={lang} state={life} pop={last} />
       {screen === 'map' && eventLayer('map')}
+      {screen === 'home' && <HomeSheet lang={lang} state={life} onMenu={toMain} onRest={rest} onClose={back} />}
       {screen === 'store' && (
         <StoreSheet
           lang={lang}
           state={life}
-          worked={worked}
+          work={worked ? 'practice' : schoolToday(life) ? 'open' : 'school_first'}
           onShop={() => open('kirana')}
           onWork={() => open('counter')}
           onClose={back}

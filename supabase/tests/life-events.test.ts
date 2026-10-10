@@ -31,9 +31,10 @@ const SAMPLES: Record<SyncEventType, Record<string, unknown>> = {
   glossary_term_opened: { term_id: 'inflation', article_id: 'upi_fraud' },
   news_question_answered: { edition: '2026-W41', article_id: 'upi_fraud', correct: true, attempt: 1 },
   news_edition_completed: { edition: '2026-W41', correct_count: 5 },
-  shop_purchase: { kind: 'want', price: 400, health: 0, sanity: 12, month: 1, week: 2 },
-  work_shift: { wage: 300, health: -5, sanity: -3, month: 1, week: 2 },
-  school_attended: { health: 0, sanity: -2, month: 1, week: 2 },
+  shop_purchase: { kind: 'want', price: 400, health: 0, sanity: 12, month: 1, week: 2, day: 3 },
+  work_shift: { wage: 300, health: -5, sanity: -3, month: 1, week: 2, day: 3 },
+  school_attended: { health: 0, sanity: -2, month: 1, week: 2, day: 3 },
+  day_rested: { month: 1, week: 2, day: 3, health: 2, sanity: 6 },
   guide_completed: { guide_id: 'guide.bank_account', correct: true },
 };
 

@@ -1,0 +1,77 @@
+/* Home sheet and the rest scene. Same Kenney panels and buttons as the store sheet. */
+
+/* ---- Home sheet: at the top, under the meters bar ---- */
+.hm-overlay { align-items: flex-start; padding-top: 88px; box-sizing: border-box; }
+.hm-sheet { max-height: calc(100dvh - 96px); }
+.hm-today { margin: 0; text-align: center; color: #7a4a2a; }
+.hm-checks { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 16px; margin: 0; padding: 0; list-style: none; }
+.hm-checks li { display: inline-flex; align-items: center; gap: 4px; color: #7a4a2a; }
+.hm-checks li.is-done { color: #2f7a2a; }
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-saver]) .hm-sheet { animation: hm-drop 180ms ease-out; }
+}
+@keyframes hm-drop { from { transform: translateY(-24px); opacity: 0; } }
+
+/* ---- Rest scene: night at home ---- */
+.rs-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px;
+  box-sizing: border-box;
+  background: #05040f;
+  color: #fff3dc;
+  font: 16px/1.3 "Paisa Digits", "Pixelify Sans", "Noto Sans Devanagari", "Noto Sans Telugu", sans-serif;
+  font-variant-ligatures: none;
+  text-align: center;
+}
+.rs-screen:lang(hi) { line-height: 1.45; }
+.rs-screen p, .rs-screen h1 { margin: 0; }
+.rs-scene { display: block; max-width: 100%; height: auto; image-rendering: pixelated; }
+.rs-scene text { font-family: "Pixelify Sans", sans-serif; }
+
+.rs-caption { display: flex; flex-direction: column; align-items: center; gap: 8px; min-height: 104px; }
+.rs-skip { justify-content: center; min-width: 120px; }
+
+.rs-card {
+  width: min(336px, 100%);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #4a2b17;
+}
+.rs-morning { font-size: 24px; font-weight: normal; }
+.rs-day { font-size: 18px; }
+.rs-wake { justify-content: center; min-height: 56px; font-size: 18px; }
+
+/* The last frame is the resting state: blanket up, arm back, lamp out, Zzz showing.
+   The animation plays from the first frame to it. */
+.rs-blanket { transform-box: fill-box; transform-origin: right center; }
+.rs-arm { opacity: 0; }
+.rs-glow { opacity: 0; }
+.rs-lamp { opacity: 0.3; }
+.rs-dark { opacity: 0.55; pointer-events: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-saver]) .rs-scene:not(.is-still) .rs-ammi { animation: rs-walk 1200ms steps(6, end) both; }
+  :root:not([data-saver]) .rs-scene:not(.is-still) .rs-arm { animation: rs-reach 1400ms 1100ms both; }
+  :root:not([data-saver]) .rs-scene:not(.is-still) .rs-blanket { animation: rs-tuck 1000ms 1300ms ease-out both; }
+  :root:not([data-saver]) .rs-scene:not(.is-still) .rs-glow,
+  :root:not([data-saver]) .rs-scene:not(.is-still) .rs-lamp { animation: rs-lamp 300ms 2700ms steps(1, end) both; }
+  :root:not([data-saver]) .rs-scene:not(.is-still) .rs-dark { animation: rs-dim 500ms 2700ms ease-in both; }
+  :root:not([data-saver]) .rs-scene:not(.is-still) .rs-zzz { animation: rs-zzz 1600ms 3100ms ease-out both, rs-float 2s 4700ms ease-in-out infinite; }
+  :root:not([data-saver]) .rs-scene.is-still .rs-zzz { animation: rs-float 2s ease-in-out infinite; }
+}
+@keyframes rs-walk { from { transform: translateX(-14px); } }
+@keyframes rs-reach { 0% { opacity: 0; } 1%, 85% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes rs-tuck { from { transform: scaleX(0.15); } }
+@keyframes rs-lamp { from { opacity: 1; } }
+@keyframes rs-dim { from { opacity: 0; } }
+@keyframes rs-zzz { from { opacity: 0; transform: translateY(4px); } }
+@keyframes rs-float { 50% { transform: translateY(-1px); } }

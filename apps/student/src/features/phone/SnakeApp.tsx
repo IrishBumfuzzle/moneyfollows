@@ -9,7 +9,7 @@ import type { Dir, SnakeState } from './snake';
 import { usePhone } from './usePhone';
 
 /** Snake gives a small sanity boost (a short break), at most once per in-game week. Never money. */
-const RELAX_SANITY = 3;
+const RELAX_SANITY = 2; // meters are out of 25
 const SWIPE_MIN = 24;
 
 type Phase = 'ready' | 'playing' | 'paused' | 'over';

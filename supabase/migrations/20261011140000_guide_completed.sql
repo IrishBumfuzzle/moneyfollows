@@ -3,7 +3,8 @@
 --   guide_completed { guide_id, correct }   guide_id like "guide.bank_account"; correct is the
 --                                          first answer to the guide's check question.
 -- The type CHECK and the payload keys change together (see 20261011090000_life_events_persona.sql).
--- event_payload_keys is otherwise unchanged from that migration. create or replace keeps its grants.
+-- Both lists are otherwise unchanged from 20261011130000_daily_life_events.sql (day_rested, and `day`
+-- on the life events). create or replace keeps its grants.
 
 alter table public.events drop constraint events_type_check;
 alter table public.events add constraint events_type_check check (type in (
@@ -11,7 +12,7 @@ alter table public.events add constraint events_type_check check (type in (
   'minigame_complete', 'quiz_submitted', 'module_complete', 'badge_earned', 'language_changed', 'sync_complete',
   'map_opened', 'location_selected', 'week_slept', 'glossary_term_opened', 'news_question_answered',
   'news_edition_completed',
-  'shop_purchase', 'work_shift', 'school_attended',
+  'shop_purchase', 'work_shift', 'school_attended', 'day_rested',
   'guide_completed'
 ));
 
@@ -44,10 +45,12 @@ as $$
     when 'glossary_term_opened' then array['term_id', 'article_id']
     when 'news_question_answered' then array['edition', 'article_id', 'correct', 'attempt']
     when 'news_edition_completed' then array['edition', 'correct_count']
-    -- Life meters: health and sanity are the clamped changes; price and wage whole rupees.
-    when 'shop_purchase' then array['kind', 'price', 'health', 'sanity', 'month', 'week']
-    when 'work_shift' then array['wage', 'health', 'sanity', 'month', 'week']
-    when 'school_attended' then array['health', 'sanity', 'month', 'week']
+    -- Life meters: health and sanity are the clamped changes; price and wage whole rupees;
+    -- day (1-7) is the day of the week it happened.
+    when 'shop_purchase' then array['kind', 'price', 'health', 'sanity', 'month', 'week', 'day']
+    when 'work_shift' then array['wage', 'health', 'sanity', 'month', 'week', 'day']
+    when 'school_attended' then array['health', 'sanity', 'month', 'week', 'day']
+    when 'day_rested' then array['month', 'week', 'day', 'health', 'sanity']
     -- A real-life guide finished: its id and whether the check question was answered right.
     when 'guide_completed' then array['guide_id', 'correct']
   end

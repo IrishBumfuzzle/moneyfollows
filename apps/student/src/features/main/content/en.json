@@ -1,6 +1,6 @@
 {
   "main.title": "{{name}}'s room",
-  "main.week": "Month {{month}} · Week {{week}}",
+  "main.week": "Month {{month}} · Week {{week}} · Day {{day}}",
   "main.money": "Money",
   "main.greeting": "Hi, {{nickname}}!",
   "main.rejoin": "Rejoin code: {{code}}",

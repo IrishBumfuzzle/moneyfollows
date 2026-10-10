@@ -30,8 +30,11 @@ export function CounterShift({ lang, seed, practice: practiceProp, onFinish, onE
   lang: Lang;
   seed: number;
   practice: boolean;
-  /** Called once when the shift ends, with the wage earned (0 to the weekly wage). */
-  onFinish: (wage: number) => void;
+  /**
+   * Called once when the shift ends: the wage earned (0 to the full wage; 0 in practice) and
+   * how many customers were served right.
+   */
+  onFinish: (result: { wage: number; correct: number; total: number }) => void;
   onExit: () => void;
 }) {
   const tr = (key: string, vars?: Record<string, string | number>) => t(lang, key, vars);
@@ -65,7 +68,7 @@ export function CounterShift({ lang, seed, practice: practiceProp, onFinish, onE
   function next() {
     if (last) {
       setPhase('done');
-      onFinish(practice ? 0 : wage);
+      onFinish({ wage: practice ? 0 : wage, correct: answers.filter((a) => a.ok).length, total: shift.length });
       return;
     }
     setIndex((i) => i + 1);

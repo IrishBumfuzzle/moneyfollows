@@ -306,10 +306,14 @@ export interface SyncEventPayloads {
     sanity: number;
     month: number;
     week: number;
+    /** Day of the week, 1-7 (older clients send none). */
+    day?: number;
   };
   /** wage is whole rupees, earned (never free money). */
-  work_shift: { wage: number; health: number; sanity: number; month: number; week: number };
-  school_attended: { health: number; sanity: number; month: number; week: number };
+  work_shift: { wage: number; health: number; sanity: number; month: number; week: number; day?: number };
+  school_attended: { health: number; sanity: number; month: number; week: number; day?: number };
+  /** A night's rest at home: the day that ended, and the clamped meter changes. */
+  day_rested: { month: number; week: number; day: number; health: number; sanity: number };
   /** A real-life guide finished; correct is the first answer to its check question. */
   guide_completed: { guide_id: string; correct: boolean };
 }

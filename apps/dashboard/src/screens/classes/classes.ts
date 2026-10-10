@@ -16,6 +16,19 @@ export function validateClassName(raw: string): 'empty' | 'long' | null {
  */
 export const formatCode = (code: string) => (code.length === 8 ? `${code.slice(0, 4)} ${code.slice(4)}` : code);
 
+/** A search box appears above the class list once a facilitator has more classes than this. */
+export const CLASS_SEARCH_FROM = 6;
+
+/** Classes whose name or code contains the query; case and spaces in a code ("ABCD 2345") don't matter. */
+export function filterClasses(list: readonly ClassRow[], query: string): ClassRow[] {
+  const q = query.trim().toLocaleLowerCase();
+  if (!q) return [...list];
+  const bare = q.replace(/\s+/g, '');
+  return list.filter(
+    (c) => c.name.toLocaleLowerCase().includes(q) || (bare && c.class_code.toLowerCase().includes(bare)),
+  );
+}
+
 /** The fields a settings change may set; the id never changes. */
 export type ClassPatch = Partial<Omit<ClassRow, 'id'>>;
 

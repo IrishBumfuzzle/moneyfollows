@@ -152,49 +152,43 @@ vitals?: { health: number; sanity: number };   // missing → treat as START_VIT
 - `rewind` restores `money` and `vitals` like every other field (snapshots already cover the whole state).
 - **Open for BE-1:** should sanity or health feed the Money Health Score (CLAUDE.md §5.3), lower over a week with no wants, or trigger events at low values (for example, sanity under 20 makes a "feeling low" card more likely)? None of this is in the frontend stand-in.
 
-## 5. Backend API (proposed for BE-2, not built)
+## 5. Backend API (built)
 
-Each successful action becomes one `SyncEvent` (CLAUDE.md §5.5), queued offline and sent through `push_events`, idempotent on `event_id` like every other event.
+Each successful action becomes one `SyncEvent` (CLAUDE.md §5.5), queued offline and sent through `push_events`, idempotent on `event_id` like every other event. The game runs day by day: school, then work, at most once each a day, and resting at home ends the day.
 
 | `type` | When | `payload` |
 |---|---|---|
-| `shop_purchase` | A store purchase goes through | `{ kind: 'necessity' \| 'want', price, health, sanity, month, week }` (price comes out of the common wallet) |
-| `work_shift` | A work shift is done | `{ wage, health, sanity, month, week }` |
-| `school_attended` | The player goes to school | `{ health, sanity, month, week }` |
+| `shop_purchase` | A Kirana Run basket is paid (one event per kind in the basket) | `{ kind: 'necessity' \| 'want', price, health, sanity, month, week, day }` |
+| `work_shift` | A paid Counter Shift ends (not practice) | `{ wage, health, sanity, month, week, day }` |
+| `school_attended` | A classroom round is finished (first one that day) | `{ health, sanity, month, week, day }` |
+| `day_rested` | The player rests at home | `{ month, week, day, health, sanity }` (`day` = the day that ended) |
+| `week_slept` | Resting ends day 7 | `{ month, week }` |
+| `minigame_complete` | A Counter Shift or Kirana Run ends | `{ game: 'counter_shift' \| 'kirana_run', correct, total, score }` (shift: customers served right of 5; trip: list done + within plan, of 2) |
 
-`health` and `sanity` are the clamped changes, not the totals. `price` and `wage` are whole rupees. Every value is a number or an id-like string, so it passes the existing payload filter (`^[A-Za-z0-9_.:-]{1,64}$`).
+`health` and `sanity` are the clamped changes on the 0–25 meters, not the totals. `price` and `wage` are whole rupees. `day` is 1–7; older clients send none and are still accepted. Every value is a number or an id-like string, so it passes the existing payload filter (`^[A-Za-z0-9_.:-]{1,64}$`).
 
 ```jsonc
 {
   "event_id": "uuid made on the device",
   "anon_id": "…", "class_id": "…",
-  "type": "shop_purchase",
-  "payload": { "kind": "want", "price": 400, "health": 0, "sanity": 12, "month": 1, "week": 2 },
-  "client_ts": "2026-10-10T16:30:00.000Z",
+  "type": "day_rested",
+  "payload": { "month": 1, "week": 2, "day": 3, "health": 2, "sanity": 6 },
+  "client_ts": "2026-10-11T21:30:00.000Z",
   "content_version": "life-2026-10-10"
 }
 ```
 
-**What BE-2 needs to add:**
+**Where it lives:**
 
-1. Add the three values to `SyncEvent['type']` in `packages/shared` (additive; announce it in the team channel).
-2. Add them to `event_payload_keys` in the `push_events` migration:
-
-   ```sql
-   when 'shop_purchase'   then array['kind', 'price', 'health', 'sanity', 'month', 'week']
-   when 'work_shift'      then array['wage', 'health', 'sanity', 'month', 'week']
-   when 'school_attended' then array['health', 'sanity', 'month', 'week']
-   ```
-
-Both steps shipped (migration `20261011090000_life_events_persona.sql`). The store sends `shop_purchase` from `App.tsx`. `work_shift` and `school_attended` will follow once a UI calls `lifeApi.work` or `lifeApi.attendSchool`.
+- Types: `day_rested` in `SyncEvent['type']` (`packages/shared`, additive) and typed payloads in `packages/api-client` (`SyncEventPayloads`).
+- `push_events` key lists: migrations `20261011090000_life_events_persona.sql` (the first three types) and `20261011130000_daily_life_events.sql` (`day`, `day_rested`).
+- `class_wellbeing(class_id)` (facilitator only, RLS): per student, necessity and want purchases, want spending, and the days with a work shift, a school day or a rest (`rest_days`). Older events without a day count once per week. Tests: `supabase/tests/life-events.test.ts`, `supabase/tests/dashboard-data.test.ts`.
 
 **Not needed:**
 
 - **No new table.** These rows live in `events`, which already has the `(class_id, type)` index.
 - **No endpoint to fetch prices.** The config ships in the app bundle, so the store works offline.
 - **No server-side game logic.** The engine on the phone is the source of truth, as for decisions.
-
-**Optional for the dashboard:** a `class_wellbeing(class_id)` RPC (facilitator-only, same RLS check as `class_progress`) returning, per student, the counts of necessity vs want purchases and the work/school shifts. It would show who is overspending on wants. Ask the dashboard owner first; it is not on the demo path.
 
 ## 6. UI
 

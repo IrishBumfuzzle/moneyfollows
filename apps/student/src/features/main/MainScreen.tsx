@@ -82,7 +82,7 @@ export function MainScreen({
             <span className="ms-sr">{`${tr('main.money')}: ${money}`}</span>
             <span aria-hidden="true">{money}</span>
           </p>
-          <p className="k-panel ms-chip">{tr('main.week', { month: life.month, week: life.week })}</p>
+          <p className="k-panel ms-chip">{tr('main.week', { month: life.month, week: life.week, day: life.day })}</p>
         </div>
 
         <div

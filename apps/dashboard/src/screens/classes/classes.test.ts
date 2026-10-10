@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ClassRow } from '@paisa/api-client';
-import { NAME_MAX, formatCode, mergeClass, patchClassRow, validateClassName } from './classes';
+import { NAME_MAX, filterClasses, formatCode, mergeClass, patchClassRow, validateClassName } from './classes';
 
 const row = (id: string, created_at: string, over: Partial<ClassRow> = {}): ClassRow => ({
   id,
@@ -85,5 +85,29 @@ describe('patchClassRow', () => {
     expect(patchClassRow(before, 'zzz', { join_open: false })).toEqual(list());
     patchClassRow(before, 'a', { join_open: false });
     expect(before).toEqual(list());
+  });
+});
+
+describe('filterClasses', () => {
+  const list = [
+    row('a', '2026-10-01', { name: 'Class 11 A', class_code: 'ABCD2345' }),
+    row('b', '2026-10-02', { name: 'Saturday batch', class_code: 'WXYZ6789' }),
+  ];
+
+  it('returns every class for an empty query', () => {
+    expect(filterClasses(list, '  ').map((c) => c.id)).toEqual(['a', 'b']);
+  });
+
+  it('matches part of a name, ignoring case', () => {
+    expect(filterClasses(list, 'saturday').map((c) => c.id)).toEqual(['b']);
+  });
+
+  it('matches a code typed with or without the space', () => {
+    expect(filterClasses(list, 'abcd 2345').map((c) => c.id)).toEqual(['a']);
+    expect(filterClasses(list, 'xyz6').map((c) => c.id)).toEqual(['b']);
+  });
+
+  it('finds nothing for a query that matches no class', () => {
+    expect(filterClasses(list, 'Class 12')).toEqual([]);
   });
 });

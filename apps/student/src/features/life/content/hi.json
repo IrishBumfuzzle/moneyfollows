@@ -1,6 +1,6 @@
 {
   "life.meters.label": "तुम्हारे पैसे, सेहत और मन की शांति",
-  "life.meter.value": "{{label}}: 100 में से {{value}}",
+  "life.meter.value": "{{label}}: {{max}} में से {{value}}",
   "life.meter.money": "पैसे",
   "life.meter.health": "सेहत",
   "life.meter.sanity": "मन की शांति",
@@ -17,7 +17,8 @@
   "life.school.label": "स्कूल जाओ",
   "life.school.hint": "पढ़ाई में मेहनत लगती है, इसलिए मन की शांति कम होती है।",
   "life.blocked.not_enough_money": "पैसे कम हैं।",
-  "life.blocked.already_worked": "इस हफ़्ते तुम काम कर चुके हो।",
-  "life.blocked.already_at_school": "इस हफ़्ते तुम स्कूल जा चुके हो।",
-  "life.meter.debt": "उधार {{debt}}"
+  "life.blocked.already_worked": "आज तुम काम कर चुके हो।",
+  "life.blocked.already_at_school": "आज तुम स्कूल जा चुके हो।",
+  "life.meter.debt": "उधार {{debt}}",
+  "life.blocked.school_first": "पहले स्कूल जाओ। स्कूल के बाद काम कर सकते हो।"
 }

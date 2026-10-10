@@ -1,4 +1,5 @@
 import { rupees, signed, signedRupees, t } from './content';
+import { VITALS_MAX } from './config';
 import { PixelIcon } from './PixelIcon';
 import type { Lang } from './content';
 import type { IconId, LifeDelta, LifeState } from './types';
@@ -64,12 +65,12 @@ function Vital({ lang, id, icon, value, change, popId }: {
       <span
         className={`lf-track is-${id}`}
         role="meter"
-        aria-label={t(lang, 'life.meter.value', { label, value })}
+        aria-label={t(lang, 'life.meter.value', { label, value, max: VITALS_MAX })}
         aria-valuemin={0}
-        aria-valuemax={100}
+        aria-valuemax={VITALS_MAX}
         aria-valuenow={value}
       >
-        <span className="lf-fill" style={{ width: `${value}%` }} />
+        <span className="lf-fill" style={{ width: `${(value / VITALS_MAX) * 100}%` }} />
       </span>
     </div>
   );
