@@ -1,0 +1,90 @@
+[
+  {
+    "id": "quiz.classroom.budget.needs_first",
+    "quiz": "classroom",
+    "pillar": "plan_budget",
+    "concept": "needs_vs_wants",
+    "text": "t:quiz.classroom.budget.needs_first.q",
+    "options": ["t:quiz.classroom.budget.needs_first.o1", "t:quiz.classroom.budget.needs_first.o2", "t:quiz.classroom.budget.needs_first.o3"],
+    "answer": 0,
+    "explanation": "t:quiz.classroom.budget.needs_first.why",
+    "meta": { "status": "draft", "author": "claude" }
+  },
+  {
+    "id": "quiz.classroom.budget.opportunity_cost",
+    "quiz": "classroom",
+    "pillar": "plan_budget",
+    "concept": "opportunity_cost",
+    "text": "t:quiz.classroom.budget.opportunity_cost.q",
+    "options": ["t:quiz.classroom.budget.opportunity_cost.o1", "t:quiz.classroom.budget.opportunity_cost.o2", "t:quiz.classroom.budget.opportunity_cost.o3"],
+    "answer": 1,
+    "explanation": "t:quiz.classroom.budget.opportunity_cost.why",
+    "meta": { "status": "draft", "author": "claude" }
+  },
+  {
+    "id": "quiz.classroom.save.emergency_fund",
+    "quiz": "classroom",
+    "pillar": "save_manage",
+    "concept": "emergency_fund",
+    "text": "t:quiz.classroom.save.emergency_fund.q",
+    "options": ["t:quiz.classroom.save.emergency_fund.o1", "t:quiz.classroom.save.emergency_fund.o2", "t:quiz.classroom.save.emergency_fund.o3"],
+    "answer": 1,
+    "explanation": "t:quiz.classroom.save.emergency_fund.why",
+    "meta": { "status": "draft", "author": "claude" }
+  },
+  {
+    "id": "quiz.classroom.save.track_spending",
+    "quiz": "classroom",
+    "pillar": "save_manage",
+    "concept": "tracking_spending",
+    "text": "t:quiz.classroom.save.track_spending.q",
+    "options": ["t:quiz.classroom.save.track_spending.o1", "t:quiz.classroom.save.track_spending.o2", "t:quiz.classroom.save.track_spending.o3"],
+    "answer": 0,
+    "explanation": "t:quiz.classroom.save.track_spending.why",
+    "meta": { "status": "draft", "author": "claude" }
+  },
+  {
+    "id": "quiz.classroom.invest.risk_return",
+    "quiz": "classroom",
+    "pillar": "understand_investing",
+    "concept": "risk_and_return",
+    "text": "t:quiz.classroom.invest.risk_return.q",
+    "options": ["t:quiz.classroom.invest.risk_return.o1", "t:quiz.classroom.invest.risk_return.o2", "t:quiz.classroom.invest.risk_return.o3"],
+    "answer": 0,
+    "explanation": "t:quiz.classroom.invest.risk_return.why",
+    "meta": { "status": "draft", "author": "claude" }
+  },
+  {
+    "id": "quiz.classroom.invest.diversify",
+    "quiz": "classroom",
+    "pillar": "understand_investing",
+    "concept": "diversification",
+    "text": "t:quiz.classroom.invest.diversify.q",
+    "options": ["t:quiz.classroom.invest.diversify.o1", "t:quiz.classroom.invest.diversify.o2", "t:quiz.classroom.invest.diversify.o3"],
+    "answer": 0,
+    "explanation": "t:quiz.classroom.invest.diversify.why",
+    "meta": { "status": "draft", "author": "claude" }
+  },
+  {
+    "id": "quiz.classroom.safe.otp",
+    "quiz": "classroom",
+    "pillar": "stay_safe",
+    "concept": "never_share_otp",
+    "text": "t:quiz.classroom.safe.otp.q",
+    "options": ["t:quiz.classroom.safe.otp.o1", "t:quiz.classroom.safe.otp.o2", "t:quiz.classroom.safe.otp.o3"],
+    "answer": 1,
+    "explanation": "t:quiz.classroom.safe.otp.why",
+    "meta": { "status": "draft", "author": "claude" }
+  },
+  {
+    "id": "quiz.classroom.safe.collect_request",
+    "quiz": "classroom",
+    "pillar": "stay_safe",
+    "concept": "upi_collect_request",
+    "text": "t:quiz.classroom.safe.collect_request.q",
+    "options": ["t:quiz.classroom.safe.collect_request.o1", "t:quiz.classroom.safe.collect_request.o2", "t:quiz.classroom.safe.collect_request.o3"],
+    "answer": 0,
+    "explanation": "t:quiz.classroom.safe.collect_request.why",
+    "meta": { "status": "draft", "author": "claude" }
+  }
+]

@@ -1,0 +1,96 @@
+/* Classroom quiz. Positions are stage pixels on the 360x640 backdrop (tools/build-classroom.py):
+   room x 28..332, wall y 8..200, chalkboard slate x 52..308 / y 48..188, floor y 200..632. */
+
+/* Pixelify Sans draws 5 like S and 2 like Z. Quiz text has amounts, so digits, % and ₹
+   come from Noto Sans (the Latin subset fontsource already ships with Devanagari). */
+@font-face {
+  font-family: 'Paisa Digits';
+  src: url('@fontsource/noto-sans-devanagari/files/noto-sans-devanagari-latin-400-normal.woff2') format('woff2');
+  unicode-range: U+0030-0039, U+0025, U+20B9;
+}
+
+.cr-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #000;                           /* the black bars */
+  font: 16px/1.3 "Paisa Digits", "Pixelify Sans", "Noto Sans Devanagari", "Noto Sans Telugu", sans-serif;
+  font-variant-ligatures: none;               /* after `font`, which resets it: Pixelify's "fi" reads as "A" */
+}
+.cr-screen:lang(hi) { line-height: 1.45; }
+.cr-screen p, .cr-screen ul, .cr-screen ol { margin: 0; padding: 0; list-style: none; }
+
+.cr-stage {
+  position: relative;
+  flex: none;
+  background: url(/assets/classroom.png) 0 0 / 100% 100%;
+  image-rendering: pixelated;
+}
+
+.cr-back { position: absolute; left: 38px; top: 6px; }
+
+.cr-banner { position: absolute; left: 50%; top: 6px; transform: translateX(-50%); }
+
+.cr-pips { position: absolute; right: 40px; top: 14px; display: flex; gap: 4px; }
+
+.cr-board {
+  position: absolute;
+  left: 52px;
+  top: 48px;
+  width: 256px;
+  height: 140px;
+  box-sizing: border-box;
+  padding: 6px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  color: #eef3e0;                              /* chalk */
+  text-align: center;
+  outline: none;
+  overflow: hidden;
+}
+.cr-board-label { color: #9fc2ae; }
+.cr-score { font-size: 32px; line-height: 1.1; }
+
+.cr-floor {
+  position: absolute;
+  left: 44px;
+  right: 44px;
+  top: 206px;
+  bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cr-floor-end { justify-content: flex-end; }
+.cr-options { display: flex; flex-direction: column; gap: 8px; }
+.cr-letter { flex: none; min-width: 12px; color: #a0603a; }
+.k-btn.is-correct .cr-letter, .k-btn.is-wrong .cr-letter { color: inherit; }
+.cr-wide { width: 100%; }
+.cr-center { justify-content: center; }
+
+.cr-feedback {
+  position: absolute;
+  left: -8px;
+  right: -8px;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cr-verdict { font-size: 20px; }
+.cr-verdict.is-right { color: #2f7a2a; }
+.cr-verdict.is-wrong { color: #b0362f; }
+
+.cr-pillars { display: flex; flex-direction: column; gap: 6px; }
+.cr-pillars li { display: flex; justify-content: space-between; gap: 8px; }
+.cr-pillar-score { flex: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .cr-feedback { animation: cr-rise 160ms ease-out; }
+  @keyframes cr-rise { from { transform: translateY(12px); opacity: 0; } }
+}

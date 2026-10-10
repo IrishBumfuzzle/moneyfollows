@@ -3,6 +3,8 @@
   "private": true,
   "scripts": {
     "dev:student": "pnpm --filter student dev",
-    "typecheck": "pnpm -r --if-present typecheck"
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
+    "check": "pnpm typecheck && pnpm test"
   }
 }
