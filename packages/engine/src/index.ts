@@ -17,5 +17,8 @@ export {
   XP,
 } from './rewards';
 export type { Rewards, RewardGain } from './rewards';
+// Additive: Jar Splitter mini-game helpers (practice only, never changes GameState).
+export { scoreJarSplit, jarSplitterRounds, emptySplit } from './jar-splitter';
+export type { JarSplit, JarSplitResult, JarCheckResult } from './jar-splitter';
 export { EngineError } from './errors';
 export type { EngineErrorCode } from './errors';

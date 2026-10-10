@@ -20,6 +20,8 @@ import endline from '../quizzes/endline.json';
 import manifest from '../manifest.json';
 import badgeDefs from '../rewards/badges.json';
 import { BadgeSchema, type Badge } from './badges';
+import jarRounds from '../minigames/jar-splitter.json';
+import { JarSplitRoundSchema, type JarSplitRound } from './jar-splitter';
 import { buildI18n, buildLanguages, type ContentManifest, type LanguageInfo } from './languages';
 
 const contentManifest: ContentManifest = manifest;
@@ -38,6 +40,9 @@ export const content: ContentBundle = {
 
 /** Badges the engine's rewards module can award (rewards/badges.json). Kept outside ContentBundle so the frozen contract is unchanged. */
 export const badges: Badge[] = BadgeSchema.array().parse(badgeDefs);
+
+/** Jar Splitter practice rounds (minigames/jar-splitter.json). Also kept outside ContentBundle. */
+export const jarSplitRounds: JarSplitRound[] = JarSplitRoundSchema.array().parse(jarRounds);
 
 /**
  * Every i18n/<code>.json file, found at build time. Vite and Vitest turn the import.meta.glob
@@ -90,5 +95,6 @@ export const i18n = buildI18n(rawI18n, contentManifest);
 export const languages: LanguageInfo[] = buildLanguages(rawI18n, contentManifest);
 
 export * from './badges';
+export * from './jar-splitter';
 export * from './languages';
 export * from './validate';

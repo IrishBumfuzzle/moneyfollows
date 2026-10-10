@@ -418,5 +418,19 @@
   "badge.goal_getter.name": "Goal Getter",
   "badge.goal_getter.desc": "You saved enough for your goal.",
   "badge.steady_streak.name": "Steady Streak",
-  "badge.steady_streak.desc": "You played 3 weeks in a row."
+  "badge.steady_streak.desc": "You played 3 weeks in a row.",
+  "jar.sana_payday.01.story": "Payday! Your tuition students paid ₹4,000. Bus pass and phone recharge need ₹1,200, and you give ₹800 at home for food. Split the money into your four jars.",
+  "jar.sana_payday.01.lesson": "Bills come first, then savings and goals, then fun. That order keeps you from running short.",
+  "jar.ravi_payday.01.story": "The tiffin stall gave you ₹3,000 this month. Gas and vegetables cost ₹700, and you give ₹500 at home. Split the rest between fun, your bike goal and savings.",
+  "jar.ravi_payday.01.lesson": "When income changes month to month, saving a fixed share each payday still adds up.",
+  "jar.festival_month.01.story": "Bonalu month! You earned ₹4,000 and an uncle gave you ₹1,000. Bills still need ₹2,000, and new festival clothes would be nice.",
+  "jar.festival_month.01.lesson": "A festival can have a bigger Wants jar. Planning for it means the fun does not eat your bills.",
+  "jar.exam_month.01.story": "Exam month: on top of ₹1,200 of bills, the ₹600 exam fee is due. You have ₹4,000 to split.",
+  "jar.exam_month.01.lesson": "In a costly month, saving a little still counts. Small amounts keep the habit going.",
+  "jar.check.needs.ok": "Needs has ₹{{amount}} or more, enough for this month's bills.",
+  "jar.check.needs.fix": "Needs is ₹{{short}} short. This month's bills need ₹{{amount}}.",
+  "jar.check.save.ok": "Goals and Savings get {{percent}}% or more of the money. Your future self says thanks.",
+  "jar.check.save.fix": "Goals and Savings get less than {{percent}}%. That share is ₹{{amount}}.",
+  "jar.check.wants.ok": "Wants stays within {{percent}}% (₹{{amount}}). Fun, with a limit.",
+  "jar.check.wants.fix": "Wants is over {{percent}}%. The limit this month is ₹{{amount}}."
 }
