@@ -408,5 +408,15 @@
   "reflection.pay_down_debt": "Next month, try to pay back a little of what you borrowed.",
   "reflection.great_month": "Great month! Your plan is working. Keep the same habits going.",
   "common.continue": "Continue",
-  "assumption.banner": "These are assumed numbers, not promises. Real results can be higher or lower."
+  "assumption.banner": "These are assumed numbers, not promises. Real results can be higher or lower.",
+  "badge.first_step.name": "First Step",
+  "badge.first_step.desc": "You made your first money choice.",
+  "badge.safety_shield.name": "Safety Shield",
+  "badge.safety_shield.desc": "You faced 3 different scam or safety situations.",
+  "badge.rainy_day_ready.name": "Rainy Day Ready",
+  "badge.rainy_day_ready.desc": "Your Savings jar can cover half a month of Needs.",
+  "badge.goal_getter.name": "Goal Getter",
+  "badge.goal_getter.desc": "You saved enough for your goal.",
+  "badge.steady_streak.name": "Steady Streak",
+  "badge.steady_streak.desc": "You played 3 weeks in a row."
 }

@@ -1,6 +1,15 @@
 import { PILLARS, REFLECTION_KEYS } from '@paisa/shared';
 import { describe, expect, it } from 'vitest';
-import { buildI18n, buildLanguages, collectKeys, content, i18n, isValidContentVersion, languages } from '../src';
+import {
+  badges,
+  buildI18n,
+  buildLanguages,
+  collectKeys,
+  content,
+  i18n,
+  isValidContentVersion,
+  languages,
+} from '../src';
 import manifest from '../manifest.json';
 
 const bundleKeys = () =>
@@ -106,11 +115,21 @@ describe('i18n', () => {
     expect(Object.keys(i18n.hi).sort()).toEqual(Object.keys(i18n.en).sort());
     const allowed = new Set([
       ...bundleKeys(),
+      ...collectKeys(badges),
       ...Object.values(REFLECTION_KEYS).map((k) => k.slice(2)),
       'common.ok',
       'common.continue',
       'assumption.banner',
     ]);
     expect(Object.keys(i18n.en).filter((k) => !allowed.has(k))).toEqual([]);
+  });
+});
+
+describe('badges', () => {
+  it('parses, has unique ids, and every name and description exists in en and hi', () => {
+    expect(badges.length).toBeGreaterThan(0);
+    expect(new Set(badges.map((b) => b.id)).size).toBe(badges.length);
+    for (const key of collectKeys(badges))
+      for (const lang of ['en', 'hi'] as const) expect(i18n[lang][key], `${lang}:${key}`).toBeTruthy();
   });
 });

@@ -245,7 +245,9 @@ describe('rule 6: links and numbers', () => {
     const scamRun = (s1: string, over: Record<string, string> = {}) =>
       run({ items: [item(s1)], file: 'minigames/scam-or-safe.json', en: { ...texts(s1), ...over } });
     it('may quote promises and use reserved fake links and placeholder numbers in the message body', () => {
-      expect(scamRun('Guaranteed prize! Click http://win.example/x or kyc.invalid now, or call 00000 00000.')).toEqual([]);
+      expect(scamRun('Guaranteed prize! Click http://win.example/x or kyc.invalid now, or call 00000 00000.')).toEqual(
+        [],
+      );
     });
     it.each([
       ['a real-looking link', 'Claim at win-big.shop/claim today.', 'link'],
@@ -257,7 +259,9 @@ describe('rule 6: links and numbers', () => {
     });
     it('gives the explanation, hint and sender the full checks', () => {
       const ok = 'Fake prize.';
-      expect(rules(scamRun(ok, { 'scam.test.01.why': 'This one is guaranteed to pay.' }), 'error')).toEqual(['promise']);
+      expect(rules(scamRun(ok, { 'scam.test.01.why': 'This one is guaranteed to pay.' }), 'error')).toEqual([
+        'promise',
+      ]);
       expect(rules(scamRun(ok, { 'scam.why.link': 'Visit prize.example to check.' }), 'error')).toEqual(['link']);
       expect(rules(scamRun(ok, { 'scam.test.01.sender': '+91 98765 43210' }), 'error')).toEqual(['phone']);
     });
@@ -537,7 +541,10 @@ describe('cards that can never play out', () => {
       { path: 'personas.json', data: readJson('personas.json') },
     ];
     const real = readJson('i18n/en.json') as Record<string, string>;
-    const en = { ...baseTexts(), ...Object.fromEntries(Object.entries(real).filter(([k]) => k.startsWith('persona.'))) };
+    const en = {
+      ...baseTexts(),
+      ...Object.fromEntries(Object.entries(real).filter(([k]) => k.startsWith('persona.'))),
+    };
     expect(rules(run({ files, en }), 'error')).toEqual(['no_persona']);
   });
 });
@@ -588,5 +595,49 @@ describe('the real content', () => {
     const errors = issues.filter((i) => i.severity === 'error');
     expect(errors.length).toBeGreaterThan(0);
     expect(new Set(errors.map((e) => e.rule))).toEqual(new Set(['draft']));
+  });
+});
+
+describe('badges (rewards/badges.json)', () => {
+  const badgeItem = (over: Record<string, unknown> = {}) => ({
+    id: 'first_step',
+    name: 't:badge.first_step.name',
+    description: 't:badge.first_step.desc',
+    icon: 'footprints',
+    xp: 10,
+    rule: { kind: 'decisions', n: 1 },
+    meta,
+    ...over,
+  });
+  const badgeTexts = {
+    'badge.first_step.name': 'First Step',
+    'badge.first_step.desc': 'You made your first money choice.',
+  };
+  const runBadge = (item: unknown, en: Record<string, unknown> = badgeTexts, strict = false) =>
+    run({ items: [item], file: 'rewards/badges.json', en, strict });
+
+  it('accepts a valid badge', () => {
+    expect(runBadge(badgeItem())).toEqual([]);
+  });
+
+  it('rejects an unknown rule kind and a negative XP', () => {
+    expect(rules(runBadge(badgeItem({ rule: { kind: 'magic' } })))).toContain('schema');
+    expect(rules(runBadge(badgeItem({ xp: -5 })))).toContain('schema');
+  });
+
+  it('needs its strings in en and hi, within the badge caps', () => {
+    expect(rules(run({ items: [badgeItem()], file: 'rewards/badges.json', en: badgeTexts, hi: {} }))).toContain(
+      'missing_key',
+    );
+    expect(capFor('badge.first_step.name')).toBe('badgeName');
+    expect(capFor('badge.first_step.desc')).toBe('badgeDesc');
+    const long = { ...badgeTexts, 'badge.first_step.name': 'A badge name that is far too long' };
+    expect(rules(runBadge(badgeItem(), long))).toContain('length');
+  });
+
+  it('applies the brand guardrail and strict draft rule to badges too', () => {
+    const brand = { ...badgeTexts, 'badge.first_step.desc': 'You paid with Paytm.' };
+    expect(rules(runBadge(badgeItem(), brand))).toContain('real_brand');
+    expect(rules(runBadge(badgeItem({ meta: { status: 'draft', author: 'x' } }), badgeTexts, true))).toContain('draft');
   });
 });
