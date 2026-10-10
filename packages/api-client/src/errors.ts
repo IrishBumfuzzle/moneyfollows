@@ -8,6 +8,7 @@ export type ApiErrorCode =
   | 'nickname_blocked'
   | 'nickname_invalid'
   | 'nickname_personal_info'
+  | 'rejoin_failed'
   | 'too_many_events'
   | 'not_signed_in'
   | 'network'
@@ -23,6 +24,7 @@ const KNOWN = new Set<string>([
   'nickname_blocked',
   'nickname_invalid',
   'nickname_personal_info',
+  'rejoin_failed',
   'too_many_events',
 ]);
 

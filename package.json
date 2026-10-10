@@ -16,6 +16,7 @@
     "lint:content": "tsx scripts/lint-content.ts",
     "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm lint:content",
     "seed": "tsx scripts/seed.ts",
+    "staff:invite": "tsx supabase/scripts/invite-staff.ts",
     "db:test:up": "docker compose -f supabase/tests/docker-compose.yml up -d --wait"
   },
   "devDependencies": {

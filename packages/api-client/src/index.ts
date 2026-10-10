@@ -4,6 +4,7 @@ export {
   type ApiClientOptions,
   type ClassRow,
   type MatchedLearningGainRow,
+  type StudentRow,
 } from './client';
 export {
   createSyncQueue,

@@ -70,7 +70,14 @@ describe.skipIf(skipDbTests)('join_class v2', () => {
   describe('lang', () => {
     it('saves a valid language as the student’s and still returns the class default', async () => {
       const r = await join(cls.class_code, 'Lang En', 'en');
-      expect(r).toEqual({ anon_id: expect.any(String), class_id: cls.id, default_lang: 'hi' });
+      expect(r).toEqual({
+        anon_id: expect.any(String),
+        class_id: cls.id,
+        default_lang: 'hi',
+        // Additive (20261011120500_class_settings_rejoin.sql).
+        endline_open: false,
+        rejoin_code: expect.stringMatching(/^[A-HJKMNP-Z2-9]{6}$/),
+      });
       expect(await studentLang(r.anon_id)).toBe('en');
       expect(await studentLang((await join(cls.class_code, 'Lang Te', 'te')).anon_id)).toBe('te');
       expect(await studentLang((await join(cls.class_code, 'Lang Upper', ' EN ')).anon_id)).toBe('en');
