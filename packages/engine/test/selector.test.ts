@@ -1,15 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { BASICS_BEFORE_INVESTING, RECENT_DECISIONS, RECENT_EVENTS, UNSEEN_WEIGHT } from '@paisa/shared';
-import type { Level, PersonaId } from '@paisa/shared';
+import type { GameState, Level, PersonaId } from '@paisa/shared';
 import { EngineError, createGame, nextCard } from '../src';
-import { bundle, event, fixture, scenario } from './fixtures';
+import { bundle, event, fixture, scenario, withState } from './fixtures';
 
 const noEvents = bundle({ events: [] });
 
-function firstCards(persona: PersonaId, level: Level, patch: object = {}): Set<string> {
+function firstCards(persona: PersonaId, level: Level, patch: Partial<GameState> = {}): Set<string> {
   const ids = new Set<string>();
   for (let seed = 0; seed < 200; seed++) {
-    const s = { ...createGame(persona, level, seed, noEvents), ...patch };
+    const s = withState(createGame(persona, level, seed, noEvents), patch);
     const card = nextCard(s, noEvents);
     if (card.kind === 'decision') ids.add(card.scenario.id);
   }
@@ -73,7 +73,7 @@ describe('decision selector', () => {
   it('relaxes recency first, keeping the gates', () => {
     const c = bundle({ events: [], scenarios: [scenario('easy'), scenario('hard', { difficulty: 3 })] });
     for (let seed = 0; seed < 50; seed++) {
-      const s = { ...createGame('sana', 'starter', seed, c), seen: ['easy'] };
+      const s = withState(createGame('sana', 'starter', seed, c), { seen: ['easy'] });
       const card = nextCard(s, c);
       expect(card.kind === 'decision' && card.scenario.id).toBe('easy');
     }
@@ -83,7 +83,7 @@ describe('decision selector', () => {
     // three events after budget.a: budget.a is still one of the last RECENT_DECISIONS decisions
     const seen = ['budget.a', 'event.rain', 'event.ok', 'event.rain'];
     for (let seed = 0; seed < 200; seed++) {
-      const s = { ...createGame('sana', 'starter', seed, fixture), seen, stage: 'decision' as const };
+      const s = withState(createGame('sana', 'starter', seed, fixture), { seen, stage: 'decision' });
       const card = nextCard(s, fixture);
       expect(card.kind === 'decision' && card.scenario.id).not.toBe('budget.a');
     }
@@ -93,7 +93,7 @@ describe('decision selector', () => {
     const c = bundle({ events: [event('event.rain'), event('event.sun')] });
     const seen = ['event.rain', 'budget.a', 'save.a', 'save.delayed', 'flag.set', 'budget.sana_only', 'invest.a'];
     for (let seed = 0; seed < 50; seed++) {
-      const s = { ...createGame('sana', 'explorer', seed, c), seen, stage: 'event' as const };
+      const s = withState(createGame('sana', 'explorer', seed, c), { seen, stage: 'event' });
       const card = nextCard(s, c);
       expect(card.kind === 'event' && card.scenario.id).toBe('event.sun');
     }
@@ -111,7 +111,7 @@ describe('decision selector', () => {
   it('weights unseen cards above seen ones', () => {
     let seenPicks = 0;
     for (let seed = 0; seed < 600; seed++) {
-      const s = { ...createGame('sana', 'starter', seed, noEvents), seen: ['flag.set', 'x', 'y', 'z'] };
+      const s = withState(createGame('sana', 'starter', seed, noEvents), { seen: ['flag.set', 'x', 'y', 'z'] });
       const card = nextCard(s, noEvents);
       if (card.kind === 'decision' && card.scenario.id === 'flag.set') seenPicks++;
     }

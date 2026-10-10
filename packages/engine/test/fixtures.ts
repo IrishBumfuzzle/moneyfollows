@@ -137,6 +137,11 @@ export function deepFreeze<T>(value: T): T {
   return value;
 }
 
+/**
+ * A hand-patched state. The week's pins are dropped unless the patch sets them, so the engine
+ * rebuilds them from the patched state (the same path an older save without pins takes).
+ */
 export function withState(state: GameState, patch: Partial<GameState>): GameState {
-  return { ...state, ...patch };
+  const { pins: _pins, ...rest } = state;
+  return { ...rest, ...patch };
 }

@@ -25,5 +25,7 @@ describe('real bundled content', () => {
         }
       }
     },
+    // 300 full games with 2-3 pins a week: allow more than the default 5 s.
+    30_000,
   );
 });

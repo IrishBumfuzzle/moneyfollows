@@ -66,6 +66,18 @@ export interface PendingEffect {
   principal?: Partial<Record<JarId, number>>;
 }
 
+/**
+ * Additive: one of the week's pinned cards (5.8). Pins are chosen when the week starts; the
+ * map shows the unplayed ones, and sleep is blocked until every pin is played.
+ */
+export interface WeekPin {
+  location: LocationId;
+  sublocation?: string;
+  scenarioId: string;
+  kind: 'decision' | 'event';
+  played: boolean;
+}
+
 export interface GameState {
   version: 1;
   personaId: PersonaId;
@@ -106,6 +118,8 @@ export interface GameState {
   scores?: number[];
   /** Lesson cards collected so far ("My Notes"). */
   lessons?: TKey[];
+  /** Additive: this week's pinned cards. Absent in saves from before the map loop; the engine rebuilds them. */
+  pins?: WeekPin[];
 }
 
 // ---------------------------------------------------------------------------

@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { GAME_MONTHS, GameStateSchema, REWIND_TOKENS_PER_MONTH } from '@paisa/shared';
+import { DECISIONS_PER_WEEK, GAME_MONTHS, GameStateSchema, REWIND_TOKENS_PER_MONTH } from '@paisa/shared';
 import type { GameState } from '@paisa/shared';
 import { EngineError, choose, createGame, monthReport, nextCard, rewind } from '../src';
 import { applyToWallet } from '../src/wallet';
 import { hash, unit } from '../src/hash';
-import { bundle, choice, deepFreeze, fixture, sana, scenario } from './fixtures';
+import { bundle, choice, deepFreeze, fixture, sana, scenario, withState } from './fixtures';
 import { always, at, first, play, playGame } from './helpers';
 
 const noEvents = bundle({ events: [] });
@@ -37,7 +37,7 @@ describe('rule 2: immutable', () => {
   it('never mutates state or content', () => {
     const content = deepFreeze(structuredClone(fixture));
     let s = deepFreeze(createGame('sana', 'planner', 3, content));
-    for (let i = 0; i < 40; i++) {
+    for (let i = 0; i < 200; i++) {
       const card = nextCard(s, content);
       if (card.kind === 'yearEnd') break;
       monthReport(s);
@@ -146,20 +146,22 @@ describe('rule 4: rewind', () => {
 
   it('stops at zero tokens and with no history', () => {
     expect(rewind(createGame('sana', 'starter', 1, noEvents))).toBeNull();
+    // One snapshot per pin played this month: 3 weeks of starter pins before week 4.
     let s = play(createGame('sana', 'starter', 1, noEvents), noEvents, first, (st) => st.week === 4).state;
-    expect(s.history.length).toBe(3);
+    expect(s.history.length).toBe(3 * DECISIONS_PER_WEEK.starter);
+    const depth = s.history.length;
     for (let i = 0; i < REWIND_TOKENS_PER_MONTH; i++) s = rewind(s)!;
     expect(s.rewindTokens).toBe(0);
-    expect(s.history).toEqual([]);
+    expect(s.history).toHaveLength(depth - REWIND_TOKENS_PER_MONTH);
     expect(rewind(s)).toBeNull();
-    const withTokensNoHistory = { ...s, rewindTokens: 2 };
+    const withTokensNoHistory = { ...createGame('sana', 'starter', 1, noEvents), rewindTokens: 2 };
     expect(rewind(withTokensNoHistory)).toBeNull();
   });
 
   it('cannot cross back over a month boundary', () => {
-    // month 1 week 4 decided (history 4 deep), at month end: a rewind is still allowed here
+    // month 1 fully played (one snapshot per pin), at month end: a rewind is still allowed here
     const atEnd = play(createGame('sana', 'starter', 1, noEvents), noEvents, first, (st) => st.stage === 'monthEnd').state;
-    expect(atEnd.history).toHaveLength(4);
+    expect(atEnd.history).toHaveLength(4 * DECISIONS_PER_WEEK.starter);
     expect(rewind(atEnd)?.stage).toBe('decision');
     // after continue the new month has tokens but no way back into month 1
     const m2 = choose(atEnd, noEvents, 'continue').state;
@@ -456,11 +458,11 @@ describe('events', () => {
     });
     for (let seed = 0; seed < 100; seed++) expect(createGame('sana', 'explorer', seed, ev).stage).toBe('decision');
     // flag gate: only e.flag eligible once the flag is set
-    const flagged = { ...createGame('sana', 'explorer', 1, ev), flags: ['borrowed_friend'], stage: 'event' as const };
+    const flagged = withState(createGame('sana', 'explorer', 1, ev), { flags: ['borrowed_friend'], stage: 'event' });
     const card = nextCard(flagged, ev);
     expect(card.kind === 'event' && card.scenario.id).toBe('e.flag');
     // recent repeat is relaxed rather than failing when it is the only event
-    const repeated = { ...flagged, seen: ['e.flag'] };
+    const repeated = withState(flagged, { seen: ['e.flag'] });
     expect(nextCard(repeated, ev).kind).toBe('event');
   });
 });
@@ -543,7 +545,8 @@ describe('game flow', () => {
     expect(r.state.lessons).toEqual(['t:lesson.a']);
     const r2 = choose(r.state, noEvents, 'a');
     expect(r2.state.lessons).toEqual(['t:lesson.a']);
-    expect(r2.state.week).toBe(3);
+    // Starter weeks hold DECISIONS_PER_WEEK.starter (2) pins: two choices finish week 1.
+    expect(r2.state.week).toBe(1 + Math.floor(2 / DECISIONS_PER_WEEK.starter));
   });
 
   it('nextCard is a stable pure query', () => {

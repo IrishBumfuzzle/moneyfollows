@@ -16,6 +16,13 @@ export const MAX_DELAY_WEEKS = GAME_MONTHS * WEEKS_PER_MONTH - 1;
 
 /** Highest scenario difficulty each level sees. */
 export const LEVEL_MAX_DIFFICULTY: Record<Level, 1 | 2 | 3> = { starter: 1, explorer: 2, planner: 3 };
+/**
+ * Map loop (5.8): decision cards pinned each week. With the optional surprise event that is
+ * 2-4 pins: starter 24 decisions over the 12 weeks, explorer and planner 36.
+ */
+export const DECISIONS_PER_WEEK: Record<Level, number> = { starter: 2, explorer: 3, planner: 3 };
+/** Jar that earn() pays into unless the caller names another: earned pocket money (5.8 paper route). */
+export const EARN_JAR: JarId = 'wants';
 /** Chance of a surprise event in a week. */
 export const EVENT_CHANCE: Record<Level, number> = { starter: 0.2, explorer: 0.3, planner: 0.4 };
 

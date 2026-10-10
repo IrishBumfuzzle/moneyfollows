@@ -299,4 +299,15 @@ export const GameStateSchema = z.strictObject({
     .optional(),
   scores: z.array(z.number().min(0).max(100)).optional(),
   lessons: z.array(TKeySchema).optional(),
+  pins: z
+    .array(
+      z.strictObject({
+        location: LocationIdSchema,
+        sublocation: SublocationSchema.optional(),
+        scenarioId: z.string().min(1),
+        kind: z.enum(['decision', 'event']),
+        played: z.boolean(),
+      }),
+    )
+    .optional(),
 });
