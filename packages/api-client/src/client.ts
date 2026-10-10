@@ -17,6 +17,8 @@ export interface ClassRow {
   facilitator_id: string;
   name: string;
   created_at: string;
+  /** false: join_class refuses new students with class_closed (setJoinOpen). */
+  join_open: boolean;
 }
 
 /** learning_gain row plus the additive `n`: matched students for that pillar (= baseline_n = endline_n). */
@@ -53,8 +55,15 @@ export function createApiClient(options: ApiClientOptions) {
     supabase: sb,
 
     // ---- Students (5.5) ----
-    joinClass(classCode: string, nickname: string): Promise<JoinClassResult> {
-      return rpc<JoinClassResult>('join_class', { class_code: classCode, nickname });
+    /**
+     * `opts.lang` is the language picked in onboarding, saved as the student's; without it (or
+     * with an unknown one) the class default is used. `default_lang` in the result is always the
+     * class's. On nickname_taken, the ApiError's `suggestions` lists up to 3 free nicknames.
+     */
+    joinClass(classCode: string, nickname: string, opts?: { lang?: Lang }): Promise<JoinClassResult> {
+      const args: Record<string, unknown> = { class_code: classCode, nickname };
+      if (opts?.lang !== undefined) args.lang = opts.lang;
+      return rpc<JoinClassResult>('join_class', args);
     },
 
     /** `signal` aborts the request (the sync queue uses it for its timeout). */
@@ -98,6 +107,22 @@ export function createApiClient(options: ApiClientOptions) {
     async renameStudent(anonId: string, nickname: string): Promise<void> {
       const { error } = await sb.from('students').update({ nickname }).eq('anon_id', anonId);
       if (error) throw toApiError(error);
+    },
+
+    /** Closes (false) or reopens (true) a class to new joins. Students already in it keep playing. */
+    async setJoinOpen(classId: string, open: boolean): Promise<void> {
+      const { data, error } = await sb.from('classes').update({ join_open: open }).eq('id', classId).select('id');
+      if (error) throw toApiError(error);
+      // RLS hides other facilitators' classes, so no row updated means not yours (or no such class).
+      if (!data?.length) throw new ApiError('class_not_found', undefined, 404);
+    },
+
+    /**
+     * A fresh code for a leaked one; returns it. The old code stops working for new joins.
+     * Students who already joined keep syncing (they hold class_id, not the code).
+     */
+    rotateClassCode(classId: string): Promise<string> {
+      return rpc<string>('rotate_class_code', { class_id: classId });
     },
 
     classProgress(classId: string): Promise<ClassProgressRow[]> {
