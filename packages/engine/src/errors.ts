@@ -6,7 +6,11 @@ export type EngineErrorCode =
   | 'invalid_seed'
   | 'invalid_reward'
   | 'invalid_week'
-  | 'invalid_split';
+  | 'invalid_split'
+  | 'not_pinned'
+  | 'pins_remaining'
+  | 'sleep_required'
+  | 'invalid_earn';
 
 export class EngineError extends Error {
   readonly code: EngineErrorCode;
