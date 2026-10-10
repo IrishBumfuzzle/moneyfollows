@@ -50,5 +50,14 @@
   "struggles.attempts": "Attempts",
   "struggles.wrong": "Most-picked wrong answer",
   "struggles.option": "Option {{n}}",
-  "struggles.no_wrong": "No wrong answers"
+  "struggles.no_wrong": "No wrong answers",
+
+  "concepts.title": "Ideas the class understands",
+  "concepts.intro": "Practice answers grouped by the idea each question checks, weakest first. Use it to pick what to go over in the next session.",
+  "concepts.error": "We couldn't load the practice quiz results. Check the connection and try again.",
+  "concepts.empty": "No practice quiz answers yet. Students play these in School.",
+  "concepts.caption": "Ideas, lowest percent correct first",
+  "concepts.concept": "Idea",
+  "concepts.questions": "Questions",
+  "concepts.answers": "Answers"
 }

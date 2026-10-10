@@ -3,6 +3,8 @@ import type { ClassroomQuizSummaryRow } from '@paisa/shared';
 import { STRINGS, t } from './content';
 import {
   chartData,
+  conceptName,
+  conceptRows,
   hasNoGains,
   orderRows,
   questionText,
@@ -13,7 +15,7 @@ import {
   type GainRow,
   type PackDicts,
 } from './gains';
-import { loadQuestionDicts } from './questions';
+import { loadConceptMap, loadQuestionDicts } from './questions';
 
 const row = (pillar: GainRow['pillar'], baseline: number | null, endline: number | null, n: number): GainRow => ({
   pillar,
@@ -209,5 +211,47 @@ describe('content pack', () => {
           expect(wrongAnswer(dicts, lang, id, choice)?.text, `${lang} ${id} option ${choice + 1}`).toBeTruthy();
       }
     }
+  });
+});
+
+describe('conceptRows (by concept)', () => {
+  const q = (question_id: string, pillar: ClassroomQuizSummaryRow['pillar'], attempts: number, correct_pct: number) =>
+    ({
+      question_id,
+      pillar,
+      attempts,
+      students: 2,
+      correct_pct,
+      top_wrong_choice: null,
+    }) satisfies ClassroomQuizSummaryRow;
+  const conceptOf = { 'q.a': 'needs_vs_wants', 'q.b': 'needs_vs_wants', 'q.c': 'never_share_otp' };
+
+  it('groups questions by concept, weighting percent correct by answers, weakest first', () => {
+    const rows = conceptRows(
+      [q('q.a', 'plan_budget', 10, 80), q('q.b', 'plan_budget', 30, 40), q('q.c', 'stay_safe', 4, 100)],
+      conceptOf,
+    );
+    expect(rows).toEqual([
+      // (0.8 * 10 + 0.4 * 30) / 40 = 50%
+      { concept: 'needs_vs_wants', pillar: 'plan_budget', questions: 2, answers: 40, correct_pct: 50 },
+      { concept: 'never_share_otp', pillar: 'stay_safe', questions: 1, answers: 4, correct_pct: 100 },
+    ]);
+  });
+
+  it('leaves out questions the map does not know, and handles no answers', () => {
+    expect(conceptRows([q('q.unknown', 'stay_safe', 5, 20)], conceptOf)).toEqual([]);
+    expect(conceptRows([], conceptOf)).toEqual([]);
+  });
+
+  it('names a concept from the pack, falling back to its id', () => {
+    const dicts: PackDicts = { en: { 'concept.kyc.name': 'KYC' }, hi: {} };
+    expect(conceptName(dicts, 'hi', 'kyc')).toBe('KYC');
+    expect(conceptName({}, 'en', 'kyc')).toBe('kyc');
+  });
+
+  it('maps every classroom question in the pack to a concept', async () => {
+    const map = await loadConceptMap();
+    expect(Object.keys(map).length).toBeGreaterThan(0);
+    for (const concept of Object.values(map)) expect(concept).toMatch(/^[a-z0-9_]+$/);
   });
 });

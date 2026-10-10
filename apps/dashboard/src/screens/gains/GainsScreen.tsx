@@ -6,16 +6,19 @@ import { formatNumber, formatPct } from '../../format';
 import { ErrorBoundary } from '../../shell/ErrorBoundary';
 import { t } from './content';
 import {
+  conceptName,
+  conceptRows,
   hasNoGains,
   orderRows,
   sortStruggles,
   questionText,
   summarizeGains,
   wrongAnswer,
+  type ConceptRow,
   type GainRow,
   type PackDicts,
 } from './gains';
-import { loadQuestionDicts } from './questions';
+import { loadConceptMap, loadQuestionDicts } from './questions';
 import { useLoad } from './useLoad';
 import './gains.css';
 
@@ -31,6 +34,7 @@ export function GainsScreen({ api, cls, lang }: ClassScreenProps) {
   return (
     <div className="gains stack">
       <GainsCard {...{ api, cls, lang }} />
+      <ConceptsCard {...{ api, cls, lang }} />
       <StrugglesCard {...{ api, cls, lang }} />
     </div>
   );
@@ -180,6 +184,82 @@ function GainsResult({ rows, lang }: { rows: readonly GainRow[]; lang: Lang }) {
           </table>
         </div>
       )}
+    </div>
+  );
+}
+
+// ---- By concept: which ideas the class understands ----
+
+function ConceptsCard({ api, cls, lang }: CardProps) {
+  const { state, reload } = useLoad(async () => {
+    const [rows, dicts, conceptOf] = await Promise.all([
+      api.classroomQuizSummary(cls.id),
+      loadQuestionDicts(),
+      loadConceptMap(),
+    ]);
+    return { rows: conceptRows(rows, conceptOf), dicts };
+  }, cls.id);
+
+  return (
+    <section className="card" aria-labelledby="concepts-title">
+      <CardHead id="concepts-title" title={t(lang, 'concepts.title')} lang={lang} demo={isDemoClass(cls)} />
+      {state.status === 'loading' && <Loading lang={lang} />}
+      {state.status === 'error' && <LoadError message={t(lang, 'concepts.error')} lang={lang} onRetry={reload} />}
+      {state.status === 'ready' && (
+        <>
+          <p className="muted">{t(lang, 'concepts.intro')}</p>
+          {state.data.rows.length === 0 ? (
+            <p className="empty">{t(lang, 'concepts.empty')}</p>
+          ) : (
+            <ConceptsTable rows={state.data.rows} dicts={state.data.dicts} lang={lang} />
+          )}
+        </>
+      )}
+    </section>
+  );
+}
+
+function ConceptsTable({ rows, dicts, lang }: { rows: readonly ConceptRow[]; dicts: PackDicts; lang: Lang }) {
+  return (
+    <div className="table-wrap">
+      <table className="data">
+        <caption className="sr-only">{t(lang, 'concepts.caption')}</caption>
+        <thead>
+          <tr>
+            <th scope="col">{t(lang, 'concepts.concept')}</th>
+            <th scope="col">{t(lang, 'struggles.pillar')}</th>
+            <th scope="col" className="num">
+              {t(lang, 'struggles.correct')}
+            </th>
+            <th scope="col" className="num">
+              {t(lang, 'concepts.questions')}
+            </th>
+            <th scope="col" className="num">
+              {t(lang, 'concepts.answers')}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.concept}>
+              <th scope="row" className="gains-q">
+                {conceptName(dicts, lang, r.concept)}
+              </th>
+              <td>{t(lang, `pillar.${r.pillar}`)}</td>
+              <td className="num">
+                <span className="gains-meter">
+                  <span className="gains-bar" aria-hidden="true">
+                    <span style={{ width: `${Math.min(100, Math.max(0, r.correct_pct))}%` }} />
+                  </span>
+                  <span className="gains-pct">{formatPct(r.correct_pct)}</span>
+                </span>
+              </td>
+              <td className="num">{formatNumber(r.questions)}</td>
+              <td className="num">{formatNumber(r.answers)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
