@@ -201,12 +201,14 @@ delete from public.classes where id = ${q(DEMO.classId)} or facilitator_id = ${q
 delete from auth.users where id = ${q(DEMO.userId)};
 delete from public.staff where email = ${q(DEMO.email)};
 
--- Demo facilitator. On Supabase it can sign in with the password below (local only);
--- on a plain test database only the id and email exist.
+-- Demo facilitator. With Supabase Auth's schema (supabase start, a hosted project) it can sign
+-- in with the password below (local only); with the bare auth.users of a test database (the
+-- auth stub, or the supabase/postgres image before Auth migrates it) only the id and email exist.
 do $$
 begin
-  if exists (select 1 from information_schema.columns
-             where table_schema = 'auth' and table_name = 'users' and column_name = 'encrypted_password') then
+  if to_regclass('auth.identities') is not null
+     and exists (select 1 from information_schema.columns
+                 where table_schema = 'auth' and table_name = 'users' and column_name = 'email_confirmed_at') then
     insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
                             raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
                             confirmation_token, recovery_token, email_change_token_new, email_change)

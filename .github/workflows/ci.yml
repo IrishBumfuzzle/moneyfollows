@@ -8,16 +8,6 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
-    services:
-      # SQL tests create and drop their own databases here (supabase/tests).
-      postgres:
-        image: postgres:17-alpine
-        env:
-          POSTGRES_PASSWORD: postgres
-        ports: ['54330:5432']
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 3s --health-timeout 3s --health-retries 20
     env:
       # With CI set, the SQL tests never skip: a missing database fails the build.
       # (Locally, without CI, they skip when nothing listens on 54330.)
@@ -31,6 +21,17 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Supabase's own Postgres image, as locally (supabase/tests/docker-compose.yml): the SQL
+      # tests clone its initialised database, so real roles, grants and the auth schema are covered.
+      - run: pnpm db:test:up
       - run: pnpm check
-      # The Vercel build, so a broken app build fails here and not on deploy.
+      # The Vercel builds, so a broken app build fails here and not on deploy.
       - run: pnpm --filter student build
+      # Until UI-2 lands the dashboard app, apps/dashboard holds only vercel.json.
+      - name: pnpm --filter dashboard build
+        run: |
+          if [ -f apps/dashboard/package.json ]; then
+            pnpm --filter dashboard build
+          else
+            echo "apps/dashboard has no package.json yet: skipped"
+          fi

@@ -1,15 +1,28 @@
-# Plain Postgres for the SQL tests (pnpm db:test:up). Tests create and drop their
-# own databases here and stub the bits of Supabase they need (auth-stub.sql).
+# Supabase's own Postgres image for the SQL tests (pnpm db:test:up), the same version as the
+# hosted project (supabase/.temp/postgres-version), so the real roles, the non-superuser
+# `postgres` role, Supabase's default grants and its auth schema are all covered.
+# make-template.sh builds `paisa_template` from the initialised database; db.ts clones it for
+# every test database and applies the migrations as `postgres`, as `supabase db push` does.
 # `supabase start` works too: point SUPABASE_TEST_DB_URL at its database.
 services:
   db:
-    image: postgres:17-alpine
+    image: supabase/postgres:17.11.0.003
     environment:
       POSTGRES_PASSWORD: postgres
     ports:
       - '54330:5432'
+    volumes:
+      - ./make-template.sh:/docker-entrypoint-initdb.d/zz-paisa-template.sh:ro
+    # Fresh on every start: no stale data directory from an older image.
+    tmpfs:
+      - /var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      # Ready once the init scripts are done and the template exists.
+      test:
+        [
+          'CMD-SHELL',
+          'PGPASSWORD=postgres psql -h localhost -U postgres -d postgres -tAc "select 1 from pg_database where datname = ''paisa_template''" | grep -q 1',
+        ]
       interval: 3s
       timeout: 3s
-      retries: 20
+      retries: 60

@@ -42,16 +42,24 @@ export interface TestDb {
   drop(): Promise<void>;
 }
 
-/** A fresh database with the auth stub and every migration applied. */
+/** Built by make-template.sh in the supabase/postgres test container (docker-compose.yml). */
+const SUPABASE_TEMPLATE = 'paisa_template';
+
+/**
+ * A fresh database with every migration applied. On Supabase's Postgres image it is a copy of
+ * the real initialised database (roles, default grants, auth schema); on plain Postgres the
+ * auth stub stands in for those.
+ */
 export async function createTestDb(): Promise<TestDb> {
   const name = `paisa_test_${randomBytes(5).toString('hex')}`;
   const admin = postgres(ADMIN_URL, { max: 1, onnotice: () => {} });
-  await admin.unsafe(`create database ${name}`);
+  const [tpl] = await admin`select 1 from pg_database where datname = ${SUPABASE_TEMPLATE} and datistemplate`;
+  await admin.unsafe(`create database ${name}${tpl ? ` template ${SUPABASE_TEMPLATE}` : ''}`);
   const url = new URL(ADMIN_URL);
   url.pathname = `/${name}`;
   const sql = postgres(url.toString(), { max: 4, onnotice: () => {} });
 
-  await sql.unsafe(readFileSync(here('./auth-stub.sql'), 'utf8'));
+  if (!tpl) await sql.unsafe(readFileSync(here('./auth-stub.sql'), 'utf8'));
   const dir = here('../migrations/');
   for (const file of readdirSync(dir)
     .filter((f) => f.endsWith('.sql'))
