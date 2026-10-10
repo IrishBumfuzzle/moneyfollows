@@ -55,6 +55,12 @@ describe('createApiClient', () => {
     expect(sb.rpc).toHaveBeenLastCalledWith('push_events', { events: [e] });
   });
 
+  it('passes push_events’ rejected list through pushEvents', async () => {
+    const sb = fakeSupabase(() => ({ data: { accepted: 0, rejected: ['x'] }, error: null, status: 200 }));
+    const api = createApiClient({ url: 'http://x', anonKey: 'k', supabase: sb });
+    expect(await api.pushEvents([event()])).toEqual({ accepted: 0, rejected: ['x'] });
+  });
+
   it('maps backend errors to stable codes', async () => {
     const sb = fakeSupabase(() => ({ data: null, error: { message: 'nickname_taken', code: 'PT409' } }));
     const api = createApiClient({ url: 'http://x', anonKey: 'k', supabase: sb });
@@ -77,6 +83,44 @@ describe('createApiClient', () => {
     expect(await api.learningGain('c')).toEqual([
       { pillar: 'stay_safe', baseline_avg: 25, endline_avg: null, baseline_n: 2, endline_n: 0 },
     ]);
+  });
+});
+
+describe('makeEvent', () => {
+  it('builds the map and news events with their 5.5 payload keys', () => {
+    const now = new Date('2026-10-11T00:00:00Z');
+    expect(makeEvent(ctx, 'location_selected', { location_id: 'convenience.phone_shop' }, now, 'id-1')).toEqual({
+      event_id: 'id-1',
+      ...ctx,
+      type: 'location_selected',
+      payload: { location_id: 'convenience.phone_shop' },
+      client_ts: '2026-10-11T00:00:00.000Z',
+    });
+    expect(makeEvent(ctx, 'map_opened').payload).toEqual({});
+    expect(
+      makeEvent(ctx, 'news_question_answered', {
+        edition: '2026-W41',
+        article_id: 'upi_fraud',
+        correct: true,
+        attempt: 1,
+      }).type,
+    ).toBe('news_question_answered');
+    expect(makeEvent(ctx, 'decision_made', { scenarioId: 'x', anything: 1 }).payload).toEqual({
+      scenarioId: 'x',
+      anything: 1,
+    });
+  });
+
+  it('rejects wrong payload keys for the typed events at compile time', () => {
+    // @ts-expect-error: payload required for week_slept
+    makeEvent(ctx, 'week_slept');
+    // @ts-expect-error: camelCase key (5.5 is snake_case)
+    makeEvent(ctx, 'glossary_term_opened', { termId: 'inflation', article_id: 'a' });
+    // @ts-expect-error: correct_count missing
+    makeEvent(ctx, 'news_edition_completed', { edition: '2026-W41' });
+    // @ts-expect-error: map_opened carries nothing
+    makeEvent(ctx, 'map_opened', { location_id: 'home' });
+    expect(true).toBe(true);
   });
 });
 
@@ -228,6 +272,41 @@ describe('createSyncQueue', () => {
     expect(onPartial).toHaveBeenCalledWith({ batch, accepted: 2 });
     expect(await queue.deadLetters()).toEqual([
       expect.objectContaining({ reason: 'partial', accepted: 2, events: batch }),
+    ]);
+  });
+
+  it('dead-letters only the events the server lists as rejected and drops the accepted rest', async () => {
+    const storage = memory();
+    const onPartial = vi.fn();
+    const batch = [event(), event(), event()];
+    const bad = batch[1]!;
+    const push = vi.fn(async (events: SyncEvent[]) => ({
+      accepted: events.filter((e) => e.event_id !== bad.event_id).length,
+      rejected: events.some((e) => e.event_id === bad.event_id) ? [bad.event_id] : [],
+    }));
+    const queue = createSyncQueue({ storage, push, onPartial });
+    for (const e of batch) await queue.enqueue(e);
+    expect(await queue.flush()).toEqual({ sent: 3, remaining: 0, dropped: 1, deadLettered: 1 });
+    expect(await queue.size()).toBe(0);
+    expect(onPartial).toHaveBeenCalledWith({ batch, accepted: 2, rejected: [bad] });
+    expect(await queue.deadLetters()).toEqual([expect.objectContaining({ reason: 'skipped', events: [bad] })]);
+    // The next flush sends nothing again: the good events left the queue.
+    expect(await queue.flush()).toEqual({ sent: 0, remaining: 0 });
+    expect(push).toHaveBeenCalledTimes(1);
+    expect(await queue.requeueDeadLetters()).toBe(1);
+    expect(await queue.size()).toBe(1);
+  });
+
+  it('falls back to dead-lettering the whole batch when `rejected` does not account for the drop', async () => {
+    const storage = memory();
+    const batch = [event(), event(), event()];
+    // 1 accepted + 1 listed (plus an id that was never sent) leaves one event unaccounted for.
+    const push = vi.fn(async () => ({ accepted: 1, rejected: [batch[0]!.event_id, 'not-in-batch'] }));
+    const queue = createSyncQueue({ storage, push });
+    for (const e of batch) await queue.enqueue(e);
+    expect(await queue.flush()).toEqual({ sent: 3, remaining: 0, dropped: 2, deadLettered: 3 });
+    expect(await queue.deadLetters()).toEqual([
+      expect.objectContaining({ reason: 'partial', accepted: 1, events: batch }),
     ]);
   });
 });

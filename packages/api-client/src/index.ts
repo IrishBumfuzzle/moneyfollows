@@ -11,7 +11,10 @@ export {
   type DeadLetter,
   type EventContext,
   type FlushResult,
+  type PushEventsResponse,
   type QueueStorage,
+  type SyncEventPayload,
+  type SyncEventPayloads,
   type SyncQueue,
   type SyncQueueOptions,
 } from './sync-queue';

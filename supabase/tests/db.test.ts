@@ -33,24 +33,19 @@ describe.skipIf(skipDbTests)('database', () => {
 
   const push = (events: unknown[]) =>
     db.asAnon(
-      async (tx) => (await tx`select push_events(${tx.json(events as never)}) as r`)[0]!.r as { accepted: number },
+      async (tx) =>
+        (await tx`select push_events(${tx.json(events as never)}) as r`)[0]!.r as {
+          accepted: number;
+          rejected: string[];
+        },
     );
 
-  // The map and news types (5.5) until BE-1's contracts PR adds them to SyncEvent['type'].
-  type EventType =
-    | SyncEvent['type']
-    | 'map_opened'
-    | 'location_selected'
-    | 'week_slept'
-    | 'glossary_term_opened'
-    | 'news_question_answered'
-    | 'news_edition_completed';
   const ev = (
     s: JoinClassResult,
-    type: EventType,
+    type: SyncEvent['type'],
     payload: Record<string, unknown> = {},
     ts = '2026-10-10T10:00:00+05:30',
-  ): Omit<SyncEvent, 'type'> & { type: EventType } => ({
+  ): SyncEvent => ({
     event_id: randomUUID(),
     anon_id: s.anon_id,
     class_id: s.class_id,
@@ -236,8 +231,8 @@ describe.skipIf(skipDbTests)('database', () => {
         ev(student, 'app_open'),
         ev(student, 'decision_made', { scenarioId: 'budget.recharge.01', choiceId: 'a', pillar: 'plan_budget' }),
       ];
-      expect(await push(batch)).toEqual({ accepted: 2 });
-      expect(await push(batch)).toEqual({ accepted: 2 });
+      expect(await push(batch)).toEqual({ accepted: 2, rejected: [] });
+      expect(await push(batch)).toEqual({ accepted: 2, rejected: [] });
       expect(await count(db.sql`select count(*)::int as n from events where anon_id = ${student.anon_id}`)).toBe(2);
     });
 
@@ -248,11 +243,17 @@ describe.skipIf(skipDbTests)('database', () => {
       const badType = { ...ev(student, 'app_open'), type: 'hack' };
       const badTs = { ...ev(student, 'app_open'), client_ts: 'not-a-date' };
       const badPayload = { ...ev(student, 'app_open'), payload: [1, 2] };
-      expect(await push([good, wrongClass, unknown, badType, badTs, badPayload, { nope: true }, 'x'])).toEqual({
+      const badId = { ...ev(student, 'app_open'), event_id: 'not-a-uuid' };
+      // Every skipped event is listed by the id it was sent with; items without one cannot be.
+      expect(await push([good, wrongClass, unknown, badType, badTs, badPayload, badId, { nope: true }, 'x'])).toEqual({
         accepted: 1,
+        rejected: [wrongClass, unknown, badType, badTs, badPayload, badId].map((e) => e.event_id),
       });
       // Another student re-using an id that is already held is not accepted.
-      expect(await push([{ ...ev(other, 'app_open'), event_id: good.event_id }])).toEqual({ accepted: 0 });
+      expect(await push([{ ...ev(other, 'app_open'), event_id: good.event_id }])).toEqual({
+        accepted: 0,
+        rejected: [good.event_id],
+      });
     });
 
     it('keeps only allow-listed payload keys with short id-like values, and caps payload size', async () => {
@@ -267,7 +268,7 @@ describe.skipIf(skipDbTests)('database', () => {
         choiceIdExtra: 'x',
       });
       const freeText = ev(student, 'badge_earned', { badgeId: 'call me on 98765 43210' });
-      expect(await push([e, freeText])).toEqual({ accepted: 2 });
+      expect(await push([e, freeText])).toEqual({ accepted: 2, rejected: [] });
       const rows =
         await db.sql`select event_id, payload from events where event_id in ${db.sql([e.event_id, freeText.event_id])}`;
       const byId = Object.fromEntries(rows.map((r) => [r.event_id, r.payload]));
@@ -281,12 +282,12 @@ describe.skipIf(skipDbTests)('database', () => {
       expect(byId[freeText.event_id]).toEqual({});
 
       const big = ev(student, 'app_open', { padding: 'a'.repeat(3000) });
-      expect(await push([big])).toEqual({ accepted: 0 });
+      expect(await push([big])).toEqual({ accepted: 0, rejected: [big.event_id] });
     });
 
     it('clamps a future device time so it cannot pin last_active', async () => {
       const future = await join(cls.class_code, 'Future Kid');
-      expect(await push([ev(future, 'app_open', {}, '2099-01-01T00:00:00Z')])).toEqual({ accepted: 1 });
+      expect(await push([ev(future, 'app_open', {}, '2099-01-01T00:00:00Z')])).toEqual({ accepted: 1, rejected: [] });
       const [s] =
         await db.sql`select last_active, now() + interval '5 minutes' as cap from students where anon_id = ${future.anon_id}`;
       expect(s!.last_active.getTime()).toBeLessThanOrEqual(s!.cap.getTime());
@@ -316,7 +317,7 @@ describe.skipIf(skipDbTests)('database', () => {
         score: 100,
         answers: answers.map((a) => ({ ...a, correct: true })),
       });
-      expect(await push([retake])).toEqual({ accepted: 1 });
+      expect(await push([retake])).toEqual({ accepted: 1, rejected: [] });
 
       const attempts =
         await db.sql`select quiz_type, score, answers, created_at from quiz_attempts where anon_id = ${student.anon_id}`;
@@ -348,7 +349,7 @@ describe.skipIf(skipDbTests)('database', () => {
         { quiz_type: 'midline', score: 50, answers: [ok] },
       ];
       const events = bad.map((p) => ev(student, 'quiz_submitted', p));
-      expect(await push(events)).toEqual({ accepted: 0 });
+      expect(await push(events)).toEqual({ accepted: 0, rejected: events.map((e) => e.event_id) });
       expect(
         await count(
           db.sql`select count(*)::int as n from events where event_id in ${db.sql(events.map((e) => e.event_id))}`,
@@ -373,7 +374,7 @@ describe.skipIf(skipDbTests)('database', () => {
       });
       const again = ev(student, 'quiz_submitted', { quiz_type: 'classroom', quiz_id: 'classroom', answers, score: 0 });
       // Both count as accepted, so the client sync queue never sees a partial batch.
-      expect(await push([first, again])).toEqual({ accepted: 2 });
+      expect(await push([first, again])).toEqual({ accepted: 2, rejected: [] });
       const stored =
         await db.sql`select payload from events where event_id in ${db.sql([first.event_id, again.event_id])}`;
       expect(stored).toHaveLength(2);
@@ -402,7 +403,7 @@ describe.skipIf(skipDbTests)('database', () => {
         ev(student, 'news_edition_completed', { edition: '2026-W41', correct_count: 4, score: 80 }),
         ev(student, 'glossary_term_opened', { term_id: 'call 98765 43210', article_id: 'upi_fraud' }),
       ];
-      expect(await push(events)).toEqual({ accepted: events.length });
+      expect(await push(events)).toEqual({ accepted: events.length, rejected: [] });
       const rows = await db.sql`select event_id, type, payload from events where event_id in ${db.sql(
         events.map((e) => e.event_id),
       )}`;
@@ -416,6 +417,36 @@ describe.skipIf(skipDbTests)('database', () => {
         ['news_edition_completed', { edition: '2026-W41', correct_count: 4 }],
         ['glossary_term_opened', { article_id: 'upi_fraud' }],
       ]);
+    });
+
+    it('rejects only the bad events of a mixed batch and keeps the good ones', async () => {
+      const good = [ev(student, 'app_open'), ev(student, 'badge_earned', { badgeId: 'first_save' })];
+      const bad = { ...ev(student, 'app_open'), type: 'hack' };
+      expect(await push([good[0], bad, good[1]])).toEqual({ accepted: 2, rejected: [bad.event_id] });
+      expect(
+        await count(
+          db.sql`select count(*)::int as n from events where event_id in ${db.sql(good.map((e) => e.event_id))}`,
+        ),
+      ).toBe(2);
+    });
+
+    it('rejects an event that breaks a table constraint instead of failing the whole batch', async () => {
+      // As if a type had payload keys but were missing from the events CHECK: the insert raises.
+      const [{ def }] = (await db.sql`
+        select pg_get_constraintdef(oid) as def from pg_constraint where conname = 'events_type_check'`) as [
+        { def: string },
+      ];
+      await db.sql`alter table events drop constraint events_type_check`;
+      await db.sql`alter table events add constraint events_type_check check (type <> 'badge_earned') not valid`;
+      try {
+        const good = ev(student, 'app_open');
+        const breaks = ev(student, 'badge_earned', { badgeId: 'x' });
+        expect(await push([good, breaks])).toEqual({ accepted: 1, rejected: [breaks.event_id] });
+        expect(await count(db.sql`select count(*)::int as n from events where event_id = ${breaks.event_id}`)).toBe(0);
+      } finally {
+        await db.sql`alter table events drop constraint events_type_check`;
+        await db.sql.unsafe(`alter table events add constraint events_type_check ${def}`);
+      }
     });
 
     it('caps a batch at 500 events', async () => {
