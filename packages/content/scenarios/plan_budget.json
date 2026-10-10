@@ -3,6 +3,9 @@
     "id": "budget.bus_pass.01",
     "pillar": "plan_budget",
     "concept": "planning_ahead",
+    "location": "home",
+    "channel": "in_person",
+    "speaker": "t:speaker.you",
     "personas": [
       "ravi",
       "sana",
@@ -84,6 +87,10 @@
     "id": "budget.festival.01",
     "pillar": "plan_budget",
     "concept": "festival_budget",
+    "location": "convenience",
+    "sublocation": "convenience.clothes_stall",
+    "channel": "in_person",
+    "speaker": "t:speaker.shopkeeper",
     "personas": [
       "ravi",
       "sana",
@@ -150,6 +157,9 @@
     "id": "budget.friend_treat.01",
     "pillar": "plan_budget",
     "concept": "wants_budget",
+    "location": "home",
+    "channel": "phone",
+    "speaker": "t:speaker.friend",
     "personas": [
       "ravi",
       "sana",
@@ -215,6 +225,9 @@
     "id": "budget.goal.01",
     "pillar": "plan_budget",
     "concept": "goal_setting",
+    "location": "home",
+    "channel": "in_person",
+    "speaker": "t:speaker.you",
     "personas": [
       "ravi",
       "sana",
@@ -275,6 +288,10 @@
     "id": "budget.recharge.01",
     "pillar": "plan_budget",
     "concept": "needs_vs_wants",
+    "location": "convenience",
+    "sublocation": "convenience.phone_shop",
+    "channel": "in_person",
+    "speaker": "t:speaker.shopkeeper",
     "personas": [
       "ravi",
       "sana",
@@ -343,6 +360,9 @@
     "id": "budget.split.01",
     "pillar": "plan_budget",
     "concept": "simple_budget_split",
+    "location": "home",
+    "channel": "in_person",
+    "speaker": "t:speaker.cousin",
     "personas": [
       "ravi",
       "sana",

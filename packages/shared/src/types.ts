@@ -8,6 +8,10 @@ export type Level = 'starter' | 'explorer' | 'planner';
 export type JarId = 'needs' | 'wants' | 'goals' | 'savings';
 export type TKey = `t:${string}`; // translation key, resolved in the UI
 
+// Map places. Ids are stable keys, not labels (the "Shop" place is `convenience`);
+// labels are localised separately. Sub-map locations are strings like "convenience.phone_shop".
+export type LocationId = 'home' | 'convenience' | 'school' | 'hospital' | 'bank';
+
 // Money is whole rupees (integers). Never use floats for money.
 export interface Effects {
   jars?: Partial<Record<JarId, number>>; // + adds, − spends
@@ -36,6 +40,10 @@ export interface Scenario {
   id: string; // e.g. "budget.recharge.01"
   pillar: Pillar;
   concept: string;
+  location: LocationId; // where the pin appears on the map
+  sublocation?: string; // e.g. "convenience.phone_shop"
+  channel: 'in_person' | 'phone'; // dialogue scene vs phone chat
+  speaker: TKey; // who is talking (Ammi, shopkeeper, Unknown number)
   personas: PersonaId[];
   difficulty: 1 | 2 | 3;
   text: TKey;
@@ -58,6 +66,18 @@ export interface PendingEffect {
   principal?: Partial<Record<JarId, number>>;
 }
 
+/**
+ * Additive: one of the week's pinned cards (5.8). Pins are chosen when the week starts; the
+ * map shows the unplayed ones, and sleep is blocked until every pin is played.
+ */
+export interface WeekPin {
+  location: LocationId;
+  sublocation?: string;
+  scenarioId: string;
+  kind: 'decision' | 'event';
+  played: boolean;
+}
+
 export interface GameState {
   version: 1;
   personaId: PersonaId;
@@ -73,6 +93,7 @@ export interface GameState {
   pending: PendingEffect[];
   rewindTokens: number;
   history: unknown[]; // snapshots for rewind (engine-internal)
+  earned: string[]; // sourceIds already paid by earn()
   score?: number; // Money Health Score, set at month end
 
   // ---- Additive (engine-internal, optional so v0 states still type-check) ----
@@ -97,6 +118,8 @@ export interface GameState {
   scores?: number[];
   /** Lesson cards collected so far ("My Notes"). */
   lessons?: TKey[];
+  /** Additive: this week's pinned cards. Absent in saves from before the map loop; the engine rebuilds them. */
+  pins?: WeekPin[];
 }
 
 // ---------------------------------------------------------------------------
@@ -129,7 +152,8 @@ export interface Persona {
   meta: { status: 'draft' | 'reviewed'; author: string };
 }
 
-export type QuizType = 'baseline' | 'endline';
+/** Additive: 'classroom' is the practice quiz at School. Only baseline and endline feed learning_gain. */
+export type QuizType = 'baseline' | 'endline' | 'classroom';
 
 export interface QuizQuestion {
   id: string;
@@ -163,6 +187,42 @@ export interface ScamMessage {
   meta: { status: 'draft' | 'reviewed'; author: string };
 }
 
+// ---- Paisa Times (5.1, 5.8) ----
+export interface GlossaryTerm {
+  id: string;
+  word: TKey;
+  simple: TKey;
+  example: TKey;
+}
+
+export interface Article {
+  id: string;
+  edition: string; // e.g. "2026-W41"
+  headline: TKey;
+  body: TKey; // contains [[termId]] markers
+  terms: string[]; // GlossaryTerm ids
+  question: { prompt: TKey; options: TKey[]; correct: number; explanation: TKey };
+  reward: { wage: number; xp: number }; // wage = in-game rupees for the paper-route shift
+  meta: { status: 'draft' | 'reviewed'; author: string; factsCheckedBy?: string };
+}
+
+/**
+ * Additive: a map place or a sub-map location (places.json, 5.8). Top-level places use a
+ * LocationId; sub-map locations use "<parent>.<name>" and set `parent`.
+ */
+export interface Place {
+  id: string;
+  name: TKey;
+  parent?: LocationId;
+  /** Position on the map, in percent of the map's width and height (0-100). */
+  position: { x: number; y: number };
+  illustration?: string;
+  /** Sub-map location ids this place opens. */
+  children?: string[];
+  /** When the place opens. Absent means open from the start. */
+  unlock?: { month?: number; requiresFlag?: string };
+}
+
 /** Everything the engine and mini-games read. Bundled with the app as static JSON. */
 export interface ContentBundle {
   version: string;
@@ -171,6 +231,12 @@ export interface ContentBundle {
   events: EventCard[];
   quizzes: QuizQuestion[];
   scamMessages: ScamMessage[];
+  /** Additive (optional so existing bundles still type-check): map places and sub-map locations. */
+  places?: Place[];
+  /** Additive: Paisa Times glossary. */
+  glossary?: GlossaryTerm[];
+  /** Additive: Paisa Times articles, every edition. */
+  news?: Article[];
 }
 
 export interface ScoreParts {
@@ -247,7 +313,14 @@ export type SyncEventType =
   | 'module_complete'
   | 'badge_earned'
   | 'language_changed'
-  | 'sync_complete';
+  | 'sync_complete'
+  // Additive: map and news signals (5.5).
+  | 'map_opened'
+  | 'location_selected'
+  | 'week_slept'
+  | 'glossary_term_opened'
+  | 'news_question_answered'
+  | 'news_edition_completed';
 
 export interface SyncEvent {
   event_id: string; // uuid, generated on device

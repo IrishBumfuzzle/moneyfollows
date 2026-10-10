@@ -1,6 +1,6 @@
 # @paisa/content
 
-Scenarios, events, personas, quizzes, the Scam or Safe? messages, the translation files and the guardrail word lists. Content is data: designers and reviewers change JSON, not code.
+Scenarios, events, personas, quizzes, the Scam or Safe? messages, the map places, the Paisa Times editions and glossary, the translation files and the guardrail word lists. Content is data: designers and reviewers change JSON, not code.
 
 ## Layout
 
@@ -11,15 +11,22 @@ Scenarios, events, personas, quizzes, the Scam or Safe? messages, the translatio
 | `personas.json` | Sana and Ravi: income, fixed costs, starting jars, payday split and goal. Goals are sized for the 3-month game: saving the payday split reaches the goal (Sana ₹3,400, Ravi ₹3,450), and one raid on the goal jar (₹300 or more) misses it. |
 | `quizzes/baseline.json`, `quizzes/endline.json` | 6 parallel questions each, paired by pillar and concept (`.baseline` and `.endline` ids). |
 | `minigames/scam-or-safe.json` | 12 Scam or Safe? messages. |
+| `places.json` | The map: 5 places (`home`, `convenience` = the Shop, `school`, `hospital`, `bank`) and the Shop's 3 sub-map locations (`convenience.phone_shop`, `.kirana`, `.clothes_stall`). `position` is the pin's centre in percent of the map (sub-map locations: of the sub-map). Names are `t:place.<id>`. No `unlock` means open from month 1. |
+| `glossary.json` | Paisa Times words: `t:glossary.<id>.word`, `.simple` (one line, at most 100 characters) and `.example`. |
+| `news/<edition>.json` | One Paisa Times edition (e.g. `2026-W41`): 5 articles. Every file here is an edition; adding one needs no code change. Keys are `t:news.<edition>.<id>.headline`, `.body`, `.q`, `.o1`…, `.why`. |
 | `i18n/<code>.json` | Flat maps from key (without `t:`) to text. Every file here is a language. |
 | `manifest.json` | `CONTENT_VERSION`, the required languages (en, hi) and display names. |
 | `glossary.hi.json` | The Hindi glossary. Reuse it whenever Hindi is written. |
 | `guardrails.json` | Forbidden-term lists and length caps. Non-developers can edit it. |
-| `src/index.ts` | Exports `content` (the parsed bundle), `i18n` (every language), `languages`, `CONTENT_VERSION` and the validator. |
+| `src/index.ts` | Exports `content` (the parsed bundle, with `places`, `glossary` and `news`), `places`, `glossary`, `news`, `i18n` (every language), `languages`, `CONTENT_VERSION` and the validator. |
 | `src/languages.ts` | Builds the language tables and list from the files and the manifest. |
 | `src/validate.ts` | The linter library behind `pnpm lint:content`. |
 
 Keys contain dots, so with react-i18next set `keySeparator: false`.
+
+### Paisa Times term markers
+
+An article body marks a glossary word as `[[termId]]`, e.g. `Never share your [[otp]].` The app shows the term's `word` in the reader's language as a tappable word that opens the thought cloud. Write the sentence so the word fits where the marker is, in every language. The article's `terms` lists exactly the ids marked in the English body, and every language marks the same ids.
 
 ### Placeholders the UI fills
 
@@ -34,7 +41,7 @@ Some strings use react-i18next's default `{{name}}` interpolation. Every languag
 
 ```
 pnpm lint:content            # errors fail; warnings (tone) do not
-pnpm lint:content -- --strict   # release check: also fails on any "draft"
+pnpm lint:content -- --strict   # release check: also fails on any "draft" and any article without factsCheckedBy
 ```
 
 The linter enforces CLAUDE.md section 7.2 on every language file:
@@ -45,6 +52,8 @@ The linter enforces CLAUDE.md section 7.2 on every language file:
 - **Investing cards**: fictional assets only, `assumption: true`, and ranges instead of one number: no single percentage (`%`, "percent", "प्रतिशत") and no single ₹ projection ("could become ₹500").
 - **Links and numbers**: only `cybercrime.gov.in` (or a subdomain) and 1930. Hosts are parsed, so `cybercrime.gov.in.evil.com` fails; any domain ending counts (`wa.me`, `.shop`); phone numbers are found in any format or digit script.
 - **Scam or Safe?**: message bodies may quote a scammer's promises, but links must use a reserved fake domain (`*.example`, `*.invalid`, `*.test`) and numbers must be on `scamPlaceholderNumbers`. The sender, hints and explanation get the full checks.
+- **Map**: every card's `location` is a top-level place in `places.json`, and its `sublocation` is one of that place's `children` (with `parent` set back to it).
+- **Paisa Times**: every `[[termId]]` in every language is in `glossary.json` and written in lower case; `terms` equals the English markers; every language marks the same terms. Articles, glossary entries and place names get all the text checks above (brands, promises, advice, links, numbers, tone). `--strict` also fails any article whose `meta` has no `factsCheckedBy` (`facts_unchecked`), because a human must check every real figure.
 - **Content version**: `manifest.json` `version` is a date (`YYYY.MM.DD`, optional `.N`) or semver.
 
 ### Length caps
@@ -67,6 +76,11 @@ Caps count visible characters (a Hindi letter with its vowel sign is one) and ap
 | reflection, banner | `reflection.*`, `assumption.banner` | 140 |
 | badgeName, badgeDesc | `badge.*.name`, `badge.*.desc` | 24, 100 |
 | feedback | Jar Splitter `jar.check.*` | 120 |
+| speaker | `speaker.*` (who talks in a scene or chat) | 30 |
+| headline, articleBody | `news.*.headline`, `news.*.body` (each `[[termId]]` counts as its word) | 80, 600 |
+| question, option, explanation | article `news.*.q`, `.o1`…, `.why` | 120, 60, 160 |
+| glossaryWord, glossarySimple, glossaryExample | `glossary.*.word`, `.simple`, `.example` | 30, 100, 140 |
+| placeName | `place.*` | 24 |
 
 Strings no card uses (reflections, buttons, the banner) get the same text checks.
 
@@ -85,7 +99,7 @@ Add `i18n/<code>.json` with the same keys as `en.json`. No code change is needed
 
 ## Status workflow
 
-Every item has `meta.status`: `draft` or `reviewed`. All content here is `draft`. A human reviews an item and changes it to `reviewed`. Release builds run `pnpm lint:content -- --strict`, which fails while any draft remains.
+Every item has `meta.status`: `draft` or `reviewed`. All content here is `draft`. A human reviews an item and changes it to `reviewed`. Articles also need `meta.factsCheckedBy` (who checked any real figure). Release builds run `pnpm lint:content -- --strict`, which fails while any draft or unchecked article remains.
 
 ## Review needed
 

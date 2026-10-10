@@ -1,4 +1,4 @@
-import { PILLARS, REFLECTION_KEYS } from '@paisa/shared';
+import { ArticleSchema, GlossaryTermSchema, PILLARS, PlaceSchema, REFLECTION_KEYS } from '@paisa/shared';
 import { describe, expect, it } from 'vitest';
 import {
   badges,
@@ -6,15 +6,28 @@ import {
   buildLanguages,
   collectKeys,
   content,
+  glossary,
   i18n,
   isValidContentVersion,
   jarSplitRounds,
   languages,
+  news,
+  places,
+  termMarkers,
 } from '../src';
 import manifest from '../manifest.json';
 
 const bundleKeys = () =>
-  collectKeys([content.personas, content.scenarios, content.events, content.quizzes, content.scamMessages]);
+  collectKeys([
+    content.personas,
+    content.scenarios,
+    content.events,
+    content.quizzes,
+    content.scamMessages,
+    content.places,
+    content.glossary,
+    content.news,
+  ]);
 
 describe('content bundle', () => {
   it('parses and has a valid version from manifest.json', () => {
@@ -75,6 +88,57 @@ describe('content bundle', () => {
   });
 });
 
+describe('places, glossary and Paisa Times', () => {
+  it('exports parsed places, glossary and news, also inside the bundle', () => {
+    expect(PlaceSchema.array().parse(places)).toEqual(places);
+    expect(GlossaryTermSchema.array().parse(glossary)).toEqual(glossary);
+    expect(ArticleSchema.array().parse(news)).toEqual(news);
+    expect(content.places).toBe(places);
+    expect(content.glossary).toBe(glossary);
+    expect(content.news).toBe(news);
+  });
+  it('has the 5 places and the 3 Shop sub-map locations, with every card on the map', () => {
+    const top = places.filter((p) => p.parent === undefined).map((p) => p.id);
+    expect(top.sort()).toEqual(['bank', 'convenience', 'home', 'hospital', 'school']);
+    const shop = places.find((p) => p.id === 'convenience');
+    expect(shop?.children?.sort()).toEqual([
+      'convenience.clothes_stall',
+      'convenience.kirana',
+      'convenience.phone_shop',
+    ]);
+    const ids = new Set(places.map((p) => p.id));
+    for (const card of [...content.scenarios, ...content.events]) {
+      expect(top, card.id).toContain(card.location);
+      if (card.sublocation) expect(shop?.children, card.id).toContain(card.sublocation);
+    }
+    for (const child of shop?.children ?? []) expect(ids.has(child)).toBe(true);
+    expect(i18n.en['place.convenience']).toBe('Shop');
+  });
+  it('has one edition of 5 articles whose markers are glossary terms', () => {
+    expect(news.map((a) => a.id)).toEqual([
+      'upi_fraud',
+      'prices_inflation',
+      'interest_family_loans',
+      'loan_app_rules',
+      'payment_safety',
+    ]);
+    const termIds = new Set(glossary.map((g) => g.id));
+    for (const a of news) {
+      expect(a.edition).toBe('2026-W41');
+      const marks = termMarkers(i18n.en[a.body.slice(2)] ?? '');
+      expect(marks.length, a.id).toBeGreaterThanOrEqual(2);
+      expect(marks.length, a.id).toBeLessThanOrEqual(4);
+      expect([...a.terms].sort()).toEqual([...marks].sort());
+      for (const t of marks) expect(termIds.has(t), t).toBe(true);
+      expect(a.question.options).toHaveLength(3);
+      expect(a.reward.wage).toBeGreaterThanOrEqual(50);
+      expect(a.reward.wage).toBeLessThanOrEqual(80);
+      expect(a.meta.factsCheckedBy).toBeUndefined();
+    }
+    expect(new Set(news.map((a) => a.question.correct)).size).toBeGreaterThan(1);
+  });
+});
+
 describe('languages', () => {
   it('lists every i18n file, with en and hi required and shipped', () => {
     const codes = languages.map((l) => l.code);
@@ -132,6 +196,18 @@ describe('badges', () => {
     expect(badges.length).toBeGreaterThan(0);
     expect(new Set(badges.map((b) => b.id)).size).toBe(badges.length);
     for (const key of collectKeys(badges))
+      for (const lang of ['en', 'hi'] as const) expect(i18n[lang][key], `${lang}:${key}`).toBeTruthy();
+  });
+});
+
+describe('classroom quiz (practice at School)', () => {
+  const classroom = content.quizzes.filter((q) => q.quiz === 'classroom');
+  it('has at least 2 questions per pillar, so a 5-question quiz covers all four', () => {
+    expect(classroom.length).toBeGreaterThanOrEqual(8);
+    for (const p of PILLARS) expect(classroom.filter((q) => q.pillar === p).length, p).toBeGreaterThanOrEqual(2);
+  });
+  it('every question string exists in en and hi', () => {
+    for (const key of collectKeys(classroom))
       for (const lang of ['en', 'hi'] as const) expect(i18n[lang][key], `${lang}:${key}`).toBeTruthy();
   });
 });

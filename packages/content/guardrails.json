@@ -66,6 +66,13 @@
     "banner": 140,
     "badgeName": 24,
     "badgeDesc": 100,
-    "feedback": 120
+    "feedback": 120,
+    "speaker": 30,
+    "headline": 80,
+    "articleBody": 600,
+    "glossaryWord": 30,
+    "glossarySimple": 100,
+    "glossaryExample": 140,
+    "placeName": 24
   }
 }

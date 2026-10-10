@@ -1,4 +1,10 @@
-import { BASICS_BEFORE_INVESTING, LEVEL_MAX_DIFFICULTY, RECENT_DECISIONS, RECENT_EVENTS, UNSEEN_WEIGHT } from '@paisa/shared';
+import {
+  BASICS_BEFORE_INVESTING,
+  LEVEL_MAX_DIFFICULTY,
+  RECENT_DECISIONS,
+  RECENT_EVENTS,
+  UNSEEN_WEIGHT,
+} from '@paisa/shared';
 import type { ContentBundle, EventCard, GameState, Scenario } from '@paisa/shared';
 import { unit, weightedPick } from './hash';
 
@@ -66,8 +72,34 @@ export function decisionPool(state: GameState, content: ContentBundle): Scenario
 }
 
 /**
- * The weekly decision card: from decisionPool, weighted towards unseen cards. Undefined when
- * no scenario passes the gates; nextCard turns that into a `no_cards` EngineError.
+ * The week's pinned decisions (5.8): up to `n` different scenarios from decisionPool, each
+ * weighted towards unseen cards and, while possible, at a place not already pinned this week,
+ * so the map shows several places. Fewer than `n` only when the pool is that small.
+ */
+export function pickWeekDecisions(state: GameState, content: ContentBundle, n: number): Scenario[] {
+  const pool = decisionPool(state, content);
+  const seen = new Set(state.seen);
+  const picked: Scenario[] = [];
+  for (let i = 0; i < n; i++) {
+    const left = pool.filter((s) => !picked.includes(s));
+    if (left.length === 0) break;
+    const usedPlaces = new Set(picked.map((s) => s.location));
+    const newPlace = left.filter((s) => !usedPlaces.has(s.location));
+    const from = newPlace.length > 0 ? newPlace : left;
+    const pick = weightedPick(
+      from,
+      (s) => (seen.has(s.id) ? 1 : UNSEEN_WEIGHT),
+      unit(state.seed, 'pin', state.month, state.week, i),
+    );
+    if (pick) picked.push(pick);
+  }
+  return picked;
+}
+
+/**
+ * One decision card from decisionPool, weighted towards unseen cards. Undefined when no
+ * scenario passes the gates. The game loop uses pickWeekDecisions; this stays for callers
+ * that want a single card.
  */
 export function pickDecision(state: GameState, content: ContentBundle): Scenario | undefined {
   const pool = decisionPool(state, content);

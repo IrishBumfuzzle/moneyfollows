@@ -12,6 +12,9 @@ export function scenario(id: string, extra: Partial<Scenario> = {}): Scenario {
     id,
     pillar: 'plan_budget',
     concept: 'test',
+    location: 'home',
+    channel: 'in_person',
+    speaker: t('speaker.you'),
     personas: ['sana', 'ravi'],
     difficulty: 1,
     text: t(`${id}.story`),
@@ -26,6 +29,9 @@ export function event(id: string, extra: Partial<EventCard> = {}): EventCard {
     id,
     pillar: 'stay_safe',
     concept: 'test',
+    location: 'home',
+    channel: 'in_person',
+    speaker: t('speaker.you'),
     personas: ['sana', 'ravi'],
     text: t(`${id}.story`),
     levels: ['starter', 'explorer', 'planner'],
@@ -131,6 +137,11 @@ export function deepFreeze<T>(value: T): T {
   return value;
 }
 
+/**
+ * A hand-patched state. The week's pins are dropped unless the patch sets them, so the engine
+ * rebuilds them from the patched state (the same path an older save without pins takes).
+ */
 export function withState(state: GameState, patch: Partial<GameState>): GameState {
-  return { ...state, ...patch };
+  const { pins: _pins, ...rest } = state;
+  return { ...rest, ...patch };
 }

@@ -11,6 +11,13 @@ import {
   ScamMessageSchema,
   ScenarioSchema,
   SyncEventSchema,
+  ArticleSchema,
+  GlossaryTermSchema,
+  PlaceSchema,
+  TKeySchema,
+  type Article,
+  type GlossaryTerm,
+  type Place,
   type EventCard,
   type GameState,
   type Persona,
@@ -36,6 +43,10 @@ describe('schemas match the contract types', () => {
       id: 'budget.recharge.01',
       pillar: 'plan_budget',
       concept: 'needs_vs_wants',
+      location: 'convenience',
+      sublocation: 'convenience.phone_shop',
+      channel: 'in_person',
+      speaker: 't:speaker.shopkeeper',
       personas: ['ravi', 'sana'],
       difficulty: 1,
       text: 't:budget.recharge.01.story',
@@ -61,6 +72,13 @@ describe('schemas match the contract types', () => {
     expect(ScenarioSchema.safeParse({ ...scenario, choices: [scenario.choices[0], scenario.choices[0]] }).success).toBe(
       false,
     );
+    // 5.1: location, channel and speaker are required; a sublocation must belong to the location.
+    const { location: _l, ...noLocation } = scenario;
+    expect(ScenarioSchema.safeParse(noLocation).success).toBe(false);
+    expect(ScenarioSchema.safeParse({ ...scenario, location: 'mall' }).success).toBe(false);
+    expect(ScenarioSchema.safeParse({ ...scenario, channel: 'letter' }).success).toBe(false);
+    expect(ScenarioSchema.safeParse({ ...scenario, sublocation: 'school.canteen' }).success).toBe(false);
+    expect(ScenarioSchema.safeParse({ ...scenario, location: 'home', sublocation: undefined }).success).toBe(true);
   });
 
   it('validates sync events', () => {
@@ -91,7 +109,9 @@ describe('schemas match the contract types', () => {
 
   it('irregular income needs min <= max', () => {
     expect(PersonaSchema.safeParse(persona).success).toBe(true);
-    expect(PersonaSchema.safeParse({ ...persona, income: { ...persona.income, min: 6000, max: 6000 } }).success).toBe(true);
+    expect(PersonaSchema.safeParse({ ...persona, income: { ...persona.income, min: 6000, max: 6000 } }).success).toBe(
+      true,
+    );
     expect(PersonaSchema.safeParse({ ...persona, income: { ...persona.income, min: 7000 } }).success).toBe(false);
   });
 
@@ -100,6 +120,9 @@ describe('schemas match the contract types', () => {
       id: 'x.a',
       pillar: 'plan_budget',
       concept: 'c',
+      location: 'home',
+      channel: 'phone',
+      speaker: 't:speaker.friend',
       personas: ['ravi'],
       difficulty: 1,
       text: 't:x.a.story',
@@ -140,7 +163,9 @@ describe('schemas match the contract types', () => {
       goal: { amount: 1000, progress: 0 },
       flags: [],
       seen: [],
-      pending: [{ dueMonth: 2, dueWeek: 1, effects: { jars: { savings: 5 } }, note: 't:note.x', principal: { savings: 5 } }],
+      pending: [
+        { dueMonth: 2, dueWeek: 1, effects: { jars: { savings: 5 } }, note: 't:note.x', principal: { savings: 5 } },
+      ],
       rewindTokens: 3,
       history: [{ anything: true }],
     };
@@ -149,5 +174,121 @@ describe('schemas match the contract types', () => {
     expect(GameStateSchema.safeParse({ ...state, debt: -1 }).success).toBe(false);
     expect(GameStateSchema.safeParse({ ...state, stage: 'nope' }).success).toBe(false);
     expect(GameStateSchema.safeParse({ ...state, extra: 1 }).success).toBe(false);
+  });
+});
+
+describe('map and Paisa Times contracts (5.1, 5.5, 5.7)', () => {
+  it('accepts edition keys like t:news.2026-W41.upi_fraud.headline', () => {
+    expect(TKeySchema.safeParse('t:news.2026-W41.upi_fraud.headline').success).toBe(true);
+    expect(TKeySchema.safeParse('t:glossary.inflation.simple').success).toBe(true);
+    expect(TKeySchema.safeParse('t:News.x').success).toBe(false);
+    expect(TKeySchema.safeParse('news.x').success).toBe(false);
+  });
+
+  it('parses an article and checks its question', () => {
+    const article = {
+      id: 'upi_fraud',
+      edition: '2026-W41',
+      headline: 't:news.2026-W41.upi_fraud.headline',
+      body: 't:news.2026-W41.upi_fraud.body',
+      terms: ['upi'],
+      question: {
+        prompt: 't:news.2026-W41.upi_fraud.q',
+        options: ['t:news.2026-W41.upi_fraud.o1', 't:news.2026-W41.upi_fraud.o2'],
+        correct: 1,
+        explanation: 't:news.2026-W41.upi_fraud.why',
+      },
+      reward: { wage: 50, xp: 10 },
+      meta: { status: 'draft', author: 'claude' },
+    };
+    expectTypeOf<z.infer<typeof ArticleSchema>>().toExtend<Article>();
+    expect(ArticleSchema.parse(article).id).toBe('upi_fraud');
+    expect(ArticleSchema.safeParse({ ...article, edition: '2026-41' }).success).toBe(false);
+    expect(ArticleSchema.safeParse({ ...article, question: { ...article.question, correct: 2 } }).success).toBe(false);
+    expect(ArticleSchema.safeParse({ ...article, meta: { ...article.meta, factsCheckedBy: 'Asha' } }).success).toBe(
+      true,
+    );
+  });
+
+  it('parses glossary terms and places, and checks sub-map parents', () => {
+    expectTypeOf<z.infer<typeof GlossaryTermSchema>>().toExtend<GlossaryTerm>();
+    expectTypeOf<z.infer<typeof PlaceSchema>>().toExtend<Place>();
+    const term = {
+      id: 'upi',
+      word: 't:glossary.upi.word',
+      simple: 't:glossary.upi.simple',
+      example: 't:glossary.upi.example',
+    };
+    expect(GlossaryTermSchema.parse(term).id).toBe('upi');
+    const shop = {
+      id: 'convenience',
+      name: 't:place.convenience',
+      position: { x: 40, y: 60 },
+      children: ['convenience.kirana'],
+    };
+    expect(PlaceSchema.safeParse(shop).success).toBe(true);
+    const kirana = {
+      id: 'convenience.kirana',
+      name: 't:place.convenience.kirana',
+      parent: 'convenience',
+      position: { x: 10, y: 20 },
+    };
+    expect(PlaceSchema.safeParse(kirana).success).toBe(true);
+    expect(PlaceSchema.safeParse({ ...kirana, parent: 'school' }).success).toBe(false);
+    expect(PlaceSchema.safeParse({ ...kirana, parent: undefined }).success).toBe(false);
+    expect(PlaceSchema.safeParse({ ...shop, parent: 'home' }).success).toBe(false);
+    expect(PlaceSchema.safeParse({ ...shop, position: { x: 140, y: 0 } }).success).toBe(false);
+  });
+
+  it('loads old saves without earned as an empty list', () => {
+    const save = GameStateSchema.parse({
+      version: 1,
+      personaId: 'sana',
+      level: 'starter',
+      seed: 1,
+      month: 1,
+      week: 1,
+      jars: { needs: 0, wants: 0, goals: 0, savings: 0 },
+      debt: 0,
+      goal: { amount: 100, progress: 0 },
+      flags: [],
+      seen: [],
+      pending: [],
+      rewindTokens: 3,
+      history: [],
+    });
+    expect(save.earned).toEqual([]);
+  });
+
+  it('accepts the classroom quiz and the six map and news event types', () => {
+    const q = {
+      id: 'quiz.classroom.save.q1',
+      quiz: 'classroom',
+      pillar: 'save_manage',
+      concept: 'emergency_fund',
+      text: 't:quiz.classroom.save.q1.q',
+      options: ['t:quiz.classroom.save.q1.o1', 't:quiz.classroom.save.q1.o2'],
+      answer: 0,
+      explanation: 't:quiz.classroom.save.q1.why',
+      meta: { status: 'draft', author: 'claude' },
+    };
+    expect(QuizQuestionSchema.safeParse(q).success).toBe(true);
+    const base = {
+      event_id: '11111111-1111-4111-8111-111111111111',
+      anon_id: '22222222-2222-4222-8222-222222222222',
+      class_id: '33333333-3333-4333-8333-333333333333',
+      payload: {},
+      client_ts: '2026-10-10T10:00:00+05:30',
+      content_version: '2026.10.10.3',
+    };
+    for (const type of [
+      'map_opened',
+      'location_selected',
+      'week_slept',
+      'glossary_term_opened',
+      'news_question_answered',
+      'news_edition_completed',
+    ])
+      expect(SyncEventSchema.safeParse({ ...base, type }).success, type).toBe(true);
   });
 });
