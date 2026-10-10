@@ -1,7 +1,11 @@
 .env
-.serena
+.env.local
+.env.*.local
+node_modules/
+dist/
+coverage/
+*.log
+.DS_Store
 .serena/
-node_modules
-dist
 apps/student/assets-src/schwarnhild/
 apps/student/tests/e2e-output/

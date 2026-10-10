@@ -1,0 +1,478 @@
+[
+  {
+    "id": "invest.compound.01",
+    "pillar": "understand_investing",
+    "concept": "compounding",
+    "location": "bank",
+    "channel": "in_person",
+    "speaker": "t:speaker.bank_guide",
+    "personas": [
+      "ravi",
+      "sana",
+      "kiran",
+      "lakshmi"
+    ],
+    "difficulty": 1,
+    "text": "t:invest.compound.01.story",
+    "assumption": true,
+    "choices": [
+      {
+        "id": "a",
+        "label": "t:invest.compound.01.a.label",
+        "icon": "chart",
+        "effects": {
+          "jars": {
+            "savings": -100
+          }
+        },
+        "lesson": "t:invest.compound.01.a.lesson",
+        "rating": "best",
+        "delayed": [
+          {
+            "afterWeeks": 6,
+            "effects": {
+              "jars": {
+                "savings": 101
+              }
+            },
+            "note": "t:invest.compound.01.a.later"
+          }
+        ]
+      },
+      {
+        "id": "b",
+        "label": "t:invest.compound.01.b.label",
+        "icon": "wait",
+        "effects": {},
+        "lesson": "t:invest.compound.01.b.lesson",
+        "rating": "ok"
+      },
+      {
+        "id": "c",
+        "label": "t:invest.compound.01.c.label",
+        "icon": "rocket",
+        "effects": {
+          "jars": {
+            "savings": -100
+          }
+        },
+        "delayed": [
+          {
+            "afterWeeks": 6,
+            "effects": {
+              "jars": {
+                "savings": 70
+              }
+            },
+            "note": "t:invest.compound.01.c.later"
+          }
+        ],
+        "lesson": "t:invest.compound.01.c.lesson",
+        "rating": "risky"
+      }
+    ],
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "invest.diversify.01",
+    "pillar": "understand_investing",
+    "concept": "diversification",
+    "location": "bank",
+    "channel": "in_person",
+    "speaker": "t:speaker.bank_guide",
+    "personas": [
+      "ravi",
+      "sana",
+      "kiran",
+      "lakshmi"
+    ],
+    "difficulty": 2,
+    "text": "t:invest.diversify.01.story",
+    "assumption": true,
+    "choices": [
+      {
+        "id": "a",
+        "label": "t:invest.diversify.01.a.label",
+        "icon": "rocket",
+        "effects": {
+          "jars": {
+            "savings": -100
+          }
+        },
+        "delayed": [
+          {
+            "afterWeeks": 6,
+            "effects": {
+              "jars": {
+                "savings": 50
+              }
+            },
+            "note": "t:invest.diversify.01.a.later"
+          }
+        ],
+        "lesson": "t:invest.diversify.01.a.lesson",
+        "rating": "risky"
+      },
+      {
+        "id": "b",
+        "label": "t:invest.diversify.01.b.label",
+        "icon": "basket",
+        "effects": {
+          "jars": {
+            "savings": -100
+          }
+        },
+        "delayed": [
+          {
+            "afterWeeks": 6,
+            "effects": {
+              "jars": {
+                "savings": 90
+              }
+            },
+            "note": "t:invest.diversify.01.b.later"
+          }
+        ],
+        "lesson": "t:invest.diversify.01.b.lesson",
+        "rating": "best"
+      },
+      {
+        "id": "c",
+        "label": "t:invest.diversify.01.c.label",
+        "icon": "coins",
+        "effects": {
+          "jars": {
+            "savings": -100
+          }
+        },
+        "delayed": [
+          {
+            "afterWeeks": 6,
+            "effects": {
+              "jars": {
+                "savings": 106
+              }
+            },
+            "note": "t:invest.diversify.01.c.later"
+          }
+        ],
+        "lesson": "t:invest.diversify.01.c.lesson",
+        "rating": "ok"
+      }
+    ],
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "invest.hot_tip.01",
+    "pillar": "understand_investing",
+    "concept": "hot_tips",
+    "location": "bank",
+    "channel": "phone",
+    "speaker": "t:speaker.classmate",
+    "personas": [
+      "ravi",
+      "sana",
+      "kiran"
+    ],
+    "difficulty": 1,
+    "text": "t:invest.hot_tip.01.story",
+    "assumption": true,
+    "choices": [
+      {
+        "id": "a",
+        "label": "t:invest.hot_tip.01.a.label",
+        "icon": "shield",
+        "effects": {},
+        "lesson": "t:invest.hot_tip.01.a.lesson",
+        "rating": "best"
+      },
+      {
+        "id": "b",
+        "label": "t:invest.hot_tip.01.b.label",
+        "icon": "rocket",
+        "effects": {
+          "jars": {
+            "savings": -300
+          },
+          "flags": [
+            "chased_tip"
+          ]
+        },
+        "delayed": [
+          {
+            "afterWeeks": 6,
+            "effects": {
+              "jars": {
+                "savings": 120
+              }
+            },
+            "note": "t:invest.hot_tip.01.b.later"
+          }
+        ],
+        "lesson": "t:invest.hot_tip.01.b.lesson",
+        "rating": "risky"
+      },
+      {
+        "id": "c",
+        "label": "t:invest.hot_tip.01.c.label",
+        "icon": "coins",
+        "effects": {
+          "jars": {
+            "savings": -50
+          }
+        },
+        "delayed": [
+          {
+            "afterWeeks": 6,
+            "effects": {
+              "jars": {
+                "savings": 30
+              }
+            },
+            "note": "t:invest.hot_tip.01.c.later"
+          }
+        ],
+        "lesson": "t:invest.hot_tip.01.c.lesson",
+        "rating": "ok"
+      }
+    ],
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "invest.inflation.01",
+    "pillar": "understand_investing",
+    "concept": "inflation",
+    "location": "convenience",
+    "sublocation": "convenience.kirana",
+    "channel": "in_person",
+    "speaker": "t:speaker.shopkeeper",
+    "personas": [
+      "ravi",
+      "sana",
+      "kiran",
+      "lakshmi"
+    ],
+    "difficulty": 2,
+    "text": "t:invest.inflation.01.story",
+    "assumption": true,
+    "choices": [
+      {
+        "id": "a",
+        "label": "t:invest.inflation.01.a.label",
+        "icon": "wait",
+        "effects": {},
+        "delayed": [
+          {
+            "afterWeeks": 6,
+            "effects": {},
+            "note": "t:invest.inflation.01.a.later"
+          }
+        ],
+        "lesson": "t:invest.inflation.01.a.lesson",
+        "rating": "ok"
+      },
+      {
+        "id": "b",
+        "label": "t:invest.inflation.01.b.label",
+        "icon": "chart",
+        "effects": {
+          "jars": {
+            "savings": -300
+          }
+        },
+        "delayed": [
+          {
+            "afterWeeks": 6,
+            "effects": {
+              "jars": {
+                "savings": 302
+              }
+            },
+            "note": "t:invest.inflation.01.b.later"
+          }
+        ],
+        "lesson": "t:invest.inflation.01.b.lesson",
+        "rating": "best"
+      },
+      {
+        "id": "c",
+        "label": "t:invest.inflation.01.c.label",
+        "icon": "basket",
+        "effects": {
+          "jars": {
+            "savings": -300
+          }
+        },
+        "lesson": "t:invest.inflation.01.c.lesson",
+        "rating": "risky"
+      }
+    ],
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "invest.loss.01",
+    "pillar": "understand_investing",
+    "concept": "long_term_view",
+    "location": "bank",
+    "channel": "phone",
+    "speaker": "t:speaker.classmate",
+    "personas": [
+      "ravi",
+      "sana",
+      "kiran"
+    ],
+    "difficulty": 2,
+    "text": "t:invest.loss.01.story",
+    "assumption": true,
+    "requiresFlag": "chased_tip",
+    "choices": [
+      {
+        "id": "a",
+        "label": "t:invest.loss.01.a.label",
+        "icon": "shield",
+        "effects": {},
+        "lesson": "t:invest.loss.01.a.lesson",
+        "rating": "best"
+      },
+      {
+        "id": "b",
+        "label": "t:invest.loss.01.b.label",
+        "icon": "rocket",
+        "effects": {
+          "jars": {
+            "savings": -200
+          }
+        },
+        "delayed": [
+          {
+            "afterWeeks": 6,
+            "effects": {
+              "jars": {
+                "savings": 90
+              }
+            },
+            "note": "t:invest.loss.01.b.later"
+          }
+        ],
+        "lesson": "t:invest.loss.01.b.lesson",
+        "rating": "risky"
+      },
+      {
+        "id": "c",
+        "label": "t:invest.loss.01.c.label",
+        "icon": "share",
+        "effects": {},
+        "lesson": "t:invest.loss.01.c.lesson",
+        "rating": "ok"
+      }
+    ],
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "invest.risk.01",
+    "pillar": "understand_investing",
+    "concept": "risk_return",
+    "location": "bank",
+    "channel": "in_person",
+    "speaker": "t:speaker.bank_guide",
+    "personas": [
+      "ravi",
+      "sana",
+      "kiran",
+      "lakshmi"
+    ],
+    "difficulty": 1,
+    "text": "t:invest.risk.01.story",
+    "assumption": true,
+    "choices": [
+      {
+        "id": "a",
+        "label": "t:invest.risk.01.a.label",
+        "icon": "coins",
+        "effects": {
+          "jars": {
+            "savings": -300
+          }
+        },
+        "delayed": [
+          {
+            "afterWeeks": 6,
+            "effects": {
+              "jars": {
+                "savings": 302
+              }
+            },
+            "note": "t:invest.risk.01.a.later"
+          }
+        ],
+        "lesson": "t:invest.risk.01.a.lesson",
+        "rating": "best"
+      },
+      {
+        "id": "b",
+        "label": "t:invest.risk.01.b.label",
+        "icon": "basket",
+        "effects": {
+          "jars": {
+            "savings": -300
+          }
+        },
+        "delayed": [
+          {
+            "afterWeeks": 6,
+            "effects": {
+              "jars": {
+                "savings": 288
+              }
+            },
+            "note": "t:invest.risk.01.b.later"
+          }
+        ],
+        "lesson": "t:invest.risk.01.b.lesson",
+        "rating": "ok"
+      },
+      {
+        "id": "c",
+        "label": "t:invest.risk.01.c.label",
+        "icon": "rocket",
+        "effects": {
+          "jars": {
+            "savings": -300
+          }
+        },
+        "delayed": [
+          {
+            "afterWeeks": 6,
+            "effects": {
+              "jars": {
+                "savings": 165
+              }
+            },
+            "note": "t:invest.risk.01.c.later"
+          }
+        ],
+        "lesson": "t:invest.risk.01.c.lesson",
+        "rating": "risky"
+      }
+    ],
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  }
+]

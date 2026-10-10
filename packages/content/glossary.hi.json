@@ -1,0 +1,39 @@
+{
+  "terms": {
+    "emergency fund": "आपातकालीन बचत",
+    "rainy-day fund": "आपातकालीन बचत (बारिश के दिन की बचत)",
+    "savings": "बचत",
+    "needs": "ज़रूरतें",
+    "wants": "इच्छाएँ",
+    "goal": "लक्ष्य",
+    "debt": "कर्ज़",
+    "loan": "कर्ज़",
+    "interest": "ब्याज",
+    "borrow": "उधार लेना",
+    "lend": "उधार देना",
+    "budget": "बजट",
+    "jar": "गुल्लक",
+    "payday": "तनख़्वाह का दिन",
+    "income": "कमाई",
+    "risk": "जोखिम",
+    "growth": "बढ़त",
+    "compounding": "चक्रवृद्धि (बढ़त पर बढ़त)",
+    "inflation": "महँगाई",
+    "scam": "ठगी",
+    "fee": "फ़ीस",
+    "fine": "जुर्माना",
+    "prize": "इनाम",
+    "refund": "रिफ़ंड",
+    "report (a fraud)": "शिकायत करना"
+  },
+  "keep_in_english_with_hindi_gloss_on_first_use": {
+    "UPI": "UPI (फ़ोन से पैसे का लेन-देन)",
+    "OTP": "OTP (SMS से आने वाला एक बार का कोड)",
+    "PIN": "PIN (गुप्त नंबर)",
+    "KYC": "KYC (पहचान की जाँच)",
+    "QR": "QR (स्कैन करने वाला चौकोर कोड)",
+    "EMI": "EMI (हर महीने की किस्त)"
+  },
+  "fictional_asset_names_kept_in_english": ["Steady Deposit", "Mixed Basket", "Rocket Co"],
+  "style": "Natural spoken Hindi in Devanagari; polite आप form; gender-neutral wording for the player; amounts with the rupee sign and Indian grouping."
+}

@@ -1,0 +1,303 @@
+[
+  {
+    "id": "scam.kyc_link.01",
+    "channel": "sms",
+    "levels": [
+      "starter",
+      "explorer",
+      "planner"
+    ],
+    "sender": "t:scam.kyc_link.01.sender",
+    "segments": [
+      {
+        "text": "t:scam.kyc_link.01.s1",
+        "suspicious": "t:scam.why.urgency"
+      },
+      {
+        "text": "t:scam.kyc_link.01.s2",
+        "suspicious": "t:scam.why.link"
+      }
+    ],
+    "verdict": "scam",
+    "explanation": "t:scam.kyc_link.01.why",
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "scam.otp_call.01",
+    "channel": "call",
+    "levels": [
+      "starter",
+      "explorer",
+      "planner"
+    ],
+    "sender": "t:scam.otp_call.01.sender",
+    "segments": [
+      {
+        "text": "t:scam.otp_call.01.s1",
+        "suspicious": "t:scam.why.unknown_sender"
+      },
+      {
+        "text": "t:scam.otp_call.01.s2",
+        "suspicious": "t:scam.why.asks_otp"
+      },
+      {
+        "text": "t:scam.otp_call.01.s3",
+        "suspicious": "t:scam.why.urgency"
+      }
+    ],
+    "verdict": "scam",
+    "explanation": "t:scam.otp_call.01.why",
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "scam.lottery.01",
+    "channel": "whatsapp",
+    "levels": [
+      "starter",
+      "explorer",
+      "planner"
+    ],
+    "sender": "t:scam.lottery.01.sender",
+    "segments": [
+      {
+        "text": "t:scam.lottery.01.s1",
+        "suspicious": "t:scam.why.too_good"
+      },
+      {
+        "text": "t:scam.lottery.01.s2",
+        "suspicious": "t:scam.why.upfront_fee"
+      }
+    ],
+    "verdict": "scam",
+    "explanation": "t:scam.lottery.01.why",
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "scam.job_fee.01",
+    "channel": "whatsapp",
+    "levels": [
+      "explorer",
+      "planner"
+    ],
+    "sender": "t:scam.job_fee.01.sender",
+    "segments": [
+      {
+        "text": "t:scam.job_fee.01.s1",
+        "suspicious": "t:scam.why.too_good"
+      },
+      {
+        "text": "t:scam.job_fee.01.s2",
+        "suspicious": "t:scam.why.job_fee"
+      },
+      {
+        "text": "t:scam.job_fee.01.s3",
+        "suspicious": "t:scam.why.urgency"
+      }
+    ],
+    "verdict": "scam",
+    "explanation": "t:scam.job_fee.01.why",
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "scam.collect.01",
+    "channel": "whatsapp",
+    "levels": [
+      "explorer",
+      "planner"
+    ],
+    "sender": "t:scam.collect.01.sender",
+    "segments": [
+      {
+        "text": "t:scam.collect.01.s1",
+        "suspicious": "t:scam.why.collect"
+      },
+      {
+        "text": "t:scam.collect.01.s2",
+        "suspicious": "t:scam.why.asks_pin"
+      }
+    ],
+    "verdict": "scam",
+    "explanation": "t:scam.collect.01.why",
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "scam.qr_receive.01",
+    "channel": "qr",
+    "levels": [
+      "explorer",
+      "planner"
+    ],
+    "sender": "t:scam.qr_receive.01.sender",
+    "segments": [
+      {
+        "text": "t:scam.qr_receive.01.s1",
+        "suspicious": "t:scam.why.qr_receive"
+      },
+      {
+        "text": "t:scam.qr_receive.01.s2",
+        "suspicious": "t:scam.why.asks_pin"
+      }
+    ],
+    "verdict": "scam",
+    "explanation": "t:scam.qr_receive.01.why",
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "scam.loan_app.01",
+    "channel": "sms",
+    "levels": [
+      "explorer",
+      "planner"
+    ],
+    "sender": "t:scam.loan_app.01.sender",
+    "segments": [
+      {
+        "text": "t:scam.loan_app.01.s1",
+        "suspicious": "t:scam.why.too_good"
+      },
+      {
+        "text": "t:scam.loan_app.01.s2",
+        "suspicious": "t:scam.why.link"
+      },
+      {
+        "text": "t:scam.loan_app.01.s3",
+        "suspicious": "t:scam.why.urgency"
+      }
+    ],
+    "verdict": "scam",
+    "explanation": "t:scam.loan_app.01.why",
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "scam.betting.01",
+    "channel": "whatsapp",
+    "levels": [
+      "explorer",
+      "planner"
+    ],
+    "sender": "t:scam.betting.01.sender",
+    "segments": [
+      {
+        "text": "t:scam.betting.01.s1",
+        "suspicious": "t:scam.why.too_good"
+      },
+      {
+        "text": "t:scam.betting.01.s2",
+        "suspicious": "t:scam.why.link"
+      }
+    ],
+    "verdict": "scam",
+    "explanation": "t:scam.betting.01.why",
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "safe.exam_fee.01",
+    "channel": "sms",
+    "levels": [
+      "starter",
+      "explorer",
+      "planner"
+    ],
+    "sender": "t:safe.exam_fee.01.sender",
+    "segments": [
+      {
+        "text": "t:safe.exam_fee.01.s1"
+      }
+    ],
+    "verdict": "safe",
+    "explanation": "t:safe.exam_fee.01.why",
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "safe.otp_sms.01",
+    "channel": "sms",
+    "levels": [
+      "explorer",
+      "planner"
+    ],
+    "sender": "t:safe.otp_sms.01.sender",
+    "segments": [
+      {
+        "text": "t:safe.otp_sms.01.s1"
+      }
+    ],
+    "verdict": "safe",
+    "explanation": "t:safe.otp_sms.01.why",
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "safe.family_call.01",
+    "channel": "call",
+    "levels": [
+      "starter",
+      "explorer",
+      "planner"
+    ],
+    "sender": "t:safe.family_call.01.sender",
+    "segments": [
+      {
+        "text": "t:safe.family_call.01.s1"
+      },
+      {
+        "text": "t:safe.family_call.01.s2"
+      }
+    ],
+    "verdict": "safe",
+    "explanation": "t:safe.family_call.01.why",
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "safe.shop_qr.01",
+    "channel": "qr",
+    "levels": [
+      "starter",
+      "explorer",
+      "planner"
+    ],
+    "sender": "t:safe.shop_qr.01.sender",
+    "segments": [
+      {
+        "text": "t:safe.shop_qr.01.s1"
+      }
+    ],
+    "verdict": "safe",
+    "explanation": "t:safe.shop_qr.01.why",
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "_readme": [
+    "Content pack manifest.",
+    "version: CONTENT_VERSION, sent with every synced event. Bump it when any content file changes. Use a date (YYYY.MM.DD, with .N for a second release that day) or semver (1.2.3).",
+    "required: languages that must be complete. A missing key in one of them fails the build.",
+    "languages: display details for each i18n/<code>.json file (name in its own script; dir 'rtl' for right-to-left scripts).",
+    "To add a language, add i18n/<code>.json. That is the only required step. Add a line under 'languages' to give it a display name or 'rtl'. A file with \"_meta\": { \"status\": \"machine_draft\" } may be incomplete and stays hidden behind VITE_SHOW_DRAFT_LANGS."
+  ],
+  "version": "2026.10.10.5",
+  "required": ["en", "hi"],
+  "languages": {
+    "en": { "name": "English" },
+    "hi": { "name": "हिन्दी" },
+    "te": { "name": "తెలుగు" },
+    "ur": { "name": "اردو", "dir": "rtl" }
+  }
+}

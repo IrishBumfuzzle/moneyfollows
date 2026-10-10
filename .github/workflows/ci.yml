@@ -1,0 +1,37 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main, Backend]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      # With CI set, the SQL tests never skip: a missing database fails the build.
+      # (Locally, without CI, they skip when nothing listens on 54330.)
+      CI: 'true'
+      SUPABASE_TEST_DB_URL: postgres://postgres:postgres@localhost:54330/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Supabase's own Postgres image, as locally (supabase/tests/docker-compose.yml): the SQL
+      # tests clone its initialised database, so real roles, grants and the auth schema are covered.
+      - run: pnpm db:test:up
+      - run: pnpm check
+      # The Vercel builds, so a broken app build fails here and not on deploy.
+      - run: pnpm --filter student build
+      # Until UI-2 lands the dashboard app, apps/dashboard holds only vercel.json.
+      - name: pnpm --filter dashboard build
+        run: |
+          if [ -f apps/dashboard/package.json ]; then
+            pnpm --filter dashboard build
+          else
+            echo "apps/dashboard has no package.json yet: skipped"
+          fi

@@ -1,0 +1,78 @@
+{
+  "_readme": [
+    "Guardrail lists for the content check (pnpm lint:content). Anyone can edit this file: add a word or phrase to a list and the check enforces it in every language file.",
+    "How matching works: case, accents of the same letter (full-width letters, nukta dots in Hindi), invisible characters and punctuation inside a word are ignored, and a space in an entry also matches no space. So 'paytm' also catches 'Pay-tm' and 'PAYTM', 'sbi' catches 'S.B.I.', and 'phone pe' catches 'PhonePe'. Entries match whole words only, so 'cred' does not match 'credit'.",
+    "brands: real banks, apps, funds, schemes and products. Never allowed anywhere (error). Add the Hindi spelling next to the English one.",
+    "promises: guarantees and pushy advice. Error everywhere except inside a Scam or Safe? message body, which may quote a scammer on purpose.",
+    "shaming: words that shame people. Only a warning.",
+    "investingTerms: real product words not allowed on investing cards, which may only use the fictionalAssets.",
+    "allowedLinks: the only websites content may show. A sub-site (www.cybercrime.gov.in) is fine; a look-alike (cybercrime.gov.in.evil.com) is not.",
+    "allowedNumbers: the only phone or helpline numbers content may show.",
+    "scamPlaceholderDomains and scamPlaceholderNumbers: clearly fake links and numbers that Scam or Safe? message bodies may use. 'example', 'invalid' and 'test' are reserved names that never reach a real website.",
+    "maxDelayWeeks: a delayed effect must land within the 12-week game.",
+    "lengthCaps: the most visible characters a text may have, in every language. See packages/content/README.md for which keys use which cap."
+  ],
+  "brands": [
+    "paytm", "पेटीएम",
+    "phonepe", "phone pe", "फोनपे",
+    "gpay", "g pay", "google pay", "गूगल पे", "जीपे",
+    "bhim", "amazon pay", "अमेज़न पे", "अमेजन पे", "mobikwik", "मोबिक्विक", "cred",
+    "sbi", "एसबीआई", "state bank", "स्टेट बैंक", "hdfc", "एचडीएफसी", "icici", "आईसीआईसीआई", "axis bank", "एक्सिस बैंक",
+    "kotak", "कोटक", "yes bank", "यस बैंक", "canara", "केनरा", "bank of baroda", "बैंक ऑफ़ बड़ौदा", "punjab national", "पंजाब नेशनल",
+    "union bank", "यूनियन बैंक", "indusind", "इंडसइंड", "idfc", "आईडीएफसी", "bandhan", "बंधन बैंक",
+    "lic", "एलआईसी", "zerodha", "ज़ेरोधा", "groww", "upstox", "अपस्टॉक्स", "angel one", "एंजेल वन", "paisabazaar", "पैसाबाज़ार",
+    "coin dcx", "wazirx", "binance", "बिनेंस", "bitcoin", "बिटकॉइन", "ethereum", "इथेरियम",
+    "sensex", "सेंसेक्स", "nifty", "निफ़्टी", "निफ्टी", "reliance", "रिलायंस", "tata", "टाटा", "infosys", "इंफोसिस", "adani", "अडानी", "vanguard", "वैनगार्ड",
+    "dream11", "ड्रीम11", "ड्रीम 11", "my11circle", "mpl", "rummy circle", "रमी सर्कल", "winzo", "विंज़ो",
+    "kreditbee", "क्रेडिटबी", "moneyview", "मनीव्यू", "cashe", "lazypay", "लेज़ीपे", "simpl", "bajaj finserv", "बजाज फिनसर्व",
+    "ppf", "पीपीएफ", "nps", "एनपीएस", "sukanya", "सुकन्या", "atal pension", "अटल पेंशन", "jan dhan", "जन धन",
+    "mutual fund", "mutual funds", "म्यूचुअल फंड", "म्यूचुअल फ़ंड", "म्यूचुअल फण्ड"
+  ],
+  "promises": [
+    "guaranteed", "guarantee", "risk-free", "risk free", "no risk", "sure return", "sure returns", "sure profit", "100% safe", "double your money",
+    "can't lose", "cannot lose", "you should invest", "you should buy", "you must invest", "best investment",
+    "गारंटी", "गारंटीड", "बिना जोखिम", "जोखिम-मुक्त", "पक्का मुनाफ़ा", "पैसा दोगुना", "पैसे दोगुने", "ज़रूर निवेश करो", "ज़रूर निवेश करें"
+  ],
+  "shaming": [
+    "poor people", "lazy", "stupid", "silly", "useless", "beggar", "shameful", "idiot", "worthless",
+    "गरीब लोग", "आलसी", "बेवकूफ़", "निकम्मा", "बेकार लोग", "हैसियत"
+  ],
+  "investingTerms": [
+    "mutual fund", "mutual funds", "stock", "stocks", "share market", "stock market", "shares", "fd", "fixed deposit", "sip",
+    "demat", "etf", "index fund", "crypto", "cryptocurrency",
+    "म्यूचुअल फंड", "शेयर बाज़ार", "शेयर", "स्टॉक", "फिक्स्ड डिपॉज़िट", "एफडी", "एसआईपी", "डीमैट", "क्रिप्टो", "इंडेक्स फंड"
+  ],
+  "allowedLinks": ["cybercrime.gov.in"],
+  "allowedNumbers": ["1930"],
+  "scamPlaceholderDomains": ["example", "invalid", "test"],
+  "scamPlaceholderNumbers": ["00000 00000"],
+  "fictionalAssets": ["Steady Deposit", "Mixed Basket", "Rocket Co"],
+  "maxDelayWeeks": 11,
+  "lengthCaps": {
+    "story": 220,
+    "label": 40,
+    "lesson": 140,
+    "note": 140,
+    "question": 120,
+    "option": 60,
+    "explanation": 160,
+    "segment": 120,
+    "hint": 80,
+    "sender": 30,
+    "bio": 160,
+    "name": 20,
+    "goal": 40,
+    "reflection": 140,
+    "banner": 140,
+    "badgeName": 24,
+    "badgeDesc": 100,
+    "feedback": 120,
+    "speaker": 30,
+    "headline": 80,
+    "articleBody": 600,
+    "glossaryWord": 30,
+    "glossarySimple": 100,
+    "glossaryExample": 140,
+    "placeName": 24
+  }
+}
