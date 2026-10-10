@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import type { Lang } from '@paisa/shared';
 import { useClassStatus } from './api/classStatus';
 import { quizSubmittedPayload } from './api/payloads';
@@ -18,6 +18,7 @@ import { StoreSheet } from './features/life/StoreSheet';
 import { trackLife } from './features/life/track';
 import { t as mainT } from './features/main/content';
 import { MainScreen } from './features/main/MainScreen';
+import { learnFromQuiz } from './features/learn/record';
 import { PaisaTimes } from './features/news';
 import { Onboarding, loadProfile } from './features/onboarding';
 import { CounterShift, KiranaRun } from './features/store';
@@ -29,11 +30,14 @@ import { useGame } from './game/useGame';
 import { LocationScreen } from './screens/LocationScreen';
 import './design/kenney.css';
 
-type Screen = 'main' | 'map' | 'classroom' | 'store' | 'kirana' | 'counter' | 'news' | 'phone';
-const SCREENS: Screen[] = ['main', 'map', 'classroom', 'store', 'kirana', 'counter', 'news', 'phone'];
+type Screen = 'main' | 'map' | 'classroom' | 'store' | 'kirana' | 'counter' | 'news' | 'phone' | 'learn';
+const SCREENS: Screen[] = ['main', 'map', 'classroom', 'store', 'kirana', 'counter', 'news', 'phone', 'learn'];
 
 // No router or language picker yet: ?lang=hi switches language, ?screen=map|classroom|store|kirana|counter|news|phone
 // opens that screen directly, ?seed=N fixes the quiz, ?event=<id> fires an event (demo / tests).
+// Learn (guides, progress, Notebook) loads when first opened; its store and recording stay eager.
+const LearnScreen = lazy(() => import('./features/learn/LearnScreen').then((m) => ({ default: m.LearnScreen })));
+
 const params = new URLSearchParams(window.location.search);
 const LANG: Lang = params.get('lang') === 'hi' ? 'hi' : 'en';
 const SEED = Number(params.get('seed')) || Math.floor(Math.random() * 2 ** 31);
@@ -55,7 +59,13 @@ export function App() {
   );
 }
 
-function Game({ profile, setProfile, lang, onLang, onOpenClassroom }: {
+function Game({
+  profile,
+  setProfile,
+  lang,
+  onLang,
+  onOpenClassroom,
+}: {
   profile: Profile | null | undefined;
   setProfile: (p: Profile | null) => void;
   lang: Lang;
@@ -154,7 +164,12 @@ function Game({ profile, setProfile, lang, onLang, onOpenClassroom }: {
   // Events and messages only surface on the map and main screen, never over a scene (CLAUDE.md 5.8).
   const eventLayer = (where: 'map' | 'main') => (
     <>
-      <PhoneLayer lang={lang} name={name} where={where} onOpen={(thread) => openPhone(thread ? { app: 'messages', item: thread } : {})} />
+      <PhoneLayer
+        lang={lang}
+        name={name}
+        where={where}
+        onOpen={(thread) => openPhone(thread ? { app: 'messages', item: thread } : {})}
+      />
       <IncomingCall lang={lang} name={name} onAnswer={(id) => openPhone({ app: 'calls', item: id })} />
       <SuddenEventSheet lang={lang} name={name} />
     </>
@@ -171,12 +186,19 @@ function Game({ profile, setProfile, lang, onLang, onOpenClassroom }: {
             tick();
           }}
           onOpenNews={() => open('news')}
+          onOpenLearn={() => open('learn')}
         />
         {eventLayer('main')}
       </>
     );
   }
   if (screen === 'news') return <PaisaTimes lang={lang} onExit={back} />;
+  if (screen === 'learn')
+    return (
+      <Suspense fallback={<div className="ln-screen" aria-busy="true" />}>
+        <LearnScreen lang={lang} onExit={back} />
+      </Suspense>
+    );
   if (screen === 'phone') return <PhoneScreen lang={lang} name={name} profile={profile} onExit={back} />;
   if (screen === 'classroom') {
     if (!classroom) return <div className="cr-screen" aria-busy="true" />;
@@ -190,6 +212,7 @@ function Game({ profile, setProfile, lang, onLang, onOpenClassroom }: {
         onFinish={(r) => {
           // Practice rounds stay events; the start- and end-of-term checks also feed learning_gain.
           track('quiz_submitted', quizSubmittedPayload(r));
+          learnFromQuiz(r);
           void flush();
         }}
       />
