@@ -1,8 +1,6 @@
 # Paisa Path
 
-A mobile-first money life-simulation game for Class 11–12 students in Hyderabad, built for the Vanguard India financial-literacy hackathon. Students run a persona's money week by week, see the consequences in a safe sandbox (fictional money, rewind allowed) and learn four pillars: plan and budget, save and manage, understand investing, and stay financially safe.
-
-`CLAUDE.md` is the source of truth for scope, contracts and ownership.
+Build and run instructions. `CLAUDE.md` is the source of truth for scope, contracts and ownership.
 
 ## Run it
 
@@ -32,10 +30,10 @@ Put the `API URL` and `anon key` that `supabase start` prints into `.env` as `VI
 
 One Vercel project per app, both from this repository:
 
-| Project | Root Directory | Environment variables |
-| --- | --- | --- |
-| student | `apps/student` | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_SHOW_DRAFT_LANGS=false` |
-| dashboard | `apps/dashboard` | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` |
+| Project   | Root Directory   | Environment variables                                                        |
+| --------- | ---------------- | ---------------------------------------------------------------------------- |
+| student   | `apps/student`   | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_SHOW_DRAFT_LANGS=false` |
+| dashboard | `apps/dashboard` | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`                                |
 
 Each app's `vercel.json` sets the rest: install at the workspace root with the frozen lockfile, `pnpm run build`, output `dist`, single-page rewrites, no caching of the service worker and manifest, and security headers. Keep "Include files outside the Root Directory" on (the default), because the apps import `packages/*`.
 
@@ -67,65 +65,83 @@ The new owner must also be in `public.staff`.
 
 ## Commands
 
-| Command | What it does |
-| --- | --- |
-| `pnpm check` | Typecheck, lint, all tests, content lint. Must pass before every commit. Without the test Postgres (below) the SQL tests skip locally; in CI (`CI` set) they always run. |
-| `pnpm test` | Vitest across packages, scripts and the SQL tests |
-| `pnpm db:test:up` | Starts the plain Postgres the SQL tests use (port 54330) |
-| `pnpm lint:content` | Guardrail linter over `packages/content` (`-- --strict` also fails on drafts; use it for release builds) |
-| `pnpm seed` | Regenerates `supabase/seed.sql` from the engine and loads it into `SUPABASE_DB_URL` |
-| `pnpm dev:student` / `pnpm dev:dashboard` | The two apps |
+| Command                                   | What it does                                                                                                                                                             |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `pnpm check`                              | Typecheck, lint, all tests, content lint. Must pass before every commit. Without the test Postgres (below) the SQL tests skip locally; in CI (`CI` set) they always run. |
+| `pnpm test`                               | Vitest across packages, scripts and the SQL tests                                                                                                                        |
+| `pnpm db:test:up`                         | Starts the plain Postgres the SQL tests use (port 54330)                                                                                                                 |
+| `pnpm lint:content`                       | Guardrail linter over `packages/content` (`-- --strict` also fails on drafts; use it for release builds)                                                                 |
+| `pnpm seed`                               | Regenerates `supabase/seed.sql` from the engine and loads it into `SUPABASE_DB_URL`                                                                                      |
+| `pnpm dev:student` / `pnpm dev:dashboard` | The two apps                                                                                                                                                             |
 
 ## Layout
 
-| Path | Lane | Contents |
-| --- | --- | --- |
-| `packages/shared` | shared (frozen) | Contract types (CLAUDE.md 5.1), zod schemas, constants; additions in its CHANGELOG |
-| `packages/engine` | BE-1 | Pure, seeded simulation: `createGame`, `nextCard`, `choose`, `rewind`, `monthReport`, `projectGrowth` |
-| `packages/content` | BE-1 | 24 scenarios, 10 events, 2 personas, baseline/end-line quizzes, Scam or Safe? messages, en + hi strings, guardrails |
-| `scripts` | BE-1 | `lint-content.ts`, `seed.ts` |
-| `packages/api-client` | BE-2 | Typed client for the Supabase functions, staff auth, and an offline sync queue |
-| `supabase` | BE-2 | Migrations (tables, RLS, functions), seed, SQL tests |
-| `apps/student`, `apps/dashboard` | UI-1, UI-2 | Student app scaffold (map, classroom quiz); the dashboard has only `vercel.json` so far |
+| Path                             | Lane            | Contents                                                                                                            |
+| -------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `packages/shared`                | shared (frozen) | Contract types (CLAUDE.md 5.1), zod schemas, constants; additions in its CHANGELOG                                  |
+| `packages/engine`                | BE-1            | Pure, seeded simulation: `createGame`, `nextCard`, `choose`, `rewind`, `monthReport`, `projectGrowth`               |
+| `packages/content`               | BE-1            | 24 scenarios, 10 events, 2 personas, baseline/end-line quizzes, Scam or Safe? messages, en + hi strings, guardrails |
+| `scripts`                        | BE-1            | `lint-content.ts`, `seed.ts`                                                                                        |
+| `packages/api-client`            | BE-2            | Typed client for the Supabase functions, staff auth, and an offline sync queue                                      |
+| `supabase`                       | BE-2            | Migrations (tables, RLS, functions), seed, SQL tests                                                                |
+| `apps/student`, `apps/dashboard` | UI-1, UI-2      | Student app scaffold (map, classroom quiz); the dashboard has only `vercel.json` so far                             |
 
 ## Backend API
 
 Students never create accounts. They reach the database only through two security-definer functions. Facilitators sign in with Supabase Auth, and row-level security limits them to their own classes. Call everything through `@paisa/api-client`.
 
-| Function | Who | Returns |
-| --- | --- | --- |
-| `join_class(class_code, nickname)` | anyone | `{ anon_id, class_id, default_lang }`. The code is case-insensitive. Nickname word filter. At most 300 students per class and 60 new joins per class per minute |
-| `push_events(events)` | anyone | `{ accepted }`. Idempotent on `event_id`, at most 500 events. `quiz_submitted` also writes `quiz_attempts` (first attempt per type counts); `language_changed` updates the student's language |
-| `class_progress(class_id)` | facilitator | One row per student: modules done, last active, decisions per pillar, baseline and end-line scores |
-| `learning_gain(class_id)` | facilitator | Per pillar: `baseline_avg`, `endline_avg` (percent correct), `baseline_n`, `endline_n` and `n`. Matched students only (answers for that pillar in both quizzes), so `n` = `baseline_n` = `endline_n`. Type: `MatchedLearningGainRow` |
-| `classes` table | facilitator | Insert `{ name, default_lang }` to create a class. The code is generated. |
+| Function                           | Who         | Returns                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ---------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `join_class(class_code, nickname)` | anyone      | `{ anon_id, class_id, default_lang }`. The code is case-insensitive. Nickname word filter. At most 300 students per class and 60 new joins per class per minute                                                                                                                                                                                                                                                           |
+| `push_events(events)`              | anyone      | `{ accepted, rejected }`. `rejected` lists the `event_id` of every skipped event (unknown student or class, unknown type, bad id, timestamp or payload); the rest are stored. Idempotent on `event_id`, at most 500 events. A baseline or end-line `quiz_submitted` also writes `quiz_attempts` (first attempt per type counts); a `classroom` one stays an event only. `language_changed` updates the student's language |
+| `class_progress(class_id)`         | facilitator | One row per student: modules done, last active, decisions per pillar, baseline and end-line scores, `weeks_played` and `news_editions` (Paisa Times editions completed)                                                                                                                                                                                                                                                   |
+| `learning_gain(class_id)`          | facilitator | Per pillar: `baseline_avg`, `endline_avg` (percent correct), `baseline_n`, `endline_n` and `n`. Matched students only (answers for that pillar in both quizzes), so `n` = `baseline_n` = `endline_n`. Type: `MatchedLearningGainRow`                                                                                                                                                                                      |
+| `classes` table                    | facilitator | Insert `{ name, default_lang }` to create a class. The code is generated.                                                                                                                                                                                                                                                                                                                                                 |
 
 Errors reach the apps as `ApiError` from `@paisa/api-client`, with a stable `code` (map it to a `t:` key) and the HTTP `status` when the server answered:
 
-| `code` | From | HTTP | Meaning |
-| --- | --- | --- | --- |
-| `class_not_found` | `join_class` | 404 | No class with that code |
-| `class_full` | `join_class` | 403 | The class already has 300 students |
-| `join_rate_limited` | `join_class` | 429 | Over 60 joins to this class in the last minute; try again shortly |
-| `nickname_taken` | `join_class` | 409 | Someone in the class already uses it (case-insensitive) |
-| `nickname_blocked` | `join_class` | 422 | Matches the word filter |
-| `nickname_invalid` | `join_class` | 422 | Not 2–20 characters of Latin or Devanagari letters, digits, space `_ . -`, or mixes scripts |
-| `nickname_personal_info` | `join_class` | 422 | Looks like a phone number or email (5+ digits, or `@`) |
-| `too_many_events` | `push_events` | 413 | More than 500 events in one call (the client also refuses before sending) |
-| `timeout` | client | – | The request was aborted after the sync queue's `timeoutMs` (default 15 s); retried later |
-| `network` | client | – | Offline or the request failed; retried later |
-| `unknown` | any | any | Anything else, with the server message |
+| `code`                   | From          | HTTP | Meaning                                                                                     |
+| ------------------------ | ------------- | ---- | ------------------------------------------------------------------------------------------- |
+| `class_not_found`        | `join_class`  | 404  | No class with that code                                                                     |
+| `class_full`             | `join_class`  | 403  | The class already has 300 students                                                          |
+| `join_rate_limited`      | `join_class`  | 429  | Over 60 joins to this class in the last minute; try again shortly                           |
+| `nickname_taken`         | `join_class`  | 409  | Someone in the class already uses it (case-insensitive)                                     |
+| `nickname_blocked`       | `join_class`  | 422  | Matches the word filter                                                                     |
+| `nickname_invalid`       | `join_class`  | 422  | Not 2–20 characters of Latin or Devanagari letters, digits, space `_ . -`, or mixes scripts |
+| `nickname_personal_info` | `join_class`  | 422  | Looks like a phone number or email (5+ digits, or `@`)                                      |
+| `too_many_events`        | `push_events` | 413  | More than 500 events in one call (the client also refuses before sending)                   |
+| `timeout`                | client        | –    | The request was aborted after the sync queue's `timeoutMs` (default 15 s); retried later    |
+| `network`                | client        | –    | Offline or the request failed; retried later                                                |
+| `unknown`                | any           | any  | Anything else, with the server message                                                      |
 
-`timeout`, `network`, 5xx, 408 and 429 are retryable (`isRetryableError`). The sync queue retries those and moves batches with any other error to a dead-letter store (`deadLetters()`, `requeueDeadLetters()`, `clearDeadLetters()`), so no event is dropped silently.
+`timeout`, `network`, 5xx, 408 and 429 are retryable (`isRetryableError`). The sync queue retries those and moves batches with any other error to a dead-letter store (`deadLetters()`, `requeueDeadLetters()`, `clearDeadLetters()`), so no event is dropped silently. When the server skips only some events of a batch, only the ones in `rejected` are dead-lettered (`reason: 'skipped'`).
+
+Event types `push_events` accepts, with the payload keys it keeps (any other key is dropped; values must be numbers, booleans or short id-like strings):
+
+| `type`                   | Payload keys                                                                      |
+| ------------------------ | --------------------------------------------------------------------------------- |
+| `app_open`, `map_opened` | none                                                                              |
+| `onboarding_complete`    | `level`, `lang`                                                                   |
+| `persona_selected`       | `personaId`, `level`                                                              |
+| `decision_made`          | `scenarioId`, `choiceId`, `pillar`, `month`, `week`                               |
+| `rewind_used`            | `scenarioId`, `month`, `week`, `tokensLeft`                                       |
+| `event_triggered`        | `eventId`, `choiceId`, `month`, `week`                                            |
+| `minigame_complete`      | `game`, `correct`, `total`, `score`, `level`                                      |
+| `quiz_submitted`         | `quiz_type` (`baseline`, `endline` or `classroom`), `quiz_id`, `answers`, `score` |
+| `module_complete`        | `moduleId`, `pillar`                                                              |
+| `badge_earned`           | `badgeId`                                                                         |
+| `language_changed`       | `lang`                                                                            |
+| `sync_complete`          | `count`                                                                           |
+| `location_selected`      | `location_id` (a place, or a sub-map location such as `convenience.phone_shop`)   |
+| `week_slept`             | `month`, `week`                                                                   |
+| `glossary_term_opened`   | `term_id`, `article_id`                                                           |
+| `news_question_answered` | `edition`, `article_id`, `correct`, `attempt`                                     |
+| `news_edition_completed` | `edition`, `correct_count`                                                        |
 
 For the UI teams:
+
 - **Translation keys.** i18n files are flat maps with dotted keys and no `t:` prefix, so configure react-i18next with `keySeparator: false`. To resolve a `TKey`, drop the `t:` prefix.
 - **Month end.** After the month-end card, call `choose(state, content, CONTINUE)` to start the next month.
-- **Quizzes.** Score with `scoreQuiz` from the engine, then queue a `quiz_submitted` event whose payload is `{ quiz_type, answers, score }`.
+- **Quizzes.** Score with `scoreQuiz` from the engine, then queue a `quiz_submitted` event whose payload is `{ quiz_type, quiz_id?, answers, score }`.
+- **Events.** Build them with `makeEvent(ctx, type, payload)`; the map and news types are checked against the keys above at compile time.
 - **Offline.** `createSyncQueue({ storage: idbKeyval, push: api.pushEvents })` keeps events in IndexedDB and sends them in batches when the phone is back online.
-
-## Guardrails
-
-- **Educate, never recommend.** The content linter enforces this: no real brands, no promises, fictional assets only, ranges instead of single numbers, and the only safe link is 1930 / cybercrime.gov.in.
-- **No runtime LLM.** Content was written once by a model at authoring time. Every item is `draft` until financial, compliance and native-Hindi review.
-- **Privacy.** The only things stored about a student are a nickname, a class code and an anonymous id. Data stays in ap-south-1.
