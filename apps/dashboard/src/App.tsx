@@ -1,7 +1,7 @@
 // Import first: captures a failed invite link in the URL hash before supabase-js clears it.
 import { AUTH_LINK_ERROR } from './shell/initialHash';
 import { Suspense, lazy, useCallback, useEffect, useState } from 'react';
-import type { ApiClient } from '@paisa/api-client';
+import type { DashboardApi } from './types';
 import { api } from './api';
 import { t } from './content';
 import { saveLang, savedLang, type Lang } from './i18n';
@@ -11,7 +11,8 @@ import { SettingsScreen } from './screens/classes/SettingsScreen';
 import { SignIn } from './screens/signin/SignIn';
 import { ClassLayout } from './shell/ClassLayout';
 import { ErrorBoundary } from './shell/ErrorBoundary';
-import { Failed, Loading, NotStaff, SetupCard } from './shell/Notices';
+import { SAMPLE_MODE } from './mode';
+import { Failed, Loading, NotStaff, SampleBanner, SetupCard } from './shell/Notices';
 import { TopBar } from './shell/TopBar';
 import { useFocusHeading } from './shell/focus';
 import { routeKey } from './shell/route';
@@ -46,7 +47,7 @@ export function App() {
 }
 
 /** Sign-in state: loading, signed out, signed in but not staff, or the workspace. */
-function Gate({ api, lang, onLang }: { api: ApiClient; lang: Lang; onLang: (lang: Lang) => void }) {
+function Gate({ api, lang, onLang }: { api: DashboardApi; lang: Lang; onLang: (lang: Lang) => void }) {
   const { state, refresh, recheck } = useAuth(api);
   const [signOutFailed, setSignOutFailed] = useState(false);
   const [linkError, setLinkError] = useState(AUTH_LINK_ERROR);
@@ -71,6 +72,7 @@ function Gate({ api, lang, onLang }: { api: ApiClient; lang: Lang; onLang: (lang
     <>
       <TopBar lang={lang} onLang={onLang} email={email} onSignOut={email ? () => void signOut() : undefined} />
       <main id="main" className="page">
+        {SAMPLE_MODE && <SampleBanner lang={lang} />}
         {signOutFailed && (
           <div className="banner bad" role="alert">
             <span aria-hidden="true">!</span>
@@ -105,7 +107,7 @@ function Gate({ api, lang, onLang }: { api: ApiClient; lang: Lang; onLang: (lang
 }
 
 /** Signed-in staff: the class list, or one class with its Progress / Learning gains / Settings tabs. */
-function Workspace({ api, lang }: { api: ApiClient; lang: Lang }) {
+function Workspace({ api, lang }: { api: DashboardApi; lang: Lang }) {
   const { route, replace } = useHashRoute();
   const { classes, failed, loading, upsert, patchClass, reload } = useClasses(api);
   const cls = route.name === 'class' ? classes?.find((c) => c.id === route.id) : undefined;

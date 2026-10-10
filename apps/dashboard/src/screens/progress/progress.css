@@ -36,14 +36,43 @@
 
 /* ---- table ---- */
 .progress-table {
-  min-width: 1040px;
+  min-width: 960px;
 }
 .progress-table th,
 .progress-table td {
   white-space: nowrap;
 }
+/* Tighter than the shared table (styles.css loads after this file, so match its selectors to win). */
+table.data.progress-table td,
+table.data.progress-table tbody th {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+/* Headers wrap to two lines so all ten columns fit a 1280 px laptop without sideways scrolling. */
+table.data.progress-table thead th {
+  white-space: normal;
+  vertical-align: bottom;
+}
+table.data.progress-table th button.sort {
+  padding: 8px 10px;
+  line-height: 1.3;
+}
+.progress-filter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  cursor: pointer;
+  font-weight: 700;
+}
+.progress-filter input {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  accent-color: var(--brand);
+}
 /* Sort buttons fill their header cell (styles.css); numbers sit at the right edge. */
-.progress-table th.num button.sort {
+table.data.progress-table th.num button.sort {
   justify-content: flex-end;
 }
 .progress-arrow {
@@ -70,8 +99,14 @@
 }
 .progress-last {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 4px 8px;
+}
+/* The inactive badge drops under the date when space is tight, so the table fits a laptop. */
+table.data.progress-table td.progress-last-cell {
+  white-space: normal;
+  min-width: 7.5rem;
 }
 .table-wrap:focus-visible {
   outline: 3px solid var(--focus);

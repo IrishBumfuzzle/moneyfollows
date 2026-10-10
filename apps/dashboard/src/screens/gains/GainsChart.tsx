@@ -44,7 +44,6 @@ const pctLabel = (v: unknown) => (typeof v === 'number' ? formatPct(v) : '');
  */
 export default function GainsChart({ rows, lang }: { rows: readonly GainRow[]; lang: Lang }) {
   const narrow = useMedia('(max-width: 600px)');
-  const reduceMotion = useMedia('(prefers-reduced-motion: reduce)');
   const data = chartData(rows).map((d) => ({ ...d, name: t(lang, `pillar.${d.pillar}`) }));
   const ticks = narrow ? NARROW_TICKS : TICKS;
   const axisLabel = { value: t(lang, 'chart.axis'), fill: COLOR.ink, fontSize: FONT_SIZE };
@@ -101,6 +100,7 @@ export default function GainsChart({ rows, lang }: { rows: readonly GainRow[]; l
           </>
         )}
         <Tooltip
+          isAnimationActive={false}
           formatter={(v) => (typeof v === 'number' ? formatPct(v) : '–')}
           cursor={{ fill: 'rgb(232 150 12 / 12%)' }}
         />
@@ -116,7 +116,7 @@ export default function GainsChart({ rows, lang }: { rows: readonly GainRow[]; l
           name={t(lang, 'chart.baseline')}
           fill={COLOR.baseline}
           maxBarSize={40}
-          isAnimationActive={!reduceMotion}
+          isAnimationActive={false} // staff dashboard: no motion, numbers show at once
         >
           <LabelList
             dataKey="baseline"
@@ -131,7 +131,7 @@ export default function GainsChart({ rows, lang }: { rows: readonly GainRow[]; l
           name={t(lang, 'chart.endline')}
           fill={COLOR.endline}
           maxBarSize={40}
-          isAnimationActive={!reduceMotion}
+          isAnimationActive={false} // staff dashboard: no motion, numbers show at once
         >
           <LabelList
             dataKey="endline"

@@ -30,7 +30,7 @@ describe('dashboard shell content', () => {
     ].filter((f) => /\.tsx?$/.test(f) && !f.endsWith('.test.ts'));
     const used = new Set<string>();
     const re =
-      /['"`]((?:app|topbar|setup|loading|staffcheck|notstaff|signin|nav|classes|lang|class|sheet|settings)\.[a-z0-9_.]+)['"`]/g;
+      /['"`]((?:app|topbar|setup|loading|staffcheck|notstaff|signin|nav|classes|lang|class|sheet|settings|sample)\.[a-z0-9_.]+)['"`]/g;
     for (const f of files) for (const m of readFileSync(f, 'utf8').matchAll(re)) used.add(m[1]!);
     expect(used.size).toBeGreaterThan(40);
     for (const k of used) expect(STRINGS.en[k], k).toBeTruthy();

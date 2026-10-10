@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import type { ApiClient } from '@paisa/api-client';
+import type { DashboardApi } from '../../types';
 import { t } from '../../content';
 import type { Lang } from '../../i18n';
+import { SAMPLE_MODE, sampleModeHref } from '../../mode';
 import {
   CODE_INPUT_MAX,
   cleanOtp,
@@ -13,7 +14,7 @@ import {
 } from './signin';
 
 interface Props {
-  api: ApiClient;
+  api: DashboardApi;
   lang: Lang;
   /** An invite or sign-in link in the URL failed (expired or already used). */
   linkError?: boolean;
@@ -145,7 +146,7 @@ export function SignIn({ api, lang, linkError, onSignedIn }: Props) {
       <form className="stack" onSubmit={submit} noValidate>
         {step === 'email' ? (
           <>
-            <p>{tr('signin.intro')}</p>
+            <p>{tr(SAMPLE_MODE ? 'sample.email_hint' : 'signin.intro')}</p>
             <div className="field">
               <label htmlFor="signin-email">{tr('signin.email')}</label>
               <input
@@ -166,7 +167,7 @@ export function SignIn({ api, lang, linkError, onSignedIn }: Props) {
           </>
         ) : (
           <>
-            <p>{tr('signin.code_sent', { email })}</p>
+            <p>{SAMPLE_MODE ? tr('sample.code_hint') : tr('signin.code_sent', { email })}</p>
             {resent && (
               <p className="muted" role="status">
                 {tr('signin.resent')}
@@ -211,18 +212,20 @@ export function SignIn({ api, lang, linkError, onSignedIn }: Props) {
           </button>
           {step === 'code' && (
             <>
-              <button
-                type="button"
-                className="btn"
-                disabled={busy !== null || wait > 0}
-                onClick={() => void sendCode(true)}
-              >
-                {sending
-                  ? tr('signin.sending')
-                  : wait > 0
-                    ? tr('signin.resend_wait', { s: wait })
-                    : tr('signin.resend')}
-              </button>
+              {!SAMPLE_MODE && (
+                <button
+                  type="button"
+                  className="btn"
+                  disabled={busy !== null || wait > 0}
+                  onClick={() => void sendCode(true)}
+                >
+                  {sending
+                    ? tr('signin.sending')
+                    : wait > 0
+                      ? tr('signin.resend_wait', { s: wait })
+                      : tr('signin.resend')}
+                </button>
+              )}
               <button
                 type="button"
                 className="btn quiet"
@@ -240,7 +243,17 @@ export function SignIn({ api, lang, linkError, onSignedIn }: Props) {
         </div>
       </form>
 
-      {import.meta.env.DEV && (
+      {!SAMPLE_MODE && (
+        <div className="sample-offer">
+          <h2>{tr('sample.try_title')}</h2>
+          <p className="muted">{tr('sample.try_body')}</p>
+          <a className="btn" href={sampleModeHref(true)}>
+            {tr('sample.try')}
+          </a>
+        </div>
+      )}
+
+      {import.meta.env.DEV && !SAMPLE_MODE && (
         <div className="dev-box">
           <button type="button" className="btn quiet" disabled={busy !== null} onClick={() => void demo()}>
             {busy === 'demo' ? tr('signin.verifying') : tr('signin.demo')}
