@@ -17,40 +17,47 @@ Read this file fully at the start of every session. It is the source of truth fo
 
 **Paisa Path** is a mobile-first life-simulation game for Class 11–12 students from underserved communities in Hyderabad. A student picks a persona (e.g. Sana, who tutors to save for college fees), runs that character's money month by month, makes weekly decisions, sees consequences in a safe sandbox (fictional money, rewind allowed) and learns four pillars: **Plan & budget, Save & manage, Understand investing, Stay financially safe.** It is offline-first (PWA), privacy-conscious (nickname + class code only), delivered through partner NGOs, and built to scale to ~1,500 students first, then new cities and languages.
 
-Full product spec: `docs/spec.md` (paste the team's spec there). This file summarizes what we build *this weekend*.
+Full product spec: `docs/spec.md` (paste the team's spec there). Visual rules: `DESIGN.md`. This file summarizes what we build *this weekend*.
 
 ### 1.1 App and game structure
 
-- The app has several **sections**; the **game** is one of them. The other sections are not decided yet.
-- Entering the game takes the player to a **map** with places: **Home, Shop, School, Hospital** (more may be added).
-- A place can open a **sub-map** with its own locations, and the player plays inside those locations.
-- Still to decide: what the other app sections are, and how the map's places connect to the weekly decision loop and the mini-games (section 2).
+- **Hub:** the app opens on the character's **room**. Objects in the room open the app's sections: door → **Map** (the game), newspaper on the table → **Paisa Times**, trophy shelf → **Me** (badges, XP), notebook → **Notes** (lesson cards + Word Wallet). A labelled tab bar (Room, Map, News, Me) is always available too. Sections come from a config array, so adding a section later is one new entry.
+- **Game map:** a tall, vertically scrolling illustrated Hyderabad neighbourhood with places: **Home, Shop (`convenience`), School, Hospital, Bank**. The Shop opens a **sub-map** (phone shop, kirana, clothes stall). The player plays inside places and sub-map locations.
+- **Weekly loop on the map:** each week the engine pins 2–4 places that hold this week's decisions; going Home to **sleep** ends the week (rules in 5.8).
+- **Inside a place:** in-person events play as a **dialogue scene**; remote events (family texts, scams) arrive as **phone notifications** that open a chat.
+- **Paisa Times:** a weekly newspaper of 5 short, original explainers. Highlighted words open a thought-cloud popup with a simple meaning. One question per article; answering pays the character's **paper-route wage** in the game, once per edition (rules in 5.8).
 
 ## 2. Scope for the hackathon (MoSCoW)
 
 ### Must (the demo path depends on these)
-- Student PWA: language pick (**English + Hindi**), join class with code, nickname, persona pick (**2 personas: Sana, Ravi**), 3-card how-to-play.
-- Game loop: weekly decision card → consequence sheet (jar changes + lesson card) → **rewind** → month-end report with **Money Health Score**. Play **3 in-game months** (12 weeks).
-- Engine: pure TypeScript, deterministic (seeded), delayed consequences, surprise events.
-- Content: **24 scenario cards (6 per pillar)**, fully in **en + hi**, plus 6 baseline/end-line quiz questions.
-- Mini-games: **Scam or Safe?** (swipe messages) and **Time Machine** (compounding slider with `AssumptionBanner`).
+- Onboarding: language (**English + Hindi**), join class with code, nickname + avatar, persona (**2 personas: Sana, Ravi**), 3-card how-to-play.
+- **Hub** (room with tappable objects + tab bar).
+- **Map** with 5 places and weekly pins; **Shop sub-map** with 3 locations; sleep at Home ends the week.
+- Decisions: **dialogue scene** (in person) and **phone chat** (remote) → consequence sheet (jar changes + lesson card) → **rewind**. Delayed consequences shown as flashbacks. Surprise scam notifications.
+- Home: payday jar split, sleep, **Month Recap** with **Money Health Score**. Play **3 in-game months** (12 weeks).
+- Engine: pure TypeScript, deterministic (seeded), location-aware, delayed consequences, surprise events.
+- Content: **24 scenario cards (6 per pillar)** tagged with a location; **1 Paisa Times edition (5 articles) + glossary**; 6 baseline/end-line quiz questions. All in **en + hi**.
+- **Paisa Times:** edition front page, articles with thought-cloud word popups, 1 question each, paper-route wage, Word Wallet.
+- Mini-games: **Scam or Safe?** with Message Inspector (Shop / phone scams) and **Time Machine** (Bank, with `AssumptionBanner`).
 - Offline play with queued sync (airplane-mode demo).
 - Staff dashboard: create class + code/QR, student progress table, baseline vs end-line chart.
 - Guardrail linter on content (section 7).
-- Deployed live URL, seeded **demo mode**, README, fallback video.
+- Deployed live URL, seeded **demo mode** + hidden demo panel, README, fallback video.
 
 ### Should
 - Voice-over via browser `speechSynthesis` (hi-IN / en-IN), hide the button if no voice is available.
 - XP, 3–5 badges, weekly streak.
 - Jar Splitter mini-game (budget).
 - Simple "profile switcher" for shared phones (no PIN).
+- A sixth place: Workplace (Ravi's tiffin stall, Sana's tuition class).
 
 ### Could
 - Life Happens deck, Basket Builder, classroom live-vote mode, announcements, certificate PDF.
 - Telugu **draft** toggle (see section 7.4).
+- More app sections beyond Map, Paisa Times, Me and Notes.
 
 ### Won't (show on the roadmap slide, do not build)
-Urdu/RTL, Telugu as a shipped language, recorded voice-over packs, headless CMS, translation platform (Weblate/Crowdin), self-hosted analytics, Play Store wrapper, picture-PIN, retention check, full 4 personas × 12 months, Levels 3.
+Urdu/RTL, Telugu as a shipped language, recorded voice-over packs, headless CMS, translation platform (Weblate/Crowdin), self-hosted analytics, Play Store wrapper, picture-PIN, retention check, full 4 personas × 12 months, Levels 3, live or scraped real news feeds, free-roam map without weekly pins.
 
 ## 3. Team, lanes and ownership
 
@@ -58,30 +65,30 @@ Assign names at kickoff. Four people:
 
 | Lane | Owner | Owns (may edit) | Does NOT edit |
 |---|---|---|---|
-| **UI-1** | Student app lead (+ pitch/PPT) | `apps/student/**`, `docs/pitch/**` | `packages/engine`, `supabase/**` |
-| **UI-2** | Dashboard + mini-games | `apps/dashboard/**`, `apps/student/src/games/**` | `packages/engine`, `supabase/**` |
+| **UI-1** | Student app lead, design system owner (+ slides, report, video script) | `apps/student/**` except the UI-2 folders; owns `apps/student/src/design/**` and `DESIGN.md`; `docs/pitch/**` | `packages/engine`, `supabase/**` |
+| **UI-2** | Paisa Times, mini-games, dashboard | `apps/student/src/features/news/**`, `apps/student/src/games/**`, `apps/dashboard/**` | `apps/student/src/design/**` (request changes from UI-1), `packages/engine`, `supabase/**` |
 | **BE-1** | Engine + content | `packages/engine/**`, `packages/content/**`, `scripts/**` | `apps/**` |
 | **BE-2** | API, DB, sync, deploy, integrator | `supabase/**`, `packages/api-client/**`, `.github/**`, deployment config | `packages/engine`, `packages/content` |
 
 `packages/shared/**` is **shared and frozen** (section 5): changes need a heads-up in the team channel.
 
-BE-2 is also the **integrator**: owns "does it run end-to-end, deployed, right now?", merges, submissions and the deadline clock.
+BE-2 is also the **integrator**: owns "does it run end-to-end, deployed, right now?", merges, submissions (M1, M2, final, zip) and the deadline clock.
 
 ## 4. Stack and repo layout
 
 - **Monorepo:** pnpm workspaces, Node 20+, TypeScript `strict`, Vitest, ESLint, Prettier, zod.
-- **Student app:** Vite + React + TypeScript PWA (`vite-plugin-pwa`), Zustand for UI state, `idb-keyval` for IndexedDB saves and the sync queue, `react-i18next` for strings. Canvas/CSS for mini-games. Mobile-first at 360 px.
+- **Student app:** Vite + React + TypeScript PWA (`vite-plugin-pwa`), Zustand for UI state, `idb-keyval` for IndexedDB saves and the sync queue, `react-i18next` for strings, `motion` for animation, `@floating-ui/react` for popups. Canvas/CSS/SVG for the map and mini-games. Mobile-first at 360 px.
 - **Dashboard:** Vite + React + TypeScript, shares `packages/shared` types, a small chart lib (Recharts).
 - **Engine:** `packages/engine` — pure TS, **no DOM, no network, no `Date.now()` or `Math.random()`**. State in → state out.
 - **Backend:** Supabase (Postgres + row-level security + auth for staff + SQL functions), region **ap-south-1 (Mumbai)**. Students never create accounts.
-- **Hosting:** Vercel (apps), Supabase (backend). Content packs are static JSON bundled with the app for the hackathon.
+- **Hosting:** Vercel (apps), Supabase (backend). Content packs (scenarios, newspaper editions, glossary) are static JSON bundled with the app for the hackathon, so everything works offline.
 
 ```
-/apps/student        # PWA (UI-1)
+/apps/student        # PWA (UI-1; news + games folders are UI-2)
 /apps/dashboard      # staff web app (UI-2)
 /packages/shared     # types, zod schemas, constants  (FROZEN contracts)
 /packages/engine     # simulation (BE-1)
-/packages/content    # scenarios, quizzes, i18n, guardrails (BE-1)
+/packages/content    # scenarios, news, glossary, quizzes, i18n, guardrails (BE-1)
 /packages/api-client # typed client for the backend (BE-2)
 /supabase            # migrations, RLS, seed.sql (BE-2)
 /scripts             # content generation + guardrail-lint + seed (BE-1)
@@ -112,6 +119,10 @@ export type Level = 'starter' | 'explorer' | 'planner';
 export type JarId = 'needs' | 'wants' | 'goals' | 'savings';
 export type TKey = `t:${string}`;               // translation key, resolved in the UI
 
+// Map places. Ids are stable keys, not labels (the "Shop" place is `convenience`);
+// labels are localised separately. Sub-map locations are strings like "convenience.phone_shop".
+export type LocationId = 'home' | 'convenience' | 'school' | 'hospital' | 'bank';
+
 // Money is whole rupees (integers). Never use floats for money.
 export interface Effects {
   jars?: Partial<Record<JarId, number>>;        // + adds, − spends
@@ -134,6 +145,10 @@ export interface Scenario {
   id: string;                                    // e.g. "budget.recharge.01"
   pillar: Pillar;
   concept: string;
+  location: LocationId;                          // where the pin appears on the map
+  sublocation?: string;                          // e.g. "convenience.phone_shop"
+  channel: 'in_person' | 'phone';                // dialogue scene vs phone chat
+  speaker: TKey;                                 // who is talking (Ammi, shopkeeper, Unknown number)
   personas: PersonaId[];
   difficulty: 1 | 2 | 3;
   text: TKey;
@@ -142,6 +157,20 @@ export interface Scenario {
   assumption?: boolean;                          // true => must render AssumptionBanner
   choices: Choice[];                             // 2–4
   meta: { status: 'draft' | 'reviewed'; author: string };
+}
+
+// Paisa Times
+export interface GlossaryTerm { id: string; word: TKey; simple: TKey; example: TKey }
+
+export interface Article {
+  id: string;
+  edition: string;                               // e.g. "2026-W41"
+  headline: TKey;
+  body: TKey;                                    // contains [[termId]] markers
+  terms: string[];                               // GlossaryTerm ids
+  question: { prompt: TKey; options: TKey[]; correct: number; explanation: TKey };
+  reward: { wage: number; xp: number };          // wage = in-game rupees for the paper-route shift
+  meta: { status: 'draft' | 'reviewed'; author: string; factsCheckedBy?: string };
 }
 
 export interface GameState {
@@ -159,6 +188,7 @@ export interface GameState {
   pending: { dueMonth: number; dueWeek: number; effects: Effects; note: TKey }[];
   rewindTokens: number;
   history: unknown[];                            // snapshots for rewind (engine-internal)
+  earned: string[];                              // sourceIds already paid by earn()
   score?: number;                                // Money Health Score, set at month end
 }
 ```
@@ -167,6 +197,10 @@ export interface GameState {
 
 ```ts
 createGame(personaId, level, seed): GameState
+pinsForWeek(state, content): { location: LocationId; sublocation?: string; scenarioId: string }[]
+playAt(state, content, location, sublocation?): Card | null   // the pinned card at that place, if any
+sleep(state, content): GameState                 // ends the week; blocked while pins remain; may trigger payday or monthEnd
+earn(state, amount, sourceId): GameState         // e.g. paper-route wage; idempotent per sourceId
 nextCard(state, content): Card                   // 'decision' | 'event' | 'monthEnd' | 'yearEnd'
 choose(state, content, choiceId): { state: GameState; consequence: Consequence }
 rewind(state): GameState | null                  // null if no tokens/snapshot
@@ -181,6 +215,8 @@ Rules the engine must satisfy (each has a unit test):
 4. **Rewind** restores the exact prior state and consumes one token (3 per month).
 5. **Delayed effects** fire on the right week, even across a month boundary.
 6. **Serializable:** `JSON.parse(JSON.stringify(state))` round-trips.
+7. **`earn` is idempotent:** the same `sourceId` never pays twice.
+8. **`sleep` is blocked** while any of the week's pins are unplayed.
 
 ### 5.3 Money Health Score (v0, tunable)
 
@@ -212,12 +248,25 @@ export interface SyncEvent {
   class_id: string;
   type: 'app_open' | 'onboarding_complete' | 'persona_selected' | 'decision_made'
       | 'rewind_used' | 'event_triggered' | 'minigame_complete' | 'quiz_submitted'
-      | 'module_complete' | 'badge_earned' | 'language_changed' | 'sync_complete';
+      | 'module_complete' | 'badge_earned' | 'language_changed' | 'sync_complete'
+      | 'map_opened' | 'location_selected'
+      | 'week_slept' | 'glossary_term_opened' | 'news_question_answered' | 'news_edition_completed';
   payload: Record<string, unknown>;
   client_ts: string;           // ISO
   content_version: string;
 }
 ```
+
+Map and news signals (additive; fire-and-forget like all `SyncEvent`s: queued offline, pushed via `push_events`, idempotent on `event_id`):
+
+| `type` | When | `payload` |
+|---|---|---|
+| `map_opened` | The map screen is shown (emitted by `apps/student/src/screens/LocationScreen.tsx`) | `{}` |
+| `location_selected` | The student taps a place (`onSelect(id)`), before any sub-map or scenario opens | `{ location_id: LocationId \| string }` (sub-map locations use their string id) |
+| `week_slept` | The student sleeps at Home and the week advances | `{ month, week }` |
+| `glossary_term_opened` | A thought-cloud popup opens | `{ term_id, article_id }` |
+| `news_question_answered` | An article question is answered | `{ edition, article_id, correct, attempt }` |
+| `news_edition_completed` | All 5 articles answered | `{ edition, correct_count }` |
 
 ### 5.6 Database (MVP tables)
 
@@ -227,49 +276,71 @@ No real names, phone numbers, birth dates, addresses or bank data. Facilitators 
 
 ### 5.7 Content and i18n
 
-- Content lives in `packages/content/`: `scenarios/*.json`, `quizzes/*.json`, `personas.json`, `i18n/{en,hi,te}.json`, `guardrails.json`.
+- Content lives in `packages/content/`: `scenarios/*.json`, `news/<edition>.json`, `glossary.json`, `quizzes/*.json`, `personas.json`, `places.json`, `i18n/{en,hi,te}.json`, `guardrails.json`.
 - Every user-facing string is a `t:` key in the i18n files. **No hard-coded words in components or images.**
-- Keys follow the scenario id: `budget.recharge.01.story`, `budget.recharge.01.a.label`, `lesson.needs_first`.
+- Keys follow the item id: `budget.recharge.01.story`, `budget.recharge.01.a.label`, `lesson.needs_first`, `news.2026-W41.upi_fraud.headline`, `glossary.inflation.simple`.
 - Amounts display with Indian grouping: `new Intl.NumberFormat('en-IN')` → ₹1,00,000, in every language.
+
+### 5.8 Map, week and Paisa Times rules
+
+**Map and week loop**
+- Places and sub-map locations are data (`places.json` + `apps/student/src/features/map/places.ts`): id, name key, map position, illustration, children, unlock rule. Adding a place must not need new screen code.
+- Each week the engine pins 2–4 places. Pinned places hold this week's decisions; unpinned places offer practice (mini-games, replays) with no effect on the story.
+- Sleeping at Home ends the week and is blocked while pins remain (show a friendly "still to do" sheet with the pins highlighted). Payday and the Month Recap happen at Home.
+- Scam notifications can arrive anywhere, but never interrupt a scene in progress; they queue until it ends.
+- First-time players see a guide arrow to the first pin. Target: first decision in under 3 minutes from app open.
+- Place ↔ pillar mapping: Home = Plan & budget; Shop = Plan & budget + Stay safe; School and Hospital = Save & manage; Bank = Understand investing (Time Machine). Phone scams = Stay safe.
+
+**Paisa Times**
+- Articles are **short, original explainers written by us** about real-world money topics (UPI fraud, inflation and prices, interest rates and family loans, loan-app rules, payment safety). Never copy or closely paraphrase real news articles. No market tips, stock/fund news or anything that recommends an investment.
+- Any real figure (a rate, a price, a date) is checked by a human before publishing (`meta.factsCheckedBy`). Each edition is dated.
+- Editions ship in the content pack, so they work offline. Scaling story: Claude drafts each weekly edition, a human reviews it through the same workflow as scenarios.
+- `[[termId]]` in article text renders as a tappable word: dotted marigold underline → thought-cloud popup (word, simple meaning, everyday example, speaker button). Tapped words go to the Word Wallet.
+- One question per article with an explanation. A correct answer pays the wage via `earn(state, wage, "news:<edition>:<articleId>")`; a wrong answer shows the explanation and allows one retry at half wage. Each edition pays once.
+- The reward is framed as the character's **paper-route shift** (earned income), never free money.
 
 ## 6. UI standards (UI-1 and UI-2)
 
-- **Mobile-first, 360 px wide**, tested on Chrome DevTools "Slow 4G" with CPU 4× slowdown. Initial JS budget: aim under ~250 KB gzipped.
-- Font ≥ 16 px (Noto Sans); tap targets ≥ 48 px; 8 px grid; 12 px rounded cards.
+- Follow `DESIGN.md` (colours, type, motion, illustration, sound, voice). UI-1 owns it; nobody restyles shared components locally.
+- **Mobile-first, 360 px wide**, tested on Chrome DevTools "Slow 4G" with CPU 4× slowdown. Initial JS budget: aim under ~250 KB gzipped; lazy-load places, mini-games and the Recap.
+- Font ≥ 16 px (Noto Sans; Baloo 2 for display); tap targets ≥ 48 px; 8 px grid.
 - **Jar colours** (always with icon + label, never colour alone): Needs teal, Wants amber, Goals purple, Savings green.
 - Every choice has an **icon + short label**. Jargon always followed by a one-line "what this means".
 - Respect `prefers-reduced-motion`; provide a **data-saver** toggle that disables animation.
 - Show **offline / sync status as a banner**, not as a separate screen.
+- Android hardware back always goes up one level; it never exits the app from inside a place.
 - No timers by default (anxiety).
-- Student app screens to build first: Language → Join class → Nickname/avatar → Persona → My Month → Decision → Consequence → Month-end report. Then: Scam or Safe?, Time Machine, Me (badges), Settings.
+- Build order (UI-1): Onboarding → Room (hub) → Map → week pins → Place scene + decision → Consequence + rewind → Phone layer + scams → Home (payday, sleep, Month Recap) → Shop sub-map + remaining places → flashbacks → Me, Notes, Settings → demo panel.
+- Build order (UI-2): Paisa Times reader → thought-cloud popup → questions + wage → Word Wallet → Message Inspector (needed by UI-1's scam flow) → Scam or Safe? → Time Machine → dashboard.
 - Dashboard screens: Sign in → Class setup (code + QR) → Class progress table → Learning gains chart.
-- Component names to reuse from the spec: `WalletCard`, `JarCard`, `JarDelta`, `DecisionCard`, `ChoiceButton`, `ConsequenceSheet`, `LessonCard`, `ScoreRing`, `SwipeCard`, `MessageInspector`, `TimeSlider`, `GrowthChart`, `AssumptionBanner`, `OfflineBanner`.
+- Component names to reuse: `RoomHub`, `MapView`, `PlacePin`, `PlaceScene`, `DialogueBubble`, `PhoneNotification`, `ChatThread`, `WalletCard`, `JarCard`, `JarDelta`, `ChoiceButton`, `ConsequenceSheet`, `LessonCard`, `RewindButton`, `FlashbackCard`, `MonthRecap`, `ScoreRing`, `NewsFrontPage`, `ArticleView`, `GlossaryWord`, `ThoughtCloud`, `WordWallet`, `SwipeCard`, `MessageInspector`, `TimeSlider`, `GrowthChart`, `AssumptionBanner`, `OfflineBanner`.
 - The UI talks to the engine **only through the engine API** (5.2) and to the backend **only through `api-client`**. Develop against the mock engine (`packages/engine/src/mock.ts`) until the real one lands.
 
 ## 7. Content, AI usage and guardrails
 
 ### 7.1 Where Claude is used (and where it is not)
 
-- **Authoring time (yes):** Claude drafts scenarios, quiz questions, lesson cards and Hindi translations as JSON matching the `Scenario` schema. Output is validated by zod and the guardrail linter, then **a human reviews it and flips `status` to `reviewed`**.
+- **Authoring time (yes):** Claude drafts scenarios, newspaper articles, glossary entries, quiz questions, lesson cards and Hindi translations as JSON matching the schemas. Output is validated by zod and the guardrail linter, then **a human reviews it and flips `status` to `reviewed`**.
 - **Runtime in the student app (no):** no live LLM calls. Reasons: works offline, no child data sent anywhere, fully predictable, nothing to go wrong on stage. This is a deliberate safety and scale decision; say so in the pitch.
 - Optional stretch (only before freeze): a facilitator-side "summarize where my class is struggling" using aggregated, anonymized counts, with the API key held server-side only.
 
 ### 7.2 Guardrail rules (enforced by `pnpm lint:content`)
 
-1. Schema valid (zod); 2–4 choices; ids unique.
+1. Schema valid (zod); 2–4 choices; ids unique; every scenario has a valid `location`; every `[[termId]]` exists in the glossary.
 2. Every `t:` key exists in **en and hi**. Missing Hindi = build failure.
-3. **Educate, never recommend.** No imperative investment advice ("you should invest/buy…"), no guarantees ("guaranteed", "sure returns", "risk-free"), no real banks, funds, stocks, apps or schemes named as something to choose. Forbidden-term list lives in `packages/content/guardrails.json` and is reviewable by non-developers.
+3. **Educate, never recommend.** No imperative investment advice ("you should invest/buy…"), no guarantees ("guaranteed", "sure returns", "risk-free"), no real banks, funds, stocks, apps or schemes named as something to choose. Forbidden-term list lives in `packages/content/guardrails.json` and is reviewable by non-developers. Applies to articles too.
 4. Investing content only uses **fictional assets**: "Steady Deposit", "Mixed Basket", "Rocket Co".
 5. Any scenario with `assumption: true` or in `understand_investing` must render `AssumptionBanner`. Projections come only from `projectGrowth` (always a range).
 6. Safe outbound links only: the 1930 cyber crime helpline and cybercrime.gov.in.
-7. Tone: no shaming of poverty or family situations; no preaching; reading level about Class 8; text length caps per field (story ≤ 220 chars, choice label ≤ 40, lesson ≤ 140).
-8. `--strict` mode (used for release builds) also fails on any `status: draft`.
+7. Tone: no shaming of poverty or family situations; no preaching; reading level about Class 8; text length caps per field (story ≤ 220 chars, choice label ≤ 40, lesson ≤ 140, article body ≤ 600, glossary simple ≤ 100).
+8. `--strict` mode (used for release builds) also fails on any `status: draft` and on any article without `factsCheckedBy`.
 
 ### 7.3 Hindi rules
 
 - Keep common terms students hear in English (UPI, OTP, EMI, KYC) and add a short Hindi explanation.
 - Use one consistent glossary: `packages/content/glossary.hi.json` (e.g. emergency fund → आपातकालीन बचत). Reuse it in every prompt that generates Hindi.
-- A Hindi-speaking teammate spot-checks at least the 10 most-used cards before the demo.
+- Conversational Hindi, not formal Hindi.
+- A Hindi-speaking teammate spot-checks at least the 10 most-used cards and all 5 articles before the demo.
 
 ### 7.4 Telugu
 
@@ -306,52 +377,59 @@ Nobody on the team speaks Telugu. Telugu is **not** a shipped language. If gener
   - A **demo video, max 4 minutes**: a recording of the solution with a voiceover explaining it.
 - **Slides (11 Oct, 11:30):** the presentation slides.
 
+**Merge checkpoints:** 23:30, 01:30, 03:15, 07:30. `main` must be deployable after each.
+
 **Definition of done per checkpoint**
 
-- **M1:** the approach PDF is submitted. Build target for the same time (live URL, even if rough): language (en/hi) → join class → nickname → persona → weekly decisions → consequence + lesson → rewind → month-end score. Engine tests green. Deployed.
-- **M2:** the progress PDF is submitted and all code is pushed. Build target: + Scam or Safe?, Time Machine with `AssumptionBanner`, offline play with queued sync, dashboard class progress, Hindi complete for all 24 cards, guardrail linter in CI.
-- **Freeze (08:30):** + baseline/end-line quiz and learning-gain chart, demo mode, voice-over if time allows. After this: bugs, copy, polish only. Start the final report and record the demo video now.
+- **M1:** the approach PDF is submitted. Build target: shell, onboarding and room deployed; contracts in this file frozen.
+- **M2:** the progress PDF is submitted and all code is pushed. Build target: room → map with pins → a place → dialogue decision → consequence + rewind → a scam notification → sleep → Month Recap, playable end to end; Paisa Times with word popups, questions and wage; Hindi complete for everything built; engine tests green; guardrail linter in CI; deployed.
+- **Freeze (08:30):** + Shop sub-map, all 5 places, flashbacks, Scam or Safe?, Time Machine, offline sync, dashboard, baseline/end-line quiz and learning-gain chart, demo mode + hidden panel. After this: bugs, copy, polish only. Start the final report and record the demo video now.
 - **Final submit (10:30):** clean `main`, README (build/run steps only), `LICENSE`, `.env.example`, no secrets, deployed link works on a phone, zip uploaded, final report PDF (≤ 3 pages), demo video (≤ 4 min, voiceover).
 
 Sleep in staggered shifts (min. 3 hours each), roughly Sun 01:00–04:00 and 04:00–08:00. Tired teams ship bugs.
 
-## 9. Demo script (3 minutes) and fallbacks
+## 9. Demo script and fallbacks
+
+The same story is used for the **demo video (≤ 4 min, voiceover)** and the **live presentation** (cut steps 8–9 live if the slot is 3 minutes).
 
 1. **Hook (15 s):** the problem and who it is for (Class 11–12, underserved Hyderabad).
-2. **Onboarding (30 s):** pick Hindi, enter class code, nickname, persona Sana.
-3. **Core loop (60 s):** one weekly decision → consequence → **rewind** → lesson card. Show a delayed consequence landing.
-4. **Safety (30 s):** Scam or Safe? with Message Inspector.
-5. **Investing (20 s):** Time Machine slider; point at the AssumptionBanner and the low/avg/high range.
-6. **Offline (10 s):** switch on airplane mode, keep playing, reconnect, show sync.
-7. **NGO view (20 s):** dashboard with class progress and the baseline vs end-line chart (labelled demo data).
-8. **Close (15 s):** scale story and the rubric map slide.
+2. **Onboarding (20 s):** pick Hindi, enter class code, avatar, persona Sana.
+3. **Room → Map (15 s):** the room; the door opens onto the neighbourhood; this week's pins glow.
+4. **Shop (45 s):** dialogue decision at the phone shop → consequence → **rewind** → lesson. A scam notification drops in; Message Inspector.
+5. **Hospital (20 s):** an emergency bill; a flashback to an earlier choice; the emergency fund saves the day.
+6. **Home (25 s):** sleep → Month Recap with Money Health Score.
+7. **Paisa Times (20 s):** tap a word → thought cloud; answer the question; the paper-route wage lands in the wallet.
+8. **Bank (15 s):** Time Machine; point at the AssumptionBanner and the low/avg/high range.
+9. **Offline + NGO view (25 s):** airplane mode, keep playing, reconnect and sync; dashboard with learning gains (labelled demo data).
+10. **Close (15 s):** scale story and the rubric map.
 
-**Demo mode:** `?demo=1` loads a seeded save (fixed seed, mid-year state) so the demo never depends on luck or a long play-through.
-**Fallbacks:** the submitted demo video (≤ 4 min, with voiceover, due at the 11:00 final submission), a seeded database, and a local build on a laptop.
+**Demo mode:** `?demo=1` loads a seeded save (fixed seed, mid-month state). A hidden panel (triple-tap the logo) jumps to any place, triggers payday, ends the week, opens the Recap, fires the scam notification or a flashback, marks a new edition, simulates offline, switches persona and resets.
+**Fallbacks:** the submitted demo video, a seeded database, and a local build on a laptop. Mirror a real phone to the projector with `scrcpy`.
 
 ## 10. Pitch slides (5) and the rubric map
 
-1. Problem and audience. 2. The experience (clip or live). 3. **Rubric map:** each success measure → the feature that delivers it. 4. Scale: 1,500 students first, cost per student, how an NGO onboards a school, language roadmap. 5. Guardrails and privacy.
+1. Problem and audience. 2. The experience (clip or live). 3. **Rubric map:** each success measure → the feature that delivers it. 4. Scale: 1,500 students first, cost per student, how an NGO onboards a school, language roadmap, weekly Paisa Times pipeline. 5. Guardrails and privacy.
 
 | Brief measure | What we show |
 |---|---|
-| Simple | Starter level, "what this means" lines, 2–4 icon choices |
-| Relatable | Hyderabad scenarios (bus pass, Bonalu/Eid/Diwali, recharge), persona backstories |
-| Persona-led | Sana vs Ravi get different income, goals and events |
+| Simple | Starter level, "what this means" lines, thought-cloud word popups, 2–4 icon choices |
+| Relatable | Hyderabad neighbourhood map, local scenarios (bus pass, Bonalu/Eid/Diwali, recharge), persona backstories, real-world topics in Paisa Times |
+| Persona-led | Sana vs Ravi get different rooms, income, goals and events |
 | Language-ready | Live en/hi switch, string-file architecture, new language = one file |
-| Game-based | Simulation loop, mini-games, baseline vs end-line quiz |
-| Intuitive UI | Four-tab nav, large icon choices, first decision in under 3 minutes |
+| Game-based | Map + weekly simulation, rewind, mini-games, paper-route rewards, baseline vs end-line quiz |
+| Intuitive UI | Room hub with labelled objects + tab bar, guided first pin, first decision in under 3 minutes |
 | NGO-integrated | Class code/QR, progress table, learning-gain view |
-| Guardrail | AssumptionBanner, fictional assets, content linter, "educate, don't recommend" |
+| Guardrail | AssumptionBanner, fictional assets, original-only news, content linter, "educate, don't recommend" |
 
 Note: the brief's heading says "six measures" but lists seven. We cover all seven; ask the organizers which are scored.
 
 ## 11. Testing and pre-submission checklist
 
-- Engine unit tests: determinism, immutability, jars ≥ 0, rewind, delayed effects, serialization.
+- Engine unit tests: determinism, immutability, jars ≥ 0, rewind, delayed effects, serialization, `earn` idempotency, `sleep` blocked while pins remain.
 - `pnpm lint:content` passes in `--strict` before the code submission.
 - Manual smoke on a real Android phone: install the PWA, play offline, reconnect, sync.
 - Run the new-user path from scratch with someone who has never seen the app; time to first decision under 3 minutes.
+- Walk every screen in Hindi; fix text overflow.
 - Final check: a fresh clone → `pnpm install && pnpm dev:student` works from the README alone.
 - `README.md` contains only build and run instructions; `LICENSE` exists at the repo root; the zip archive matches the pushed code.
 
@@ -361,10 +439,14 @@ Append decisions here as `YYYY-MM-DD HH:MM — decision — who`.
 
 - 2026-10-10 — Languages: en + hi shipped; Telugu draft-only; Urdu out of scope — team.
 - 2026-10-10 — No runtime LLM in the student app; AI used at authoring time with human review — team.
+- 2026-10-10 — App = room hub + Map (game) + Paisa Times + Me + Notes; more sections via config — team.
+- 2026-10-10 — Map places: home, convenience (Shop, with sub-map), school, hospital, bank; weekly pins, sleep at Home ends the week — team.
+- 2026-10-10 — Paisa Times: original explainers bundled in the content pack; reward is an earned paper-route wage, once per edition — team.
+- 2026-10-10 22:30 — School opens the Classroom: a repeatable 5-question practice quiz across all four pillars. Its own question bank, separate from baseline/end-line so practice can't inflate learning gain. Additive `QuizKind 'classroom'`; client API built, backend change proposed in `API.md` §5 — UI-1.
 
 Open questions:
 - Which license does Section 11 of the brief require for the `LICENSE` file?
-- What are the app's other sections, and how do the game map's places (Home, Shop, School, Hospital) and sub-maps connect to the weekly decision loop and mini-games?
 - Which success measures are scored: six or seven?
 - Compliance-approved assumed growth rates for Time Machine (placeholders: 4/8/12%).
 - Who is the native Telugu reviewer, if any, via the NGO partner?
+- Which further app sections (if any) to add after the demo path is done?

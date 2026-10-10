@@ -6,3 +6,6 @@ dist/
 coverage/
 *.log
 .DS_Store
+.serena/
+apps/student/assets-src/schwarnhild/
+apps/student/tests/e2e-output/
