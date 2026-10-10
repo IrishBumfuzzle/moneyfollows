@@ -1,0 +1,219 @@
+/* The phone: a device frame with a status bar, a home screen of four apps, and the apps. Builds
+   on the ev-* device and chat styles in events.css. */
+
+.ph-device { position: relative; background: #e8eef2; }
+
+/* ---- status bar ---- */
+.ph-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 24px;
+  padding: 0 14px;
+  background: #0f151c;
+  color: #fff;
+  font: 13px "Paisa Digits", "Noto Sans Devanagari", sans-serif;
+}
+.ph-status-icons { display: flex; align-items: center; gap: 8px; }
+.ph-signal { display: flex; align-items: flex-end; gap: 2px; height: 10px; }
+.ph-signal i { width: 3px; background: #fff; }
+.ph-signal i:nth-child(1) { height: 3px; } .ph-signal i:nth-child(2) { height: 5px; } .ph-signal i:nth-child(3) { height: 7px; } .ph-signal i:nth-child(4) { height: 10px; }
+.ph-battery { position: relative; width: 20px; height: 10px; border: 2px solid #fff; border-radius: 2px; box-sizing: border-box; }
+.ph-battery::after { content: ''; position: absolute; right: -4px; top: 2px; width: 2px; height: 2px; background: #fff; }
+.ph-battery i { position: absolute; inset: 1px; right: 5px; background: #7fd18a; }
+
+/* ---- home screen ---- */
+.ph-home {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background: linear-gradient(160deg, #2a5a50 0%, #3f7f6b 45%, #e8960c 100%);
+}
+.ph-apps { display: grid; grid-template-columns: repeat(2, 104px); gap: 28px 32px; margin: 0; padding: 0; list-style: none; }
+.ph-app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 104px;
+  min-height: 104px;
+  padding: 4px;
+  border: 0;
+  background: none;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.ph-app:focus-visible, .ph-home-bar:focus-visible, .ph-ring-btn:focus-visible, .vg-chip:focus-visible, .sn-pad:focus-visible { outline: 3px solid #ffd23f; outline-offset: 2px; }
+.ph-app:active .ph-icon { transform: scale(0.94); }
+.ph-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border: 3px solid #0f151c;
+  border-radius: 16px;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3);
+  image-rendering: pixelated;
+}
+.ph-icon.is-messages { background: #2a8f6a; }
+.ph-icon.is-calls { background: #3a6ea5; }
+.ph-icon.is-vanguard { background: #8b1e2d; }
+.ph-icon.is-snake { background: #4a3a7a; }
+.ph-badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border: 2px solid #0f151c;
+  border-radius: 12px;
+  background: #d64545;
+  color: #fff;
+  font: 14px/20px "Paisa Digits", sans-serif;
+  text-align: center;
+}
+.ph-app-name { font-size: 16px; text-shadow: 0 2px 0 rgba(0, 0, 0, 0.5); }
+
+/* The home bar at the bottom: tap to go to the home screen (or close from home). */
+.ph-home-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  height: 32px;
+  border: 0;
+  background: #0f151c;
+  cursor: pointer;
+}
+.ph-home-bar span { width: 120px; height: 5px; border-radius: 3px; background: #e8eef2; }
+
+.ph-bar.is-calls { background: #3a6ea5; }
+.ph-bar.is-vanguard { background: #8b1e2d; }
+.ph-bar.is-snake { background: #4a3a7a; }
+.ph-section { margin: 0; padding: 12px 12px 4px; font: inherit; font-size: 14px; color: #4f5d6b; }
+
+/* ---- calls ---- */
+.ph-missed { color: #b0362f; }
+.ph-callback { flex: none; padding: 4px 10px; border: 2px solid #3a6ea5; border-radius: 16px; color: #3a6ea5; font-size: 14px; }
+.ph-caller { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 0 12px; }
+.ph-avatar { display: flex; align-items: center; justify-content: center; width: 80px; height: 80px; border-radius: 50%; background: #fff; border: 3px solid #0f151c; }
+.ph-caller-name { font-size: 20px; color: #1d2733; }
+.ph-caller-number { font: 14px "Paisa Digits", sans-serif; color: #4f5d6b; }
+
+/* The ringing screen: full screen over the map or main screen. */
+.ph-ring {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px;
+  background: linear-gradient(180deg, #1d2733, #2a5a50);
+  color: #fff;
+  font: 16px/1.4 "Paisa Digits", "Pixelify Sans", "Noto Sans Devanagari", sans-serif;
+}
+.ph-ring p { margin: 0; }
+.ph-ring-label { opacity: 0.8; }
+.ph-ring-avatar { width: 120px; height: 120px; margin: 12px 0; }
+.ph-ring-name { font-size: 28px; text-align: center; }
+.ph-ring-number { opacity: 0.8; }
+.ph-ring-actions { display: flex; gap: 64px; margin-top: 48px; }
+.ph-ring-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  background: none;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+.ph-ring-btn svg { box-sizing: content-box; padding: 18px; border-radius: 50%; }
+.ph-ring-btn.is-accept svg { background: #2f9a4a; }
+.ph-ring-btn.is-decline svg { background: #c43a3a; }
+
+/* ---- Vanguard app ---- */
+.vg { display: flex; flex-direction: column; gap: 12px; padding: 12px; color: #1d2733; font-family: "Paisa Digits", "Noto Sans Devanagari", sans-serif; }
+.vg p, .vg h2, .vg h3, .vg ul, .vg dl, .vg dd { margin: 0; padding: 0; }
+.vg ul { list-style: none; }
+.vg-head { display: flex; gap: 12px; align-items: center; }
+.vg-logo { flex: none; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 10px; background: #8b1e2d; color: #fff; font: 28px "Pixelify Sans", sans-serif; }
+.vg-title { font-size: 20px; font-weight: 400; }
+.vg-sub { font-size: 14px; color: #4f5d6b; }
+.vg-card { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 12px; background: #fff; box-shadow: 0 1px 0 #c3ccd3; }
+.vg-h { font-size: 17px; font-weight: 400; color: #8b1e2d; }
+.vg-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.vg-stats dt { display: flex; align-items: center; gap: 4px; font-size: 14px; color: #4f5d6b; }
+.vg-stats dd { font-size: 20px; }
+.vg-owe { color: #b0362f; }
+.vg-slider { display: flex; flex-direction: column; gap: 4px; }
+.vg-slider input { width: 100%; min-height: 48px; accent-color: #8b1e2d; }
+.vg-label { font-size: 14px; color: #4f5d6b; }
+.vg-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.vg-chip { min-width: 64px; min-height: 48px; padding: 0 12px; border: 2px solid #8b1e2d; border-radius: 24px; background: #fff; color: #8b1e2d; font: inherit; cursor: pointer; }
+.vg-chip.is-on { background: #8b1e2d; color: #fff; }
+.vg-put-in { color: #4f5d6b; }
+.vg-bars { display: flex; flex-direction: column; gap: 8px; }
+.vg-bar { display: grid; grid-template-columns: 1fr auto; grid-template-areas: 'label value' 'track track'; gap: 2px 8px; }
+.vg-bar-label { grid-area: label; font-size: 14px; }
+.vg-bar-value { grid-area: value; font-size: 16px; }
+.vg-bar-track { grid-area: track; height: 12px; border-radius: 6px; background: #e8eef2; overflow: hidden; }
+.vg-bar-fill { display: block; height: 100%; border-radius: 6px; }
+.vg-bar.is-low .vg-bar-fill { background: #8aa4b8; }
+.vg-bar.is-avg .vg-bar-fill { background: #3a6ea5; }
+.vg-bar.is-high .vg-bar-fill { background: #2a5a50; }
+.vg-assume { display: flex; gap: 6px; align-items: flex-start; padding: 8px; border-radius: 8px; background: #fff3dc; border: 2px solid #e8960c; font-size: 14px; }
+.vg-what { font-size: 14px; color: #4f5d6b; }
+.vg-tips { display: flex; flex-direction: column; gap: 10px; }
+.vg-tips li { padding-left: 10px; border-left: 4px solid #e8960c; }
+.vg-tip-title { font-size: 16px; color: #1d2733; }
+.vg-tips li p:last-child { font-size: 15px; color: #4f5d6b; }
+.vg-safe { font-size: 14px; color: #4f5d6b; }
+.vg-footer { font-size: 13px; color: #6a7684; text-align: center; padding-bottom: 8px; }
+
+/* ---- Snake ---- */
+.sn { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 12px; min-height: 100%; box-sizing: border-box; background: #1d2733; color: #e8eef2; font-family: "Paisa Digits", "Pixelify Sans", "Noto Sans Devanagari", sans-serif; }
+.sn p { margin: 0; }
+.sn-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: min(100%, 330px); }
+.sn-pause { min-height: 40px; padding: 0 10px; border: 2px solid #7fd1c7; border-radius: 8px; background: none; color: #7fd1c7; font: inherit; cursor: pointer; }
+.sn-board {
+  position: relative;
+  display: grid;
+  width: min(100%, 330px);
+  aspect-ratio: 1;
+  background: #9bbc0f;                 /* classic handheld green */
+  border: 4px solid #0f380f;
+  box-sizing: border-box;
+  touch-action: none;                  /* swipes steer the snake instead of scrolling */
+}
+.sn-cell { display: block; min-width: 0; min-height: 0; }
+.sn-cell.is-body { background: #306230; margin: 1px; }
+.sn-cell.is-head { background: #0f380f; }
+.sn-cell.is-food { background: #f2c230; margin: 3px; border-radius: 50%; box-shadow: inset 0 0 0 2px #c98a1b; }
+.sn-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 16px; background: rgba(15, 56, 15, 0.82); text-align: center; }
+.sn-over { font-size: 24px; }
+.sn-best { color: #f2c230; }
+.sn-relax { color: #b8f0c0; font-size: 15px; }
+.sn-start { min-width: 160px; justify-content: center; }
+.sn-pads { display: grid; grid-template-areas: '. up .' 'left . right' '. down .'; grid-template-columns: repeat(3, 64px); grid-template-rows: repeat(3, 56px); gap: 4px; }
+.sn-pad { display: flex; align-items: center; justify-content: center; border: 3px solid #0f151c; border-radius: 12px; background: #3d4a5c; color: #e8eef2; cursor: pointer; touch-action: manipulation; }
+.sn-pad:active:not(:disabled) { background: #4f5d6b; }
+.sn-pad:disabled { opacity: 0.4; cursor: default; }
+.sn-up { grid-area: up; } .sn-down { grid-area: down; } .sn-left { grid-area: left; } .sn-right { grid-area: right; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .ph-ring-avatar { animation: ph-pulse 1.2s ease-in-out infinite; }
+  @keyframes ph-pulse { 50% { box-shadow: 0 0 0 16px rgba(127, 209, 199, 0.25); } }
+}

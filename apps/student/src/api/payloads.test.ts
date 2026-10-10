@@ -1,9 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { ASSESSMENT_BANK, CLASSROOM_BANK } from '../features/classroom/content';
-import { answer, currentQuestion, isFinished, next, result, startQuiz } from '../features/classroom/quiz';
-import type { QuizOptions } from '../features/classroom/quiz';
-import { PILLARS } from '../features/classroom/types';
-import type { QuizQuestion } from '../features/classroom/types';
+import {
+  answerQuestion as answer,
+  currentQuestion,
+  isQuizFinished as isFinished,
+  nextQuestion as next,
+  quizResult as result,
+  startQuiz,
+} from '@paisa/engine';
+import type { QuizOptions } from '@paisa/engine';
+import { PILLARS } from '@paisa/shared';
+import type { QuizQuestion } from '@paisa/shared';
 import { quizSubmittedPayload } from './payloads';
 
 /** Plays a whole quiz, answering every other question right. */

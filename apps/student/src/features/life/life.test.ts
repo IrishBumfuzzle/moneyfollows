@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { SCHOOL, SHOP, WORK } from './config';
 import en from './content/en.json';
 import hi from './content/hi.json';
-import { localLifeApi as api, shopPurchasePayload, startVitals, toLifeEvent } from './life';
+import { localLifeApi as api, startVitals, toLifeEvent } from './life';
 import type { LifeState } from './types';
 
 const base: LifeState = {
@@ -135,13 +135,6 @@ describe('toLifeEvent', () => {
     for (const v of Object.values(buy.payload)) {
       expect(typeof v === 'number' || /^[A-Za-z0-9_.:-]{1,64}$/.test(v)).toBe(true);
     }
-  });
-
-  it('shopPurchasePayload is the same payload, with price as the rupees spent', () => {
-    const out = api.buy(base, 'want');
-    const payload = shopPurchasePayload('want', base, out.delta);
-    expect(payload).toEqual({ month: 1, week: 2, health: 0, sanity: SHOP.want.sanity, kind: 'want', price: SHOP.want.price });
-    expect(payload).toEqual(toLifeEvent({ kind: 'buy', shop: 'want' }, base, out, ctx)!.payload);
   });
 
   it('sends nothing for a blocked action', () => {

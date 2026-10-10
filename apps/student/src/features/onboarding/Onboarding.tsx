@@ -85,7 +85,9 @@ export function Onboarding({ onDone, onLang, initialLang = 'en' }: {
   }, []);
 
   // Move focus to the title on each step, so screen readers read it next.
-  useEffect(() => titleRef.current?.focus(), [step, ready]);
+  useEffect(() => {
+    titleRef.current?.focus();
+  }, [step, ready]);
 
   // A reload after joining must not join again (the nickname would come back taken), so pick up
   // where the player was: after the nickname step, or on it if the avatar wasn't chosen yet.

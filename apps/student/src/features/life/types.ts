@@ -1,8 +1,6 @@
 // Life meters: money, health and sanity (docs/life-meters-api.md).
-// TKey mirrors packages/shared (origin/Backend, CLAUDE.md 5.1); when it lands on main,
-// import it from '@paisa/shared' and keep only the life-specific types here.
-
-export type TKey = `t:${string}`;
+export type { TKey } from '@paisa/shared';
+import type { TKey } from '@paisa/shared';
 
 /** Both meters are whole numbers, clamped to 0–100. */
 export interface Vitals {

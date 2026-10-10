@@ -1,7 +1,7 @@
-// The student app's one door to the backend (CLAUDE.md 6): the api-client, the offline sync
-// queue and the event tracker, each created once. supabase-js is loaded lazily, so it stays out
-// of the first download. With no backend configured (local dev without .env, CI builds) the app
-// still works: joins use an offline stand-in and events wait in the queue.
+// The student app's sync layer (CLAUDE.md 6): the offline sync queue and the event tracker over
+// the one api-client in ./client, each created once. With no backend configured (local dev
+// without .env, CI builds) the app still works: joins use an offline stand-in and events wait
+// in the queue.
 import { create } from 'zustand';
 import { get, set } from 'idb-keyval';
 import {
@@ -14,28 +14,18 @@ import {
   type SyncQueueOptions,
   type TrackerContext,
 } from '@paisa/api-client';
+import { CONTENT_VERSION as PACK_VERSION } from '@paisa/content';
+import { api } from './client';
 
-/** Stamped on every event. The student app's content packs are versioned per feature; this names the build. */
-export const CONTENT_VERSION = 'student-2026-10-11';
-
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL ?? '';
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY ?? '';
+/** Stamped on every event: the content pack the app plays (packages/content/manifest.json). */
+export const CONTENT_VERSION = PACK_VERSION;
 
 /** False when the build has no Supabase URL or anon key: joins are offline stand-ins and nothing is sent. */
-export const backendConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
+export const backendConfigured = api !== null;
 
-let apiPromise: Promise<ApiClient | null> | undefined;
-
-/** The api-client, loaded on first use; null when no backend is configured. Rejects if the chunk can't load (offline). */
+/** The api-client; null when no backend is configured. Async so callers don't care how it is made. */
 export function loadApi(): Promise<ApiClient | null> {
-  if (!backendConfigured) return Promise.resolve(null);
-  apiPromise ??= import('@paisa/api-client/client')
-    .then((m) => m.createApiClient({ url: SUPABASE_URL, anonKey: SUPABASE_ANON_KEY }))
-    .catch((err: unknown) => {
-      apiPromise = undefined; // try again next time (e.g. the chunk failed to load offline)
-      throw err;
-    });
-  return apiPromise;
+  return Promise.resolve(api);
 }
 
 /** The browser's own idea of being online (true when it can't tell, e.g. in node). */

@@ -15,11 +15,15 @@ import { refreshClassStatus, seedClassStatus, useClassStatus } from './classStat
  * opens); it does nothing before a profile exists.
  */
 export function useBackendSync(profile: Profile | null | undefined, setProfile: (p: Profile | null) => void): () => void {
-  useEffect(() => startSync(), []);
+  useEffect(() => {
+    return startSync(); // the stop function is the cleanup
+  }, []);
 
   // Offline cold start: the last known end-line gate comes from the profile until the server answers.
   const savedGate = profile?.endlineOpen;
-  useEffect(() => seedClassStatus(savedGate), [savedGate]);
+  useEffect(() => {
+    seedClassStatus(savedGate);
+  }, [savedGate]);
 
   // The class-status check below reads the newest profile, not the one its effect started with.
   const latest = useRef(profile);

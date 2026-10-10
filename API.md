@@ -1,6 +1,6 @@
 # API.md: Classroom quiz
 
-The School place on the map opens the **Classroom**, a 5-question practice quiz. This file covers:
+The School place on the map opens the **Classroom**, a practice quiz (5 questions by default; the facilitator can change the count and pillars, §5.5). This file covers:
 
 - **§2 Quiz API:** the client API. Built and tested.
 - **§4 Sync:** the event the client sends.
@@ -13,9 +13,10 @@ The School place on the map opens the **Classroom**, a 5-question practice quiz.
 |---|---|
 | ✅ built | Classroom backdrop, Kenney UI kit, `ClassroomScreen`, quiz API, 8 questions (en + hi), unit + browser tests |
 | ✅ built | Map → School → Classroom; the back button and Android back return to the map |
-| ✅ built | Backend support for `quiz_type: 'classroom'` (§5) and `classroom_quiz_summary` on the dashboard |
-| ✅ built | Results go through the sync queue (`App.tsx` → `track('quiz_submitted', …)`), and the baseline and end-line checks run in the same screen |
-| ⬜ todo | Move types and content into `packages/*` (§8) |
+| ✅ built | Backend accepts `quiz_type: 'classroom'` (§5.1); `classroom_quiz_summary` (§5.2) |
+| ✅ built | Result sent as `quiz_submitted` through the sync queue; quiz logic in `packages/engine`, questions in `packages/content`; the start- and end-of-term checks run in the same screen |
+| ✅ built (client) | Classroom setup from the class: question count and pillars (§5.5), with offline fallback |
+| 🟡 proposed | Backend: `classroom` setting on the class, returned by `class_status`, set by the facilitator (§5.5). BE-2 to build |
 
 ---
 
@@ -229,6 +230,39 @@ select a ->> 'questionId' as question_id, a ->> 'pillar' as pillar,
 ### 5.3 Optional: `class_progress` column
 
 `classroom_best_score int | null`: each student's best classroom score, for the progress table.
+
+### 5.5 Classroom setup per class (proposed, client built)
+
+The number of questions per round is no longer hard-coded. The facilitator sets it for the class, optionally limited to some pillars (e.g. only **Stay safe** the week the class covers scams).
+
+**What the app reads:** an additive `classroom` field on `class_status(anon_id, class_id)`:
+
+```jsonc
+// class_status → { endline_open, default_lang, rejoin_code, classroom? }
+"classroom": { "count": 8, "pillars": ["stay_safe", "save_manage"] }   // pillars optional; absent = all four
+```
+
+**What the app does with it** (`apps/student/src/features/classroom/config.ts`):
+
+| Server sends | App plays |
+|---|---|
+| nothing (today's backend), or offline | the last setup it saved for this class, else **5 questions, all pillars** |
+| `count` | that many, clamped to 1..questions available |
+| `count` not a number | 5 |
+| `pillars` | only those pillars; unknown names are dropped; an empty or unusable list means all four; the count is capped to what those pillars have |
+
+- It asks each time School opens and waits at most **1.5 s** (`CONFIG_TIMEOUT_MS`); a slow or missing answer uses the saved setup, so the classroom never hangs offline.
+- A good answer is saved in IndexedDB (`paisa.classroom.config`) for offline play.
+- The round is built by the engine: `startQuiz(bank, { kind: 'classroom', seed, count, pillars })`. The bank has 8 questions today (2 per pillar); add questions in `packages/content/quizzes/classroom.json` to allow longer rounds.
+
+**What BE-2 needs to add (additive):**
+
+1. `classes.classroom_count int not null default 5 check (classroom_count between 1 and 24)` and `classes.classroom_pillars text[]` (null = all), constrained to the four pillar ids.
+2. Return them from `class_status` as `classroom: { count, pillars }` (omit `pillars` when null).
+3. A facilitator-only setter with the same RLS check as `set_endline_open`, e.g. `set_classroom(class_id, count, pillars)`, and `ApiClient.setClassroom(classId, count, pillars?)` plus the field on `ClassStatus` in `packages/shared` (additive; announce it).
+4. The dashboard's class settings get a "Questions per classroom round" number and pillar checkboxes.
+
+`quiz_submitted` already carries the answers, so results need no change; `classroom_quiz_summary` keeps working for any count.
 
 ### 5.4 Not needed
 

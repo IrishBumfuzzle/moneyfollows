@@ -1,22 +1,22 @@
-// Classroom content pack. Lives here until packages/content (origin/Backend) is on main;
-// then move questions.json into packages/content/quizzes/classroom.json and the strings
-// into packages/content/i18n/{en,hi}.json (keys unchanged).
-//
-// assessments.json (baseline + end-line questions) and their strings are COPIES of
-// packages/content/quizzes/{baseline,endline}.json and the matching i18n keys, owned by the
-// content lane. assessments.test.ts fails if they drift; refresh by copying the files over.
-import questions from './questions.json';
-import assessments from './assessments.json';
+// Classroom content: the question bank and its quiz.classroom.* strings come from BE-1's content
+// pack (@paisa/content, quizzes/classroom.json); only the classroom's UI strings live here.
+import { content, i18n } from '@paisa/content';
+import type { Lang, QuizQuestion, TKey } from '@paisa/shared';
 import en from './en.json';
 import hi from './hi.json';
-import type { Lang, QuizQuestion, TKey } from '../types';
 
-export const CLASSROOM_BANK = questions as QuizQuestion[];
-/** Baseline and end-line questions together; startQuiz picks one set with `kind`. */
-export const ASSESSMENT_BANK = assessments as QuizQuestion[];
-export const CONTENT_VERSION = 'classroom-2026-10-10';
+export { CONTENT_VERSION } from '@paisa/content';
 
-export const STRINGS: Partial<Record<Lang, Record<string, string>>> = { en, hi };
+export const CLASSROOM_BANK: QuizQuestion[] = content.quizzes.filter((q: QuizQuestion) => q.quiz === 'classroom');
+/** The start- and end-of-term checks (learning_gain); startQuiz picks one set by `kind`. */
+export const ASSESSMENT_BANK: QuizQuestion[] = content.quizzes.filter((q: QuizQuestion) => q.quiz === 'baseline' || q.quiz === 'endline');
+
+const pack = i18n as Partial<Record<Lang, Record<string, string>>>;
+
+export const STRINGS: Partial<Record<Lang, Record<string, string>>> = {
+  en: { ...pack.en, ...en },
+  hi: { ...pack.hi, ...hi },
+};
 
 /** Resolves a `t:` key (or bare key) with {{var}} substitution; falls back to English, then the key. */
 export function t(lang: Lang, key: TKey | string, vars: Record<string, string | number> = {}): string {

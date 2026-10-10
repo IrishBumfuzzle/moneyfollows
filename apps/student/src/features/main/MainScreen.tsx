@@ -59,7 +59,9 @@ export function MainScreen({ profile, lang, onPlay, onOpenNews }: {
     setPaid(-out.delta.money);
   };
 
-  useEffect(() => trackAppOpen(), []);
+  useEffect(() => {
+    trackAppOpen();
+  }, []);
 
   return (
     <div className="ms-screen" lang={lang}>

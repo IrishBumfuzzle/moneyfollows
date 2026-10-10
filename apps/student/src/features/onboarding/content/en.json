@@ -14,7 +14,6 @@
 
   "onboarding.lang.title": "Choose your language",
   "onboarding.lang.name": "English",
-
   "onboarding.class.title": "Join your class",
   "onboarding.class.label": "Class code",
   "onboarding.class.hint": "Your teacher gives you this code.",
@@ -48,7 +47,6 @@
   "onboarding.avatar.parrot": "Parrot",
   "onboarding.avatar.lion": "Lion",
   "onboarding.avatar.rabbit": "Rabbit",
-
   "onboarding.persona.title": "Choose your character",
   "onboarding.persona.age": "Age {{age}}",
   "onboarding.persona.goal": "Goal: {{goal}}",
@@ -60,9 +58,11 @@
   "persona.ravi.story": "Helps at his father's tiffin stall in the Old City.",
   "persona.ravi.income": "{{amount}} a month, changes with sales",
   "persona.ravi.goal": "A second-hand bike, {{amount}}",
-
   "onboarding.howto.title": "How to play",
   "onboarding.howto.pins": "Play opens the map. Glowing pins show this week's tasks.",
   "onboarding.howto.choose": "Choose, then see what happens. Changed your mind? Rewind and try again.",
-  "onboarding.howto.week": "Sleep at Home to end the week. Read Paisa Times to earn your paper-route wage."
+  "onboarding.howto.week": "Sleep at Home to end the week. Read Paisa Times to earn your paper-route wage.",
+  "onboarding.class.closed": "This class is not taking new students right now. Ask your teacher.",
+  "onboarding.nickname.taken": "Someone in your class already has this nickname. Try another one.",
+  "onboarding.error.busy": "Too many tries. Wait a minute and try again."
 }

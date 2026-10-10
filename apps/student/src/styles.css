@@ -4,6 +4,8 @@
 
 body { margin: 0; background: #38cbab; }
 
+.app-crash { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 24px; background: #2b1b3d; color: #fff3dc; font: 18px "Pixelify Sans", "Noto Sans Devanagari", sans-serif; text-align: center; }
+
 .screen { position: relative; height: 100dvh; overflow: hidden; }
 .world { position: absolute; left: 0; top: 0; transform-origin: 0 0; background: url(/assets/world.png) 0 0 / 100% 100%; image-rendering: pixelated; }
 .loc { position: absolute; background: none; border: 0; padding: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; -webkit-tap-highlight-color: transparent; outline: none; }

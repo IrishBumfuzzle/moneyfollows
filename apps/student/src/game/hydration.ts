@@ -4,10 +4,11 @@ import { useEffect, useState } from 'react';
 import { useAssessments } from '../features/classroom/assessments';
 import { useEvents } from '../features/events/useEvents';
 import { useNews } from '../features/news/useNews';
+import { usePhone } from '../features/phone/usePhone';
 import { useWordWallet } from '../features/news/useWordWallet';
 import { useGame } from './useGame';
 
-const STORES = [useGame, useNews, useWordWallet, useEvents, useAssessments];
+const STORES = [useGame, useNews, useWordWallet, useEvents, usePhone, useAssessments];
 
 export function useStoresHydrated(): boolean {
   const all = () => STORES.every((s) => s.persist.hasHydrated());

@@ -20,10 +20,10 @@ export function PhoneLayer({ lang, name, where, onOpen }: {
   onOpen: (threadId?: string) => void;
 }) {
   const notify = useEvents((s) => s.notify);
-  const unread = useEvents((s) => s.inbox.filter((m) => !m.read).length);
+  const unread = useEvents((s) => s.inbox.filter((m) => !m.read).length + s.calls.filter((c) => c.status === 'missed').length);
   const dismiss = useEvents((s) => s.dismissNotify);
-  // A sudden event has the player's full attention; the banner waits until it is closed.
-  const busy = useEvents((s) => s.sudden !== null);
+  // A sudden event or a ringing call has the player's full attention; the banner waits.
+  const busy = useEvents((s) => s.sudden !== null || s.ringing !== null);
   const tr = (k: string, vars?: Record<string, string | number>) => t(lang, k, { name, ...vars });
 
   useEffect(() => {

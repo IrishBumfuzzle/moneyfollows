@@ -15,6 +15,7 @@ const PAL: Record<string, string> = {
   g: '#3d4a5c', // dark grey
   n: '#7fd1c7', // screen
   t: '#3f7f6b', // teal
+  s: '#b97a56', // skin
 };
 
 const ICONS: Record<IconId, readonly string[]> = {

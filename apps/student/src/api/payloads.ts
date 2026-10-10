@@ -1,6 +1,6 @@
 // Event payloads built from game results, kept apart from the screens so they can be tested
 // against what push_events keeps (supabase migrations; CLAUDE.md 5.5).
-import type { QuizResult } from '../features/classroom/quiz';
+import type { QuizResult } from '@paisa/engine';
 
 /**
  * `quiz_submitted` for a finished quiz of any kind (classroom, baseline, endline). The server

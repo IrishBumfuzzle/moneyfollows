@@ -22,6 +22,18 @@ async function page(w, h, url = BASE) {
   const errors = [];
   p.on('pageerror', (e) => errors.push(e.message));
   p.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+  // Onboarding gates the app: save a profile first, then load the page under test.
+  await p.goto(BASE);
+  await p.evaluate(() => new Promise((res, rej) => {
+    const r = indexedDB.open('keyval-store');
+    r.onupgradeneeded = () => r.result.createObjectStore('keyval');
+    r.onsuccess = () => {
+      const tx = r.result.transaction('keyval', 'readwrite');
+      tx.objectStore('keyval').put({ version: 1, nickname: 'Tester', avatar: 'tiger', persona: 'sana', lang: 'en', classCode: 'AB12CD', classId: 'c', anonId: 'a' }, 'paisa.profile');
+      tx.oncomplete = res;
+      tx.onerror = rej;
+    };
+  }));
   await p.goto(url);
   await p.evaluate(() => document.fonts.ready);
   return { p, errors, ctx };
@@ -82,17 +94,18 @@ async function playThrough(p, tag, pickWrongFirst) {
 // 1. Map -> School -> classroom, play, hardware back returns to the map.
 {
   const { p, errors, ctx } = await page(360, 740);
+  await p.locator('.ms-play').click(); // main screen -> map
   await p.screenshot({ path: `${OUT}shot-map.png` });
   await p.getByRole('button', { name: 'School' }).click();
   await p.locator('.cr-stage').waitFor();
   check(true, 'school opens classroom');
   await p.screenshot({ path: `${OUT}shot-en-intro.png` });
   const lay = await layout(p);
-  check(lay.stage.w === 360 && lay.stage.x === 0, `360x740 phone: stage at 1x full width (${JSON.stringify(lay.stage)})`);
+  check(lay.stage.w > 360 && 304 * (lay.stage.w / 360) <= 360.5, `360x740 phone: room fills the width (${JSON.stringify(lay.stage)})`);
   const logs = [];
   p.on('console', (m) => logs.push(m.text()));
   await playThrough(p, 'en', true);
-  check(logs.some((l) => l.includes('quiz finished')), 'onFinish fired with the result');
+  check(logs.some((l) => l.includes('quiz_submitted')), 'the result is tracked as quiz_submitted');
   await p.getByRole('button', { name: 'Play again' }).click();
   check(await p.locator('.cr-options .k-btn').count() > 0, 'play again starts a new round');
   await p.goBack();
@@ -127,11 +140,15 @@ async function playThrough(p, tag, pickWrongFirst) {
 }
 
 // 3. Letterboxing on other screens.
-for (const [w, h, expect] of [[1280, 800, 'black bars, 1x'], [1440, 1400, 'black bars, 2x'], [360, 560, 'short phone fits']]) {
+// The room (x 28-332 of the 360 px backdrop) must fit; the black side bars may be cropped. Phones
+// and laptops get a fractional zoom so the room fills the screen; big screens keep crisp whole zoom.
+for (const [w, h, expect, min] of [[1280, 800, 'fills the height', 1.2], [1440, 1400, 'black bars, 2x', 2], [360, 560, 'short phone fits', 0.85], [390, 844, 'tall phone, bigger', 1.25]]) {
   const { p, ctx } = await page(w, h, `${BASE}?screen=classroom&seed=3`);
+  await p.locator('.cr-stage').waitFor();
   const lay = await layout(p);
   const s = lay.stage.w / 360;
-  const fits = lay.stage.w <= w + 0.5 && lay.stage.h <= h + 0.5;
+  const room = 304 * s;
+  const fits = room <= w + 0.5 && lay.stage.h <= h + 0.5 && s >= min;
   const centred = Math.abs(lay.stage.x - (w - lay.stage.w) / 2) < 1;
   const bg = await p.evaluate(() => getComputedStyle(document.querySelector('.cr-screen')).backgroundColor);
   check(fits && centred && bg === 'rgb(0, 0, 0)', `${w}x${h} ${expect}: scale ${s.toFixed(3)}, centred, black bg`);

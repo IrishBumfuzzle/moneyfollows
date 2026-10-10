@@ -1,38 +1,27 @@
-// The classroom's copy of the baseline / end-line questions and strings must match
-// packages/content (BE-1's source of truth); this fails the moment either side is edited alone.
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
+// The start- and end-of-term checks come straight from packages/content (quizzes/baseline.json
+// and endline.json); these tests pin what the classroom relies on and what the server accepts.
 import { describe, expect, it } from 'vitest';
+import {
+  answerQuestion as answer,
+  isQuizFinished as isFinished,
+  nextQuestion as next,
+  quizResult as result,
+  quizSubmittedEvent as toSubmittedEvent,
+  startQuiz,
+} from '@paisa/engine';
+import type { QuizSession } from '@paisa/engine';
+import { PILLARS } from '@paisa/shared';
+import type { QuizType as QuizKind } from '@paisa/shared';
 import { ASSESSMENT_BANK, STRINGS } from './content';
-import { answer, isFinished, next, result, startQuiz, toSubmittedEvent } from './quiz';
-import type { QuizSession } from './quiz';
-import { PILLARS } from './types';
-import type { QuizKind, QuizQuestion } from './types';
 
-const fromRepo = <T>(path: string): T =>
-  JSON.parse(readFileSync(fileURLToPath(new URL(`../../../../../${path}`, import.meta.url)), 'utf8')) as T;
-
-const source = [...fromRepo<QuizQuestion[]>('packages/content/quizzes/baseline.json'), ...fromRepo<QuizQuestion[]>('packages/content/quizzes/endline.json')];
-const keysOf = (q: QuizQuestion) => [q.text, ...q.options, q.explanation].map((k) => k.slice(2));
-const usedKeys = source.flatMap(keysOf);
-
-describe('assessment content stays in step with packages/content', () => {
-  it('has the same questions as quizzes/baseline.json and quizzes/endline.json', () => {
-    expect(ASSESSMENT_BANK).toEqual(source);
-  });
-
-  it.each(['en', 'hi'] as const)('has the same %s strings for every key those questions use', (lang) => {
-    const upstream = fromRepo<Record<string, string>>(`packages/content/i18n/${lang}.json`);
-    for (const k of usedKeys) {
-      expect(STRINGS[lang]![k], `${lang} ${k}`).toBe(upstream[k]);
+describe('assessment strings', () => {
+  it.each(['en', 'hi'] as const)('every check question and option has %s text', (lang) => {
+    for (const q of ASSESSMENT_BANK) {
+      for (const k of [q.text, ...q.options, q.explanation]) expect(STRINGS[lang]![k.slice(2)], `${lang} ${k}`).toBeTruthy();
     }
   });
-
-  it.each(['en', 'hi'] as const)('carries no stray %s quiz strings beyond the questions it holds', (lang) => {
-    const own = Object.keys(STRINGS[lang]!).filter((k) => !k.startsWith('classroom.') && !k.startsWith('quiz.classroom.'));
-    expect(own.sort()).toEqual([...usedKeys].sort());
-  });
 });
+
 
 describe('assessment quizzes', () => {
   const play = (kind: 'baseline' | 'endline', pick: (s: QuizSession) => number): QuizSession => {

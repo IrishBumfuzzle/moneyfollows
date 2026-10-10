@@ -12,7 +12,9 @@ interface Props {
 export function CopyButton({ text, label, doneLabel, failLabel }: Props) {
   const [state, setState] = useState<'idle' | 'done' | 'failed'>('idle');
   const timer = useRef<number>();
-  useEffect(() => () => window.clearTimeout(timer.current), []);
+  useEffect(() => {
+    return () => window.clearTimeout(timer.current);
+  }, []);
 
   async function copy() {
     setState((await copyText(text)) ? 'done' : 'failed');
