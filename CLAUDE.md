@@ -448,6 +448,7 @@ Append decisions here as `YYYY-MM-DD HH:MM — decision — who`.
 - 2026-10-11 — Lanes reassigned: UI-2 owns onboarding, the main screen, Paisa Times and the dashboard; UI-1 owns the map, places, decisions, Home, the classroom and the life meters; `App.tsx` and `src/game/**` are shared — team.
 - 2026-10-11 — The Room hub is replaced by a main screen: character on a couch, a Play button to the map, a news rack to Paisa Times — team.
 - 2026-10-11 — Translations stay per feature (`content/en.json` + `hi.json` + a small `t()`), not react-i18next: the pattern is already used by three features and keeps the bundle small. Shared game state is one Zustand store (`src/game/useGame.ts`) saved to IndexedDB — team.
+- 2026-10-11 02:40 — Frontends wired to the backend. The student app goes only through `apps/student/src/api/` (join/rejoin, tracker + IndexedDB sync queue, `class_status`, offline banner). The staff dashboard is built on `@paisa/api-client`. The start-of-term check is offered in School; the end-of-term check only while the teacher has it open. `class_wellbeing` is not shown on the dashboard (per-child spending; DPDP open question) — BE-2.
 
 Open questions:
 - Which license does Section 11 of the brief require for the `LICENSE` file?

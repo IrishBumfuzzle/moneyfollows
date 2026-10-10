@@ -15,5 +15,20 @@
   "classroom.pillar.save_manage": "बचत और प्रबंधन",
   "classroom.pillar.understand_investing": "निवेश को समझो",
   "classroom.pillar.stay_safe": "सुरक्षित रहो",
+
+  "classroom.assess.baseline.intro": "6 सवाल, कोई टाइमर नहीं। इससे तुम्हें और तुम्हारे टीचर को पता चलेगा कि तुम क्या सीख रहे हो।",
+  "classroom.assess.endline.intro": "6 सवाल, कोई टाइमर नहीं। इससे पता चलेगा कि शुरुआत से अब तक तुमने कितना सीखा।",
+  "classroom.assess.baseline.start": "टर्म की शुरुआत की जाँच (6 सवाल)",
+  "classroom.assess.endline.start": "टर्म के अंत की जाँच (6 सवाल)",
+  "classroom.assess.practice": "प्रैक्टिस क्विज़ ({{count}} सवाल)",
+  "classroom.assess.baseline.title": "शुरुआती जाँच पूरी",
+  "classroom.assess.endline.title": "आख़िरी जाँच पूरी",
+  "classroom.assess.note.baseline": "यह तुम्हारी शुरुआत है। सब कहीं से तो शुरू करते हैं, आगे तुम और बढ़ोगे।",
+  "classroom.assess.note.endline.up": "शुरुआत में {{before}}% आए थे, इस बार उससे ज़्यादा आए। यही असली सीखना है।",
+  "classroom.assess.note.endline.same": "शुरुआत जितने ही आए ({{before}}%)। क्लासरूम में प्रैक्टिस करो, आगे बढ़ोगे।",
+  "classroom.assess.note.endline.down": "इस बार कुछ सवाल मुश्किल थे (शुरुआत में {{before}}%)। क्लासरूम में प्रैक्टिस से मदद मिलेगी।",
+  "classroom.assess.note.endline.none": "पूरा करने के लिए शाबाश! क्लासरूम में प्रैक्टिस करते रहो, हर कोशिश से फ़ायदा होता है।",
+  "classroom.assess.practice_next": "प्रैक्टिस क्विज़ खेलो",
+
   "classroom.loading": "…"
 }

@@ -3,6 +3,7 @@
   "main.week": "Month {{month}} · Week {{week}}",
   "main.money": "Money",
   "main.greeting": "Hi, {{nickname}}!",
+  "main.rejoin": "Rejoin code: {{code}}",
   "main.persona": "You are playing as {{name}}.",
   "main.news": "Paisa Times",
   "main.news.open": "Open Paisa Times",

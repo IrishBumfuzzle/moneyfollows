@@ -8,6 +8,8 @@ import hi from './hi.json';
 export { CONTENT_VERSION } from '@paisa/content';
 
 export const CLASSROOM_BANK: QuizQuestion[] = content.quizzes.filter((q: QuizQuestion) => q.quiz === 'classroom');
+/** The start- and end-of-term checks (learning_gain); startQuiz picks one set by `kind`. */
+export const ASSESSMENT_BANK: QuizQuestion[] = content.quizzes.filter((q: QuizQuestion) => q.quiz === 'baseline' || q.quiz === 'endline');
 
 const pack = i18n as Partial<Record<Lang, Record<string, string>>>;
 

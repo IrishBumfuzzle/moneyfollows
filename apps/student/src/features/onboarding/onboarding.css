@@ -33,6 +33,7 @@
 }
 .ob-back { flex: none; width: 48px; height: 48px; color: var(--ob-ink); }
 .k-round.ob-back { background-size: 40px 40px; }
+.ob-back:disabled { opacity: 0.4; cursor: default; } /* a join is in flight */
 .ob-dots { display: flex; gap: 8px; }
 
 .ob-body {
@@ -56,13 +57,14 @@
 .ob-list { display: flex; flex-direction: column; gap: 16px; }
 
 /* Parchment fallback under the 9-slice art, so dark text stays readable while the PNGs load. */
-.k-btn.ob-choice, .ob-card, .ob-error { background: var(--ob-paper) padding-box; }
+.k-btn.ob-choice, .k-btn.ob-chip, .ob-card, .ob-error, .ob-rejoin { background: var(--ob-paper) padding-box; }
 
 /* Choice buttons: language, avatar, persona. Chosen = thick outline + tick, never colour alone. */
 .k-btn.ob-choice { position: relative; width: 100%; font-size: 18px; }
 .k-btn.ob-choice.is-selected { outline: 4px solid var(--ob-accent); outline-offset: 2px; }
 .ob-check { flex: none; margin-left: auto; color: var(--ob-ink); }
 .k-btn.ob-lang { min-height: 72px; padding-left: 16px; font-size: 24px; }
+.k-btn.ob-switch { min-height: 56px; padding: 4px 8px; font-size: 16px; }
 
 .ob-field { display: flex; flex-direction: column; gap: 8px; }
 .ob-input {
@@ -78,6 +80,9 @@
   font-size: 22px;
 }
 .ob-input::placeholder { color: var(--ob-placeholder); }
+/* Locked after joining: dashed border (not just colour) says it can't be edited; a note says why. */
+.ob-input[readonly] { border-style: dashed; border-color: var(--ob-muted); background: transparent; color: var(--ob-text); }
+.ob-input[readonly]:focus { outline: none; }
 .ob-input:focus { outline: 3px solid var(--ob-accent); outline-offset: 2px; }
 .ob-code { font-size: 28px; letter-spacing: 0.15em; text-align: center; text-transform: uppercase; }
 .ob-hint { color: var(--ob-muted); font-size: 16px; }
@@ -96,6 +101,14 @@
 .ob-card { display: flex; align-items: center; gap: 12px; padding: 4px; }
 
 .ob-error { display: block; color: var(--ob-error); font-size: 16px; padding: 4px; }
+
+/* The server's free-nickname suggestions: one tap fills the nickname field. */
+.ob-chips { display: flex; flex-wrap: wrap; gap: 12px; }
+.k-btn.ob-chip { min-height: 48px; justify-content: center; padding: 2px 12px; font-size: 18px; }
+
+/* The rejoin code card on the last step: big, spaced, written-down-able. */
+.ob-rejoin { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 4px; text-align: center; font-size: 16px; }
+.ob-rejoin-code { font-size: 36px; font-weight: 700; letter-spacing: 0.15em; line-height: 1.3; }
 
 .ob-foot {
   width: 100%;

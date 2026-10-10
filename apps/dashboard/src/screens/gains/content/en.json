@@ -1,0 +1,54 @@
+{
+  "loading": "Loading…",
+  "retry": "Try again",
+  "demo": "Demo data",
+
+  "pillar.plan_budget": "Plan & budget",
+  "pillar.save_manage": "Save & manage",
+  "pillar.understand_investing": "Understand investing",
+  "pillar.stay_safe": "Stay financially safe",
+
+  "students.one": "{{n}} student",
+  "students.other": "{{n}} students",
+
+  "chart.title": "Start check vs end check",
+  "chart.crash": "The chart didn't load. Reload the page, or use Show as table to read the numbers.",
+  "chart.reload": "Reload page",
+  "chart.error": "We couldn't load the learning gains. Check the connection and try again.",
+  "chart.baseline": "Baseline (start check)",
+  "chart.endline": "End-line (end check)",
+  "chart.axis": "Correct answers (%)",
+  "chart.alt": "Bar chart of baseline and end-line scores for each skill area. Use Show as table to read the numbers.",
+  "chart.matched": "Only students who took both the start and end checks are counted.",
+  "chart.n": "Students counted in each skill area",
+
+  "summary.up": "Average score rose from {{from}}% to {{to}}% across {{students}} who took both checks.",
+  "summary.down": "Average score fell from {{from}}% to {{to}}% across {{students}} who took both checks.",
+  "summary.same": "Average score stayed at {{to}}% across {{students}} who took both checks.",
+
+  "table.show": "Show as table",
+  "table.hide": "Hide table",
+  "table.caption": "Baseline and end-line scores by skill area",
+  "table.pillar": "Skill area",
+  "table.baseline": "Baseline",
+  "table.endline": "End-line",
+  "table.n": "Students",
+
+  "empty.title": "No learning gains to show yet",
+  "empty.body": "Students take the start check in School. The end-line check opens when you turn it on in Class settings. Scores show up here once students have taken both.",
+  "empty.closed": "The end-line check is closed right now, so students can't take it yet. Turn it on in Class settings.",
+
+  "struggles.title": "Where the class is struggling",
+  "struggles.intro": "These are practice rounds that students play in School. They can repeat them, so every answer counts. The questions with the fewest right answers come first.",
+  "struggles.error": "We couldn't load the practice quiz results. Check the connection and try again.",
+  "struggles.empty": "No practice quiz answers yet. Students play these in School.",
+  "struggles.caption": "Practice quiz questions, lowest percent correct first",
+  "struggles.question": "Question",
+  "struggles.pillar": "Skill area",
+  "struggles.correct": "Correct (%)",
+  "struggles.students": "Students",
+  "struggles.attempts": "Attempts",
+  "struggles.wrong": "Most-picked wrong answer",
+  "struggles.option": "Option {{n}}",
+  "struggles.no_wrong": "No wrong answers"
+}

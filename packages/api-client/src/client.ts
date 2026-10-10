@@ -8,7 +8,7 @@ import {
   type LearningGainRow,
   type SyncEvent,
 } from '@paisa/shared';
-import { ApiError, toApiError } from './errors';
+import { ApiError, toApiError, toAuthError } from './errors';
 import type { PushEventsResponse } from './sync-queue';
 import type { ClassroomQuizSummaryRow, ClassWellbeingRow } from '@paisa/shared';
 
@@ -119,16 +119,45 @@ export function createApiClient(options: ApiClientOptions) {
      */
     async signInWithEmail(email: string): Promise<void> {
       const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
-      if (error) throw toApiError(error);
+      if (error) throw toAuthError(error);
     },
 
     async verifyEmailCode(email: string, token: string): Promise<void> {
       const { error } = await sb.auth.verifyOtp({ email, token, type: 'email' });
-      if (error) throw toApiError(error);
+      if (error) throw toAuthError(error);
+    },
+
+    /**
+     * Password sign-in, for the local demo facilitator only (supabase/seed.sql). Hosted staff
+     * accounts have no password; they use the email code.
+     */
+    async signInWithPassword(email: string, password: string): Promise<void> {
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) throw toAuthError(error);
     },
 
     async signOut(): Promise<void> {
       await sb.auth.signOut();
+    },
+
+    /** The signed-in staff email, or null. Reads the saved session; no network call. */
+    async currentEmail(): Promise<string | null> {
+      const { data } = await sb.auth.getSession();
+      return data.session?.user.email ?? null;
+    },
+
+    /** Calls `cb` with the signed-in email (or null) on every sign-in, sign-out and refresh. Returns an unsubscribe. */
+    onAuthChange(cb: (email: string | null) => void): () => void {
+      const { data } = sb.auth.onAuthStateChange((_event, session) => cb(session?.user.email ?? null));
+      return () => data.subscription.unsubscribe();
+    },
+
+    /**
+     * Whether the signed-in user is on the staff allowlist. A signed-in user who is not sees no
+     * classes and cannot create one, so the dashboard shows "ask an admin" instead of an empty list.
+     */
+    isStaff(): Promise<boolean> {
+      return rpc<boolean>('is_staff', {});
     },
 
     async listClasses(): Promise<ClassRow[]> {

@@ -35,6 +35,8 @@
 .cr-banner { position: absolute; left: 50%; top: 6px; transform: translateX(-50%); }
 
 .cr-pips { position: absolute; right: 40px; top: 14px; display: flex; gap: 4px; }
+/* A check shows "answered" without right or wrong: a grey square, not the green or red ones. */
+.cr-pips .k-pip.is-done { background-image: url(/assets/ui/pip-right.png); filter: grayscale(1); }
 
 .cr-board {
   position: absolute;
@@ -72,6 +74,12 @@
 .k-btn.is-correct .cr-letter, .k-btn.is-wrong .cr-letter { color: inherit; }
 .cr-wide { width: 100%; }
 .cr-center { justify-content: center; }
+
+/* A check's answer: blue like the primary button, no verdict. The label already says which. */
+.k-btn.is-picked { border-image-source: url(/assets/ui/button-primary.png); color: #fff; text-shadow: 0 2px #1c3d6e; }
+.k-btn.is-picked .cr-letter { color: inherit; }
+.cr-next { margin-top: auto; }
+.cr-note { padding: 2px 4px; }
 
 .cr-feedback {
   position: absolute;

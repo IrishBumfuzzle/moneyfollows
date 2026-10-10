@@ -186,7 +186,7 @@ Each successful action becomes one `SyncEvent` (CLAUDE.md §5.5), queued offline
    when 'school_attended' then array['health', 'sanity', 'month', 'week']
    ```
 
-> ⚠️ **Today's backend (`origin/Backend`) silently skips these events.** `event_payload_keys` returns null for an unknown type, so `push_events` drops the event without counting it. Nothing breaks, but nothing is stored either. Hook the client up to the queue only after step 2 ships.
+Both steps shipped (migration `20261011090000_life_events_persona.sql`). The store sends `shop_purchase` from `App.tsx`. `work_shift` and `school_attended` will follow once a UI calls `lifeApi.work` or `lifeApi.attendSchool`.
 
 **Not needed:**
 

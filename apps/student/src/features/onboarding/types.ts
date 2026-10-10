@@ -12,5 +12,6 @@ export interface Profile {
   classCode: string;
   classId: string;             // from join_class
   anonId: string;              // from join_class
-  rejoinCode?: string;         // from join_class: lets the student rejoin on a new phone (show on Me)
+  rejoinCode?: string;         // from join_class / class_status: gets the student back on a new phone
+  endlineOpen?: boolean;       // last known class_status.endline_open, so an offline cold start keeps the gate
 }

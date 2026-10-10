@@ -1,0 +1,56 @@
+/* Offline / sync banner: a slim parchment bar over the bottom of every screen. It never takes
+   taps, except the Try now button, so it can't block a control under it. */
+
+.sy-root {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;                       /* above sheets (20-45), so the status is never hidden */
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 0 8px calc(4px + env(safe-area-inset-bottom, 0px));
+  font: 16px/1.3 "Noto Sans Devanagari", sans-serif;
+  pointer-events: none;
+}
+.sy-root:lang(hi) { line-height: 1.45; }
+/* Onboarding keeps its main button at the bottom and Back at the top left, so there the chip
+   sits top right, over the progress dots. */
+.sy-root.is-top {
+  top: 0;
+  bottom: auto;
+  padding: calc(4px + env(safe-area-inset-top, 0px)) 8px 0;
+}
+/* Right-aligned and clear of the Back arrow (16 px gutter + 48 px button), however long the text. */
+.sy-root.is-top .sy-bar { margin-right: 0; margin-left: auto; max-width: calc(100% - 72px); }
+
+.sy-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 480px;
+  padding: 4px 10px;
+  border: 2px solid #4a2b17;
+  background: #fff3dc;
+  color: #4a2b17;
+  box-shadow: 0 2px 0 #4a2b17;
+}
+.sy-bar.is-compact { width: auto; max-width: calc(100% - 16px); margin-right: auto; }
+.sy-bar.is-offline { border-left: 8px solid #e8960c; }
+.sy-bar.is-waiting { border-left: 8px solid #b0362f; }
+.sy-bar.is-synced { border-left: 8px solid #2f7a2a; background: #eaf5e3; }
+.sy-icon { flex: none; }
+.sy-text { min-width: 0; flex: 1; }
+.sy-bar.is-compact .sy-text { flex: none; }
+
+/* The shared Kenney button (min-height 48 px); the one part of the bar that takes taps. */
+.sy-retry { flex: none; justify-content: center; pointer-events: auto; }
+.sy-retry:disabled { opacity: 0.7; }
+
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-saver]) .sy-bar { animation: sy-rise 160ms ease-out; }
+  @keyframes sy-rise { from { transform: translateY(12px); opacity: 0; } }
+}

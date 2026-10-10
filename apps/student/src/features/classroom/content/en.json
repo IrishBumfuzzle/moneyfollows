@@ -15,5 +15,20 @@
   "classroom.pillar.save_manage": "Save & manage",
   "classroom.pillar.understand_investing": "Understand investing",
   "classroom.pillar.stay_safe": "Stay safe",
+
+  "classroom.assess.baseline.intro": "6 questions, no timer. This helps you and your teacher see what you learn.",
+  "classroom.assess.endline.intro": "6 questions, no timer. This shows how much you have learned since the start.",
+  "classroom.assess.baseline.start": "Start-of-term check (6 questions)",
+  "classroom.assess.endline.start": "End-of-term check (6 questions)",
+  "classroom.assess.practice": "Practice quiz ({{count}} questions)",
+  "classroom.assess.baseline.title": "Start-of-term check done",
+  "classroom.assess.endline.title": "End-of-term check done",
+  "classroom.assess.note.baseline": "This is your starting point. Everyone starts somewhere, and you will grow from here.",
+  "classroom.assess.note.endline.up": "You scored higher than at the start ({{before}}%). That is real learning.",
+  "classroom.assess.note.endline.same": "Same as at the start ({{before}}%). Practice in the Classroom to move up.",
+  "classroom.assess.note.endline.down": "Some questions were tricky this time (start: {{before}}%). Practice in the Classroom helps.",
+  "classroom.assess.note.endline.none": "Well done for finishing. Keep practicing in the Classroom, every try helps.",
+  "classroom.assess.practice_next": "Try a practice quiz",
+
   "classroom.loading": "…"
 }

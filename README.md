@@ -15,9 +15,9 @@ pnpm dev:student            # student PWA (UI-1)
 pnpm dev:dashboard          # staff dashboard (UI-2)
 ```
 
-Put the `API URL` and `anon key` that `supabase start` prints into `.env` as `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+Put the `API URL` and `anon key` that `supabase start` prints into `.env` as `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. Both apps read the root `.env`. The student app runs on http://localhost:5173. The dashboard runs on http://127.0.0.1:5174, which is the local auth site URL, so keep that port. Without the two `VITE_SUPABASE_*` values, the student app still runs: joining uses an offline stand-in and events stay queued on the device. The dashboard shows a setup message instead.
 
-**Demo:** class code `HYD234`. Facilitator sign-in is `demo.facilitator@example.org`, password `paisa-demo-2026` (local only), or use an email code. Inbucket at http://127.0.0.1:54324 shows the emails. The seeded students and quiz results are labelled demo data. `pnpm seed` loads only into a local or CI database unless you pass `--allow-remote-demo`.
+**Demo:** class code `HYD234`. Facilitator sign-in is `demo.facilitator@example.org`, password `paisa-demo-2026` (local only; the dashboard's dev build has a "Use the local demo facilitator" button), or use an email code. Inbucket at http://127.0.0.1:54324 shows the emails. The seeded students and quiz results are labelled demo data. `pnpm seed` loads only into a local or CI database unless you pass `--allow-remote-demo`.
 
 ### Hosted project
 
@@ -33,7 +33,9 @@ One Vercel project per app, both from this repository:
 | Project   | Root Directory   | Environment variables                                                        |
 | --------- | ---------------- | ---------------------------------------------------------------------------- |
 | student   | `apps/student`   | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_SHOW_DRAFT_LANGS=false` |
-| dashboard | `apps/dashboard` | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`                                |
+| dashboard | `apps/dashboard` | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_STUDENT_URL`            |
+
+`VITE_STUDENT_URL` is the deployed student app (https, no trailing slash). The join QR code and link open `<VITE_STUDENT_URL>/?code=<CLASS_CODE>`, and onboarding pre-fills the code.
 
 Each app's `vercel.json` sets the rest: install at the workspace root with the frozen lockfile, `pnpm run build`, output `dist`, single-page rewrites, no caching of the service worker and manifest, and security headers. Keep "Include files outside the Root Directory" on (the default), because the apps import `packages/*`.
 
@@ -92,7 +94,7 @@ The new owner must also be in `public.staff`.
 | `scripts`                        | BE-1            | `lint-content.ts`, `seed.ts`                                                                                        |
 | `packages/api-client`            | BE-2            | Typed client for the Supabase functions, staff auth, and an offline sync queue                                      |
 | `supabase`                       | BE-2            | Migrations (tables, RLS, functions), seed, SQL tests                                                                |
-| `apps/student`, `apps/dashboard` | UI-1, UI-2      | Student app scaffold (map, classroom quiz); the dashboard has only `vercel.json` so far                             |
+| `apps/student`, `apps/dashboard` | UI-1, UI-2      | Student PWA (talks to the backend only through `apps/student/src/api/`); staff dashboard                          |
 
 ## Backend API
 
@@ -130,7 +132,7 @@ Errors reach the apps as `ApiError` from `@paisa/api-client`, with a stable `cod
 | `network`                | client                                                                                                  | –    | Offline or the request failed; retried later                                                                                                                        |
 | `unknown`                | any                                                                                                     | any  | Anything else, with the server message                                                                                                                              |
 
-`timeout`, `network`, 5xx, 408 and 429 are retryable (`isRetryableError`). The sync queue retries those and moves batches with any other error to a dead-letter store (`deadLetters()`, `requeueDeadLetters()`, `clearDeadLetters()`), so no event is dropped silently. When the server skips only some events of a batch, only the ones in `rejected` are dead-lettered (`reason: 'skipped'`).
+`timeout`, `network`, 5xx, 408 and 429 are retryable (`isRetryableError`), and so is an `unknown` 4xx other than 400, 413 and 422: a filtering proxy, an expired key or a function missing after a migration is not a problem with the events. The sync queue retries those and moves batches with any other error to a dead-letter store (`deadLetters()`, `requeueDeadLetters()`, `clearDeadLetters()`), so no event is dropped silently. When the server skips only some events of a batch, only the ones in `rejected` are dead-lettered (`reason: 'skipped'`).
 
 Event types `push_events` accepts, with the payload keys it keeps (any other key is dropped; values must be numbers, booleans or short id-like strings):
 
@@ -159,31 +161,32 @@ Event types `push_events` accepts, with the payload keys it keeps (any other key
 
 For the life events, `health` and `sanity` are the clamped changes (they can be negative), and `price` and `wage` are whole rupees.
 
-### Wiring onboarding (UI-1)
+### Student app and the backend
 
-Replace the stub in `apps/student/src/api/joinClass.ts` with `api.joinClass(classCode, nickname, { lang })`, passing the language picked earlier in onboarding. The stub only knows `class_not_found` and `nickname_rejected`; map each real `ApiError.code` to its own `t:` key:
+The student app reaches the backend only through `apps/student/src/api/`:
 
-| `code`                                                           | Show                                                                                                                                                                |
-| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `class_not_found`                                                | "We couldn't find that class code. Check it with your teacher."                                                                                                     |
-| `nickname_taken`                                                 | "Someone in your class already has that name." Offer `err.suggestions` as tappable chips; with none (empty or `undefined`), ask for another name                    |
-| `nickname_blocked`, `nickname_invalid`, `nickname_personal_info` | What the stub calls `nickname_rejected`. Ideally one message each: "Please choose a kinder name", "2–20 letters or numbers", "Don't use your phone number or email" |
-| `class_full`                                                     | "This class is full. Ask your teacher."                                                                                                                             |
-| `class_closed`                                                   | "This class isn't taking new students right now. Ask your teacher."                                                                                                 |
-| `join_rate_limited`                                              | "Lots of people are joining. Wait a minute and try again."                                                                                                          |
-| `rejoin_failed`                                                  | "That didn't match. Check your class code, name and rejoin code, or ask your teacher for your code."                                                                |
-| `network`, `timeout`                                             | "You're offline. Try again when you're connected."                                                                                                                  |
-| `unknown`                                                        | A generic "Something went wrong, try again"                                                                                                                         |
+- **`joinClass.ts`**:
+  - `joinClass(code, nickname, lang)` and `rejoinClass(code, nickname, rejoinCode)`.
+  - `ApiError` codes are mapped to `JoinError`, and onboarding shows one message per code (`features/onboarding/joinErrors.ts`).
+  - `nickname_taken` offers the server's suggestions as chips.
+- **`track.ts` and `backend.ts`**:
+  - `track(type, payload)` saves the event in IndexedDB first. It is sent in batches a few seconds later, on reconnect, when the app goes to the background, and every minute.
+  - Events from before the join (onboarding's `language_changed`) are held, then sent after `identify()`.
+  - supabase-js loads lazily, so it stays out of the first download.
+- **`classStatus.ts`**:
+  - On app open and on reconnect it refreshes the rejoin code and the end-line gate.
+  - If the server no longer knows the phone's ids (`class_not_found`), the profile is cleared and onboarding shows again. Game progress is kept.
+- **`features/sync/OfflineBanner.tsx`** shows offline, "waiting to send" and "all synced" as a banner, never as a screen.
 
-**Rejoin.** Save `rejoin_code` from `join_class` with the profile and show it on the Me screen ("Your rejoin code: ABC234. Write it down; you need it on a new phone"). Refresh it from `classStatus` on app open, because a teacher may reset it. In onboarding, offer "I've played before" next to joining: it asks for the class code, nickname and rejoin code and calls `api.rejoinClass(...)`, then continues like a join with the returned ids. A student who lost the code asks the teacher, who reads it from the dashboard (`listStudents`).
-
-**End-line quiz.** Offer it only when `classStatus(...).endline_open` (or `join_class`'s `endline_open`) is `true`.
+Rejoin: the rejoin code shows on the last onboarding step and on the main screen. "Played before on another phone?" on the class-code step asks for the nickname and rejoin code. The end-line check appears in School only while the teacher has it open (Class settings in the dashboard).
 
 For the UI teams:
 
 - **Translation keys.** i18n files are flat maps with dotted keys and no `t:` prefix, so configure react-i18next with `keySeparator: false`. To resolve a `TKey`, drop the `t:` prefix.
 - **Month end.** After the month-end card, call `choose(state, content, CONTINUE)` to start the next month.
-- **Quizzes.** Score with `scoreQuiz` from the engine, then queue a `quiz_submitted` event whose payload is `{ quiz_type, quiz_id?, answers, score }`.
+- **Quizzes.** Classroom, baseline and end-line results go out as `quiz_submitted` with `{ quiz_type, quiz_id, answers, score }` (`apps/student/src/api/payloads.ts`).
 - **Events.** Build them with `makeEvent(ctx, type, payload)`; the map, news and life types are checked against the keys above at compile time.
-- **Offline.** `createSyncQueue({ storage: idbKeyval, push: api.pushEvents })` keeps events in IndexedDB and sends them in batches when the phone is back online.
-- **Tracking, including before joining.** `createTracker({ queue, storage: idbKeyval, contentVersion })` sits in front of the queue. `tracker.track(type, payload)` has the same shape as `apps/student/src/api/track.ts`, so that stub's body becomes `tracker.track(type, payload)`. Events tracked before `join_class` returns (onboarding's `language_changed`) are held on the device with their own id and time, up to 100. Call `tracker.setContext({ anon_id, class_id })` after `join_class`, and again on every app start with the saved profile (it is safe to repeat): held events then move into the queue in order. Call `tracker.flush()` on app open and on the browser's `online` event. `clearContext()` is for a profile switch. `track` never throws; pass `onError` to see failed writes.
+- **Offline and tracking.** `apps/student/src/api/backend.ts` builds `createSyncQueue` and `createTracker` over idb-keyval.
+  - New events: call `track(type, payload)`. It never throws.
+  - Profile switch: call `forget()`.
+  - Events tracked before `join_class` returns are held on the device with their own id and time, up to 100.

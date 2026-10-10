@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Lang } from '@paisa/shared';
-import { flush, setStudent, track } from './api/track';
+import { useClassStatus } from './api/classStatus';
+import { quizSubmittedPayload } from './api/payloads';
+import { flush, track } from './api/track';
+import { useBackendSync } from './api/useBackendSync';
 import { ErrorBoundary } from './ErrorBoundary';
 import { CLASSROOM_BANK } from './features/classroom/content';
 import { ClassroomScreen } from './features/classroom/ClassroomScreen';
@@ -16,6 +19,7 @@ import { t as mainT } from './features/main/content';
 import { MainScreen } from './features/main/MainScreen';
 import { PaisaTimes } from './features/news';
 import { Onboarding, loadProfile } from './features/onboarding';
+import { OfflineBanner } from './features/sync/OfflineBanner';
 import type { Profile } from './features/onboarding';
 import { useStoresHydrated } from './game/hydration';
 import { useGame } from './game/useGame';
@@ -35,18 +39,26 @@ const screenOf = (state: unknown): Screen => (state as { screen?: Screen } | nul
 
 export function App() {
   const [profile, setProfile] = useState<Profile | null>();
+  // Sync, the student's ids for the tracker, and class_status (end-line gate, rejoin code).
+  const refreshStatus = useBackendSync(profile, setProfile);
+  // The language picked in onboarding, for the banner while there is no profile yet.
+  const [obLang, setObLang] = useState<Lang>();
   const lang: Lang = params.has('lang') || !profile ? LANG : profile.lang; // ?lang= overrides for demos and tests
   return (
     <ErrorBoundary lang={lang}>
-      <Game profile={profile} setProfile={setProfile} lang={lang} />
+      <Game profile={profile} setProfile={setProfile} lang={lang} onLang={setObLang} onOpenClassroom={refreshStatus} />
+      <OfflineBanner lang={profile ? lang : (obLang ?? LANG)} top={profile === null} />
     </ErrorBoundary>
   );
 }
 
-function Game({ profile, setProfile, lang }: {
+function Game({ profile, setProfile, lang, onLang, onOpenClassroom }: {
   profile: Profile | null | undefined;
   setProfile: (p: Profile | null) => void;
   lang: Lang;
+  onLang: (lang: Lang) => void;
+  /** The Classroom just opened: re-read the class settings (the teacher may have opened the end-line). */
+  onOpenClassroom: () => void;
 }) {
   // A reload keeps the history entry, so start where it says (else ?screen=, else main).
   const [screen, setScreen] = useState<Screen>(() => {
@@ -58,6 +70,7 @@ function Game({ profile, setProfile, lang }: {
   const apply = useGame((s) => s.apply);
   const tick = useEvents((s) => s.tick);
   const hydrated = useStoresHydrated();
+  const endlineOpen = useClassStatus((s) => s.endlineOpen);
 
   // map_opened each time the map is shown (CLAUDE.md 5.5); closing the store sheet over it doesn't count.
   const prevScreen = useRef<Screen | null>(null);
@@ -103,13 +116,14 @@ function Game({ profile, setProfile, lang }: {
   }, []);
 
   // First launch shows onboarding; afterwards the saved profile skips it. undefined = still reading IndexedDB.
+  // useBackendSync (App) tells the tracker who the student is once the profile is set.
   useEffect(() => {
-    void loadProfile().then((p) => {
-      setProfile(p ?? null);
-      // Every start: tell the tracker who the student is (also sends anything held or queued).
-      if (p) setStudent(p.anonId, p.classId);
-    });
+    void loadProfile().then((p) => setProfile(p ?? null));
   }, [setProfile]);
+
+  useEffect(() => {
+    if (screen === 'classroom') onOpenClassroom();
+  }, [screen, onOpenClassroom]);
 
   // The facilitator's classroom setup (question count, pillars); refreshed each time School opens.
   const [classroom, setClassroom] = useState<ClassroomConfig | null>(null);
@@ -123,7 +137,7 @@ function Game({ profile, setProfile, lang }: {
   }, [screen, profile]);
 
   if (profile === undefined || !hydrated) return null;
-  if (profile === null) return <Onboarding initialLang={LANG} onDone={setProfile} />;
+  if (profile === null) return <Onboarding initialLang={LANG} onLang={onLang} onDone={setProfile} />;
   const name = mainT(lang, `persona.${profile.persona}.name`);
   // Opens the phone at its home screen, an app, or an item; one history entry per level so
   // Android back walks out the same way (item → app → home → back here).
@@ -167,10 +181,11 @@ function Game({ profile, setProfile, lang }: {
         lang={lang}
         seed={SEED}
         config={classroom}
+        endlineOpen={endlineOpen === true}
         onExit={back}
         onFinish={(r) => {
-          // Practice only: stored as an event, never in learning_gain (API.md §5.1).
-          track('quiz_submitted', { quiz_type: r.kind, quiz_id: r.quizId, score: r.score, answers: r.answers });
+          // Practice rounds stay events; the start- and end-of-term checks also feed learning_gain.
+          track('quiz_submitted', quizSubmittedPayload(r));
           void flush();
         }}
       />
