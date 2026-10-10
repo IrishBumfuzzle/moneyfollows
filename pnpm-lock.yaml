@@ -65,6 +65,18 @@ importers:
       '@fontsource/pixelify-sans':
         specifier: ^5.3.0
         version: 5.3.0
+      '@paisa/api-client':
+        specifier: workspace:*
+        version: link:../../packages/api-client
+      '@paisa/content':
+        specifier: workspace:*
+        version: link:../../packages/content
+      '@paisa/engine':
+        specifier: workspace:*
+        version: link:../../packages/engine
+      '@paisa/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       idb-keyval:
         specifier: ^6.3.0
         version: 6.3.0

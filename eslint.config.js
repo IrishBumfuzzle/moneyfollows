@@ -13,6 +13,21 @@ export default tseslint.config(
     },
   },
   {
+    // An effect's return value is its cleanup. A shorthand arrow like `() => el.scrollIntoView()`
+    // returns whatever the call returns; newer browsers return a Promise there, and React then
+    // crashes ("destroy is not a function"). Always give effects a block body.
+    files: ['apps/**/*.tsx', 'apps/**/*.ts'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "CallExpression[callee.name=/^use(Layout)?Effect$/] > ArrowFunctionExpression[body.type!='BlockStatement']",
+          message: 'Give effects a block body: useEffect(() => { ... }). A returned value becomes the cleanup.',
+        },
+      ],
+    },
+  },
+  {
     // The engine must stay deterministic (CLAUDE.md 4): no clock, no randomness, no I/O.
     files: ['packages/engine/src/**/*.ts'],
     rules: {

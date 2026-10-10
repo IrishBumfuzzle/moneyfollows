@@ -5,7 +5,7 @@
 // Guardrails (CLAUDE.md 7.2): no real banks, apps or schemes; investing only appears as a scam
 // to spot, or as a pointer to the Bank, where the fictional assets and AssumptionBanner live.
 // Real offers to earn are earned income (a tutoring hour, a shift at a shop), never free money.
-import type { GameEvent, PhoneThread, SuddenEvent } from './types';
+import type { GameEvent, PhoneCall, PhoneThread, SuddenEvent } from './types';
 
 export const INJURY: SuddenEvent = {
   id: 'event.injury.01',
@@ -240,7 +240,69 @@ export const THREADS: PhoneThread[] = [
   }),
 ];
 
-export const EVENTS: GameEvent[] = [INJURY, ...THREADS];
+export const CALLS: PhoneCall[] = [
+  {
+    id: 'call.bank_officer.01',
+    kind: 'call',
+    verdict: 'scam',
+    caller: 't:events.call_bank.caller',
+    number: '+91 88•••• ••302',
+    icon: 'warn',
+    lines: ['t:events.call_bank.l1', 't:events.call_bank.l2'],
+    choices: [
+      {
+        id: 'tell',
+        label: 't:events.call_bank.tell.label',
+        effects: { money: -700, sanity: -12 },
+        ifShort: 'all',
+        reply: 't:events.call_bank.tell.reply',
+        outcome: 't:events.call_bank.tell.outcome',
+        lesson: 't:events.call_bank.lesson',
+        rating: 'risky',
+      },
+      {
+        id: 'hang_up',
+        label: 't:events.call_bank.hang_up.label',
+        effects: { sanity: 2 },
+        outcome: 't:events.call_bank.hang_up.outcome',
+        lesson: 't:events.call_bank.lesson',
+        rating: 'best',
+      },
+    ],
+    redFlags: ['t:scam.why.asks_otp', 't:scam.why.urgency', 't:scam.why.unknown_sender'],
+  },
+  {
+    id: 'call.ammi_groceries.01',
+    kind: 'call',
+    verdict: 'legit',
+    caller: 't:events.call_ammi.caller',
+    number: '+91 94•••• ••118',
+    icon: 'person',
+    lines: ['t:events.call_ammi.l1', 't:events.call_ammi.l2'],
+    choices: [
+      {
+        id: 'help',
+        label: 't:events.call_ammi.help.label',
+        effects: { money: -150, sanity: 4 },
+        reply: 't:events.call_ammi.help.reply',
+        outcome: 't:events.call_ammi.help.outcome',
+        lesson: 't:events.call_ammi.lesson',
+        rating: 'best',
+      },
+      {
+        id: 'later',
+        label: 't:events.call_ammi.later.label',
+        effects: { sanity: -2 },
+        reply: 't:events.call_ammi.later.reply',
+        outcome: 't:events.call_ammi.later.outcome',
+        lesson: 't:events.call_ammi.lesson',
+        rating: 'ok',
+      },
+    ],
+  },
+];
+
+export const EVENTS: GameEvent[] = [INJURY, ...THREADS, ...CALLS];
 
 export function getEvent(id: string): GameEvent | undefined {
   return EVENTS.find((e) => e.id === id);
@@ -253,9 +315,11 @@ export function getEvent(id: string): GameEvent | undefined {
  */
 export const SCHEDULE: { step: number; id: string }[] = [
   { step: 2, id: 'phone.kyc.01' },
+  { step: 3, id: 'call.ammi_groceries.01' },
   { step: 4, id: 'phone.tuition.01' },
   { step: 5, id: INJURY.id },
   { step: 7, id: 'phone.lottery.01' },
+  { step: 8, id: 'call.bank_officer.01' },
   { step: 9, id: 'phone.savings_club.01' },
   { step: 11, id: 'phone.double.01' },
   { step: 13, id: 'phone.shop_shift.01' },

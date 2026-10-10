@@ -1,6 +1,6 @@
 {
   "classroom.title": "क्लासरूम",
-  "classroom.intro": "बोर्ड पर 5 सवालों के जवाब दो। कोई टाइमर नहीं है, आराम से सोचो।",
+  "classroom.intro": "बोर्ड पर {{count}} सवालों के जवाब दो। कोई टाइमर नहीं है, आराम से सोचो।",
   "classroom.start": "शुरू करो",
   "classroom.back": "नक्शे पर वापस",
   "classroom.progress": "सवाल {{n}} / {{total}}",
@@ -15,52 +15,5 @@
   "classroom.pillar.save_manage": "बचत और प्रबंधन",
   "classroom.pillar.understand_investing": "निवेश को समझो",
   "classroom.pillar.stay_safe": "सुरक्षित रहो",
-
-  "quiz.classroom.budget.needs_first.q": "सना को इस महीने ₹4,000 मिले। उसे सबसे पहले किस चीज़ पर खर्च करना चाहिए?",
-  "quiz.classroom.budget.needs_first.o1": "ट्यूशन जाने का बस पास",
-  "quiz.classroom.budget.needs_first.o2": "नया फ़ोन कवर",
-  "quiz.classroom.budget.needs_first.o3": "दोस्तों के साथ नाश्ता",
-  "quiz.classroom.budget.needs_first.why": "ज़रूरतें पहले आती हैं। बस पास से वह ट्यूशन पहुँचती है, तो उसकी कमाई चलती रहती है।",
-
-  "quiz.classroom.budget.opportunity_cost.q": "रवि ₹600 का क्रिकेट बैट खरीदता है। इस फ़ैसले की उसे और क्या कीमत चुकानी पड़ती है?",
-  "quiz.classroom.budget.opportunity_cost.o1": "कुछ नहीं, पैसा उसका है",
-  "quiz.classroom.budget.opportunity_cost.o2": "बाइक के लक्ष्य के लिए ₹600 कम",
-  "quiz.classroom.budget.opportunity_cost.o3": "सिर्फ़ दुकान का टैक्स",
-  "quiz.classroom.budget.opportunity_cost.why": "जो पैसा एक चीज़ पर खर्च हुआ, वह दूसरी पर नहीं लग सकता। इसे opportunity cost कहते हैं।",
-
-  "quiz.classroom.save.emergency_fund.q": "तुम्हारे फ़ोन की स्क्रीन टूट गई। मरम्मत का पैसा किस जार से जाना चाहिए?",
-  "quiz.classroom.save.emergency_fund.o1": "Wants जार से",
-  "quiz.classroom.save.emergency_fund.o2": "Savings (आपातकालीन बचत)",
-  "quiz.classroom.save.emergency_fund.o3": "लोन ऐप से उधार",
-  "quiz.classroom.save.emergency_fund.why": "आपातकालीन बचत अचानक आने वाले खर्चों के लिए रखी जाती है, ताकि उधार न लेना पड़े।",
-
-  "quiz.classroom.save.track_spending.q": "महीना खत्म होने से पहले सना के पैसे खत्म हो जाते हैं। अच्छा पहला कदम क्या है?",
-  "quiz.classroom.save.track_spending.o1": "एक हफ़्ते तक हर खर्च लिखो",
-  "quiz.classroom.save.track_spending.o2": "रोज़ दोपहर का खाना छोड़ दो",
-  "quiz.classroom.save.track_spending.o3": "दोस्तों से पैसे माँगो",
-  "quiz.classroom.save.track_spending.why": "खर्च लिखने से पता चलता है कि पैसा कहाँ जाता है। फिर तय कर सकते हो कि क्या कम करना है।",
-
-  "quiz.classroom.invest.risk_return.q": "खेल में Rocket Co तेज़ी से बढ़ सकता है, पर बहुत गिर भी सकता है। इससे क्या पता चलता है?",
-  "quiz.classroom.invest.risk_return.o1": "ज़्यादा बढ़त का मौका, ज़्यादा जोखिम",
-  "quiz.classroom.invest.risk_return.o2": "इसमें कभी नुकसान नहीं होता",
-  "quiz.classroom.invest.risk_return.o3": "जोखिम और बढ़त का कोई रिश्ता नहीं",
-  "quiz.classroom.invest.risk_return.why": "जो चीज़ ज़्यादा बढ़ सकती है, वह ज़्यादा गिर भी सकती है। इसे risk और return कहते हैं।",
-
-  "quiz.classroom.invest.diversify.q": "कोई अपना पैसा Steady Deposit और Mixed Basket में बाँटकर क्यों रख सकता है?",
-  "quiz.classroom.invest.diversify.o1": "ताकि एक बुरा साल कम नुकसान करे",
-  "quiz.classroom.invest.diversify.o2": "कम टैक्स देने के लिए",
-  "quiz.classroom.invest.diversify.o3": "बाँटने से पैसा दोगुना होता है",
-  "quiz.classroom.invest.diversify.why": "पैसा अलग-अलग जगह रखने से एक बुरा नतीजा पूरे पैसे पर असर नहीं डालता। इसे diversification कहते हैं।",
-
-  "quiz.classroom.safe.otp.q": "कोई फ़ोन करके कहता है कि वह तुम्हारे बैंक से है और OTP माँगता है। तुम क्या करोगे?",
-  "quiz.classroom.safe.otp.o1": "जल्दी से बता दो",
-  "quiz.classroom.safe.otp.o2": "फ़ोन काटो, OTP कभी मत बताओ",
-  "quiz.classroom.safe.otp.o3": "सिर्फ़ आधा बता दो",
-  "quiz.classroom.safe.otp.why": "असली बैंक वाले कभी OTP नहीं माँगते। धोखे वाली कॉल की शिकायत 1930 हेल्पलाइन पर करो।",
-
-  "quiz.classroom.safe.collect_request.q": "एक UPI request कहती है '₹500 पाओ' और तुम्हारा PIN माँगती है। क्या सच है?",
-  "quiz.classroom.safe.collect_request.o1": "PIN डालने से पैसा जाता है",
-  "quiz.classroom.safe.collect_request.o2": "पैसा पाने के लिए PIN चाहिए",
-  "quiz.classroom.safe.collect_request.o3": "छोटी रकम में कोई खतरा नहीं",
-  "quiz.classroom.safe.collect_request.why": "पैसा पाने के लिए कभी PIN नहीं लगता। PIN सिर्फ़ तुम्हारे खाते से पैसा भेजता है।"
+  "classroom.loading": "…"
 }

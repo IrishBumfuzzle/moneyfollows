@@ -39,4 +39,17 @@ export interface PhoneThread {
   redFlags?: TKey[];           // scam.why.* keys (BE-1's strings), shown after the choice
 }
 
-export type GameEvent = SuddenEvent | PhoneThread;
+/** A phone call: rings over the map or main screen; the caller speaks, you pick a reply. */
+export interface PhoneCall {
+  id: string;
+  kind: 'call';
+  verdict: 'scam' | 'legit';
+  caller: TKey;
+  number: string;              // shown on the ringing screen; fictional
+  icon: 'warn' | 'person' | 'school';
+  lines: TKey[];               // what the caller says, in order; use {{name}}
+  choices: EventChoice[];
+  redFlags?: TKey[];
+}
+
+export type GameEvent = SuddenEvent | PhoneThread | PhoneCall;

@@ -1,24 +1,30 @@
 import { useEffect, useRef, useState } from 'react';
+import { answerQuestion, currentQuestion, isQuizFinished, nextQuestion, quizResult, startQuiz } from '@paisa/engine';
+import type { AnswerFeedback, QuizResult, QuizSession } from '@paisa/engine';
+import { PILLARS } from '@paisa/shared';
+import type { Lang } from '@paisa/shared';
+import type { ClassroomConfig } from './config';
 import { CLASSROOM_BANK, t } from './content';
-import { answer, currentQuestion, isFinished, next, result, startQuiz } from './quiz';
-import type { AnswerFeedback, QuizResult, QuizSession } from './quiz';
-import { PILLARS } from './types';
-import type { Lang } from './types';
 import '../../design/kenney.css';
 import './classroom.css';
 
 // Backdrop: public/assets/classroom.png, 360x640, built by tools/build-classroom.py. The room
 // sits in the middle with black bars at the sides; everything below is laid out in those
 // stage pixels and scaled as one. Whole-number zoom when the screen is big enough (crisp
-// pixels); a short phone gets a fractional fit so nothing is cut off.
+// pixels at 2x and up); otherwise it fills the screen with a fractional zoom.
 const STAGE = { w: 360, h: 640 };
 const MAX_ZOOM = 3;
-const QUESTIONS = 5;
+// The room is x 28–332 of the 360 px backdrop; the black side bars may be cropped off a narrow
+// phone, so the room itself (not the whole backdrop) sets the width that must fit.
+const ROOM_W = 304;
 
 function useStageScale() {
   const read = () => {
-    const s = Math.min(window.innerWidth / STAGE.w, window.innerHeight / STAGE.h);
-    return s >= 1 ? Math.min(MAX_ZOOM, Math.floor(s)) : s;
+    const fit = Math.min(window.innerWidth / ROOM_W, window.innerHeight / STAGE.h);
+    // Fill the screen. On big screens (2x and up) snap to whole-number zoom for crisp pixels
+    // when that loses under a tenth of the size.
+    const whole = Math.min(MAX_ZOOM, Math.floor(fit));
+    return whole >= 2 && whole / fit > 0.9 ? whole : Math.min(fit, MAX_ZOOM);
   };
   const [scale, setScale] = useState(read);
   useEffect(() => {
@@ -31,37 +37,42 @@ function useStageScale() {
 
 type Phase = { name: 'intro' } | { name: 'quiz'; feedback: AnswerFeedback | null; chosen: number | null } | { name: 'result'; result: QuizResult };
 
-export function ClassroomScreen({ lang, seed, onExit, onFinish }: {
+export function ClassroomScreen({ lang, seed, config, onExit, onFinish }: {
   lang: Lang;
   seed: number;
+  /** Questions per round and pillars, from the class (config.ts). */
+  config: ClassroomConfig;
   onExit: () => void;
-  /** Called once per finished quiz; turn it into a quiz_submitted event with toSubmittedEvent. */
+  /** Called once per finished quiz; App sends it as a quiz_submitted event. */
   onFinish?: (r: QuizResult) => void;
 }) {
   const scale = useStageScale();
   const [round, setRound] = useState(0);
-  const [session, setSession] = useState<QuizSession>(() => startQuiz(CLASSROOM_BANK, { kind: 'classroom', seed, count: QUESTIONS }));
+  const start = (s: number) => startQuiz(CLASSROOM_BANK, { kind: 'classroom', seed: s, count: config.count, pillars: config.pillars });
+  const [session, setSession] = useState<QuizSession>(() => start(seed));
   const [phase, setPhase] = useState<Phase>({ name: 'intro' });
   const boardRef = useRef<HTMLDivElement>(null);
   const tr = (key: string, vars?: Record<string, string | number>) => t(lang, key, vars);
 
   // Move focus to the board when the question changes, so screen readers read it next.
-  useEffect(() => boardRef.current?.focus(), [phase.name, session.index]);
+  useEffect(() => {
+    boardRef.current?.focus();
+  }, [phase.name, session.index]);
 
   const q = currentQuestion(session);
 
   function choose(i: number) {
     if (phase.name !== 'quiz' || phase.feedback) return;
-    const r = answer(session, i);
+    const r = answerQuestion(session, i);
     setSession(r.session);
     setPhase({ name: 'quiz', feedback: r.feedback, chosen: i });
   }
 
   function advance() {
-    const s = next(session);
+    const s = nextQuestion(session);
     setSession(s);
-    if (isFinished(s)) {
-      const r = result(s);
+    if (isQuizFinished(s)) {
+      const r = quizResult(s);
       onFinish?.(r);
       setPhase({ name: 'result', result: r });
     } else setPhase({ name: 'quiz', feedback: null, chosen: null });
@@ -70,7 +81,7 @@ export function ClassroomScreen({ lang, seed, onExit, onFinish }: {
   function replay() {
     const n = round + 1;
     setRound(n);
-    setSession(startQuiz(CLASSROOM_BANK, { kind: 'classroom', seed: seed + n, count: QUESTIONS }));
+    setSession(start(seed + n));
     setPhase({ name: 'quiz', feedback: null, chosen: null });
   }
 
@@ -100,7 +111,7 @@ export function ClassroomScreen({ lang, seed, onExit, onFinish }: {
         )}
 
         <div className="cr-board" ref={boardRef} tabIndex={-1} aria-live="polite">
-          {phase.name === 'intro' && <p>{tr('classroom.intro')}</p>}
+          {phase.name === 'intro' && <p>{tr('classroom.intro', { count: session.questions.length })}</p>}
           {phase.name === 'quiz' && q && (
             <>
               <p className="cr-board-label">{tr('classroom.progress', { n: session.index + 1, total: session.questions.length })}</p>

@@ -63,7 +63,7 @@ describe('schedule', () => {
   it('delivers due events once, in order', () => {
     expect(dueIds(1, [])).toEqual([]);
     expect(dueIds(2, [])).toEqual(['phone.kyc.01']);
-    expect(dueIds(5, ['phone.kyc.01'])).toEqual(['phone.tuition.01', INJURY.id]);
+    expect(dueIds(5, ['phone.kyc.01'])).toEqual(['call.ammi_groceries.01', 'phone.tuition.01', INJURY.id]);
     expect(dueIds(99, SCHEDULE.map((s) => s.id))).toEqual([]);
   });
 
@@ -77,7 +77,11 @@ describe('schedule', () => {
 describe('content (CLAUDE.md 7.2)', () => {
   const keysOf = () =>
     EVENTS.flatMap((e) => [
-      ...(e.kind === 'sudden' ? [e.title, e.story, e.billTitle, e.bill] : [e.sender, ...e.messages, ...(e.redFlags ?? [])]),
+      ...(e.kind === 'sudden'
+        ? [e.title, e.story, e.billTitle, e.bill]
+        : e.kind === 'call'
+          ? [e.caller, ...e.lines, ...(e.redFlags ?? [])]
+          : [e.sender, ...e.messages, ...(e.redFlags ?? [])]),
       ...e.choices.flatMap((c) => [c.label, c.outcome, c.lesson, ...(c.reply ? [c.reply] : [])]),
     ]);
 
