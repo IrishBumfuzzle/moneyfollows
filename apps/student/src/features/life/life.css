@@ -34,6 +34,7 @@
 .lf-px { flex: none; image-rendering: pixelated; }
 .lf-value-row { display: flex; align-items: center; justify-content: space-between; gap: 4px; min-height: 24px; }
 .lf-value { font-size: 18px; }
+.lf-debt { font-size: 14px; color: #b0362f; font-family: "Paisa Digits", "Noto Sans Devanagari", sans-serif; }
 .lf-inline { display: inline-flex; align-items: center; gap: 4px; }
 .lf-track { display: block; height: 8px; background: #c9a77c; box-shadow: inset 0 0 0 2px #4a2b17; }
 .lf-fill { display: block; height: 100%; box-shadow: inset 0 0 0 2px #4a2b17; }

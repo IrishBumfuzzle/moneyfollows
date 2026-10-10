@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ClassroomScreen } from './features/classroom/ClassroomScreen';
+import { PhoneLayer, PhoneScreen, SuddenEventSheet, triggerEvent, useEvents } from './features/events';
 import type { Lang } from './features/classroom/types';
 import { MetersBar } from './features/life/MetersBar';
 import { StoreSheet } from './features/life/StoreSheet';
+import { t as mainT } from './features/main/content';
 import { MainScreen } from './features/main/MainScreen';
 import { PaisaTimes } from './features/news';
 import { Onboarding, loadProfile } from './features/onboarding';
@@ -12,11 +14,11 @@ import { useGame } from './game/useGame';
 import { LocationScreen } from './screens/LocationScreen';
 import './design/kenney.css';
 
-type Screen = 'main' | 'map' | 'classroom' | 'store' | 'news';
-const SCREENS: Screen[] = ['main', 'map', 'classroom', 'store', 'news'];
+type Screen = 'main' | 'map' | 'classroom' | 'store' | 'news' | 'phone';
+const SCREENS: Screen[] = ['main', 'map', 'classroom', 'store', 'news', 'phone'];
 
-// No router or language picker yet: ?lang=hi switches language, ?screen=map|classroom|store|news
-// opens that screen directly, ?seed=N fixes the quiz (demo / tests).
+// No router or language picker yet: ?lang=hi switches language, ?screen=map|classroom|store|news|phone
+// opens that screen directly, ?seed=N fixes the quiz, ?event=<id> fires an event (demo / tests).
 const params = new URLSearchParams(window.location.search);
 const LANG: Lang = params.get('lang') === 'hi' ? 'hi' : 'en';
 const SEED = Number(params.get('seed')) || Math.floor(Math.random() * 2 ** 31);
@@ -32,7 +34,14 @@ export function App() {
   const life = useGame((s) => s.life);
   const last = useGame((s) => s.last);
   const apply = useGame((s) => s.apply);
+  const tick = useEvents((s) => s.tick);
   const hydrated = useStoresHydrated();
+
+  // ?event=event.injury.01 (or a phone.* id) fires that event once the saved state has loaded.
+  useEffect(() => {
+    const id = params.get('event');
+    if (hydrated && id) triggerEvent(id);
+  }, [hydrated]);
 
   // Each screen is a history entry, so Android's back button goes up a level (place → map →
   // main screen) instead of leaving the app (CLAUDE.md 6). Paisa Times adds its own levels.
@@ -57,11 +66,38 @@ export function App() {
   if (profile === undefined || !hydrated) return null;
   if (profile === null) return <Onboarding initialLang={LANG} onDone={setProfile} />;
   const lang = params.has('lang') ? LANG : profile.lang; // ?lang= still overrides for demos and tests
+  const name = mainT(lang, `persona.${profile.persona}.name`);
+  const openPhone = (thread?: string) => {
+    window.history.pushState({ screen: 'phone' }, '');
+    if (thread) window.history.pushState({ screen: 'phone', thread }, '');
+    setScreen('phone');
+  };
+  // Events and messages only surface on the map and main screen, never over a scene (CLAUDE.md 5.8).
+  const eventLayer = (where: 'map' | 'main') => (
+    <>
+      <PhoneLayer lang={lang} name={name} where={where} onOpen={openPhone} />
+      <SuddenEventSheet lang={lang} name={name} />
+    </>
+  );
 
   if (screen === 'main') {
-    return <MainScreen profile={profile} lang={lang} onPlay={() => open('map')} onOpenNews={() => open('news')} />;
+    return (
+      <>
+        <MainScreen
+          profile={profile}
+          lang={lang}
+          onPlay={() => {
+            open('map');
+            tick();
+          }}
+          onOpenNews={() => open('news')}
+        />
+        {eventLayer('main')}
+      </>
+    );
   }
   if (screen === 'news') return <PaisaTimes lang={lang} onExit={back} />;
+  if (screen === 'phone') return <PhoneScreen lang={lang} name={name} onExit={back} />;
   if (screen === 'classroom') {
     return (
       <ClassroomScreen
@@ -76,11 +112,27 @@ export function App() {
   return (
     <>
       <LocationScreen
-        onSelect={(id) => (id === 'school' ? open('classroom') : id === 'convenience' ? open('store') : console.log('go to', id))}
+        onSelect={(id) => {
+          tick();
+          if (id === 'school') open('classroom');
+          else if (id === 'convenience') open('store');
+          else console.log('go to', id);
+        }}
       />
       <MetersBar lang={lang} state={life} pop={last} />
+      {screen === 'map' && eventLayer('map')}
       {/* TODO: queue toLifeEvent(...) once the backend accepts the life events (docs/life-meters-api.md §5). */}
-      {screen === 'store' && <StoreSheet lang={lang} state={life} onBuy={(_, out) => apply(out)} onClose={back} />}
+      {screen === 'store' && (
+        <StoreSheet
+          lang={lang}
+          state={life}
+          onBuy={(_, out) => {
+            apply(out);
+            tick();
+          }}
+          onClose={back}
+        />
+      )}
     </>
   );
 }

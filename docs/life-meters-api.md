@@ -85,6 +85,17 @@ interface LifeOutcome<S> {
 }
 ```
 
+**Added for events (`src/features/events`):**
+
+```ts
+lifeApi.applyEffects(state, { money?, health?, sanity?, debt? }, ifShort?: 'block' | 'all'): LifeOutcome
+lifeApi.repay(state): LifeOutcome          // pays back as much debt as the wallet allows
+```
+
+- `LifeState` has `debt` (whole rupees owed, never negative); `LifeDelta.debt` is + borrowed, − repaid.
+- `ifShort: 'block'` refuses a spend the wallet can't cover (paying a hospital bill); `'all'` takes the wallet to ₹0 and never below (a scammer takes what is there).
+- The meters bar shows "Owe ₹600" while there is debt; the main screen has a **Pay back** button.
+
 **Rules (each one has a unit test):**
 
 1. **Necessities are cheaper and lift sanity less than wants.** Work and school lower sanity.

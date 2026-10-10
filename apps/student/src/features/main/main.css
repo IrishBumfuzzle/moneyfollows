@@ -30,6 +30,11 @@
 .ms-coin { width: 14px; height: 14px; border-radius: 50%; background: #f2c230; box-shadow: inset 0 0 0 2px #c98a1b, 0 0 0 1px #4a2b17; }
 .ms-week { font-size: 14px; color: #7a4a2a; }
 
+.ms-debt { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: #b0362f; }
+.ms-debt-btn { min-height: 48px; }
+.ms-paid { min-height: 0; text-align: center; color: #2f7a2a; }
+.ms-paid:empty { display: none; }
+
 .ms-room { position: relative; flex: 1; min-height: 300px; }
 
 .ms-window {

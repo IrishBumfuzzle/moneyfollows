@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { track } from '../../api/track';
 import { useGame } from '../../game/useGame';
+import { lifeApi } from '../life/life';
 import { useHasUnread } from '../news';
 import type { Profile } from '../onboarding';
 import { formatRupees, t } from './content';
@@ -20,9 +21,21 @@ export function MainScreen({ profile, lang, onPlay, onOpenNews }: {
 }) {
   const tr = (k: string, vars?: Record<string, string | number>) => t(lang, k, vars);
   const life = useGame((s) => s.life);
+  const apply = useGame((s) => s.apply);
   const unread = useHasUnread();
+  const [paid, setPaid] = useState<number | null>(null);
 
-  useEffect(() => track('app_open'), []);
+  // Home is Plan & budget (CLAUDE.md 5.8): pay back a family loan from here.
+  const payBack = () => {
+    const out = lifeApi.repay(life);
+    if (out.blocked) return;
+    apply(out);
+    setPaid(-out.delta.money);
+  };
+
+  useEffect(() => {
+    track('app_open');
+  }, []);
 
   return (
     <div className="ms-screen" lang={lang}>
@@ -58,6 +71,17 @@ export function MainScreen({ profile, lang, onPlay, onOpenNews }: {
       </section>
 
       <div className="ms-bottom">
+        {life.debt > 0 && (
+          <div className="ms-debt k-panel">
+            <span>{tr('main.owe', { debt: formatRupees(life.debt) })}</span>
+            <button className="k-btn ms-debt-btn" onClick={payBack} disabled={life.money <= 0}>
+              {tr('main.pay_back')}
+            </button>
+          </div>
+        )}
+        <p className="ms-paid" role="status">
+          {paid !== null && life.debt === 0 ? tr('main.paid_back', { amount: formatRupees(paid) }) : ''}
+        </p>
         <p className="ms-greeting">{tr('main.greeting', { nickname: profile.nickname })}</p>
         <button className="k-btn is-primary ms-play" onClick={onPlay}>
           <svg viewBox="0 0 5 7" width="15" height="21" aria-hidden="true" shapeRendering="crispEdges">

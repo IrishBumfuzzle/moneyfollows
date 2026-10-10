@@ -9,5 +9,8 @@
   "main.play": "Play",
   "main.back": "Back",
   "persona.sana.name": "Sana",
-  "persona.ravi.name": "Ravi"
+  "persona.ravi.name": "Ravi",
+  "main.owe": "You owe {{debt}}",
+  "main.pay_back": "Pay back",
+  "main.paid_back": "Paid back {{amount}}"
 }

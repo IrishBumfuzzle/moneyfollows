@@ -13,6 +13,8 @@ const PAL: Record<string, string> = {
   w: '#fff3dc', // cream
   b: '#a0603a', // sack
   g: '#3d4a5c', // dark grey
+  n: '#7fd1c7', // screen
+  t: '#3f7f6b', // teal
 };
 
 const ICONS: Record<IconId, readonly string[]> = {
@@ -21,6 +23,12 @@ const ICONS: Record<IconId, readonly string[]> = {
   smile: ['..kkkk..', '.kyyyyk.', 'kykyykyk', 'kyyyyyyk', 'kykyykyk', 'kyykkyyk', '.kyyyyk.', '..kkkk..'],
   sack: ['..kkkk..', '...kk...', '..kbbk..', '.kbwwbk.', 'kbwwwwbk', 'kbbwwbbk', 'kbbbbbbk', '.kkkkkk.'],
   headphones: ['..kkkk..', '.kggggk.', 'kg....gk', 'kg....gk', 'kvk..kvk', 'kvk..kvk', 'kvk..kvk', '.k....k.'],
+  phone: ['.kkkkkk.', '.kggggk.', '.knnnnk.', '.knnnnk.', '.knnnnk.', '.knnnnk.', '.kggwgk.', '.kkkkkk.'],
+  warn: ['..kkkk..', '.krrrrk.', 'krrwwrrk', 'krrwwrrk', 'krrwwrrk', 'krrrrrrk', '.krwwrk.', '..kkkk..'],
+  person: ['..kkkk..', '.kssssk.', '.kswswk.', '.kssssk.', '..kkkk..', '.kttttk.', 'kttttttk', 'kttttttk'],
+  school: ['...kk...', '..krrk..', '.krrrrk.', 'kkkkkkkk', 'kwwkkwwk', 'kwwkkwwk', 'kwwkkwwk', 'kkkkkkkk'],
+  cross: ['..kkkk..', '..kwwk..', 'kkkrrkkk', 'kwrrrrwk', 'kwrrrrwk', 'kkkrrkkk', '..kwwk..', '..kkkk..'],
+  bandage: ['......kk', '.....kpk', '....kpwk', '...kwpk.', '..kpwk..', '.kwpk...', 'kpwk....', 'kkk.....'],
 };
 
 export function PixelIcon({ id, size = 16 }: { id: IconId; size?: number }) {

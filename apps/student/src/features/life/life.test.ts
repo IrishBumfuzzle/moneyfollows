@@ -9,6 +9,7 @@ const base: LifeState = {
   month: 1,
   week: 2,
   money: 1000,
+  debt: 0,
   flags: [],
   earned: [],
   vitals: startVitals(),
@@ -148,5 +149,34 @@ describe('content', () => {
     for (const o of Object.values(SHOP)) {
       for (const k of [o.label, o.hint]) expect(en).toHaveProperty([k.slice(2)]);
     }
+  });
+});
+
+describe('applyEffects and repay (events, phone threads)', () => {
+  it("'block' refuses a spend the wallet can't cover; 'all' takes the wallet to zero, never below", () => {
+    const poor = { ...base, money: 100 };
+    expect(api.applyEffects(poor, { money: -600, health: 25 }).blocked).toBe('not_enough_money');
+    const scam = api.applyEffects(poor, { money: -500, sanity: -10 }, 'all');
+    expect(scam.state.money).toBe(0);
+    expect(scam.delta).toEqual({ money: -100, health: 0, sanity: -10 });
+  });
+
+  it('borrowing adds debt; health and sanity clamp; earning adds money', () => {
+    const out = api.applyEffects({ ...base, vitals: { health: 90, sanity: 70 } }, { debt: 600, health: 25, sanity: -6 });
+    expect(out.state).toMatchObject({ money: 1000, debt: 600, vitals: { health: 100, sanity: 64 } });
+    expect(out.delta).toEqual({ money: 0, health: 10, sanity: -6, debt: 600 });
+    expect(api.applyEffects(base, { money: 300 }).state.money).toBe(1300);
+  });
+
+  it('repay pays back what the wallet allows, and is blocked with no debt or no money', () => {
+    expect(api.repay({ ...base, debt: 600 }).state).toMatchObject({ money: 400, debt: 0 });
+    expect(api.repay({ ...base, money: 250, debt: 600 }).state).toMatchObject({ money: 0, debt: 350 });
+    expect(api.repay(base).blocked).toBe('no_debt');
+    expect(api.repay({ ...base, money: 0, debt: 50 }).blocked).toBe('not_enough_money');
+  });
+
+  it('never mutates its input', () => {
+    const frozen = deepFreeze({ ...base, debt: 100 });
+    expect(() => api.repay(api.applyEffects(frozen, { money: -50, debt: 200 }).state)).not.toThrow();
   });
 });

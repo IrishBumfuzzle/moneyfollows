@@ -20,13 +20,14 @@ export interface LifeState {
   month: number;
   week: number;
   money: number;
+  debt: number;    // whole rupees owed (e.g. a family loan for a hospital bill); never negative
   flags: string[];
   earned: string[];
   vitals: Vitals;
 }
 
 /** Pixel icons drawn by PixelIcon. */
-export type IconId = 'coin' | 'heart' | 'smile' | 'sack' | 'headphones';
+export type IconId = 'coin' | 'heart' | 'smile' | 'sack' | 'headphones' | 'phone' | 'warn' | 'person' | 'school' | 'cross' | 'bandage';
 
 /** The convenience store's two options. */
 export type ShopKind = 'necessity' | 'want';
@@ -47,9 +48,24 @@ export interface LifeDelta {
   money: number;
   health: number;
   sanity: number;
+  debt?: number;   // + borrowed, − repaid; absent when unchanged
 }
 
-export type LifeBlock = 'not_enough_money' | 'already_worked' | 'already_at_school';
+/** A choice's effects (events, phone threads). Money: + earns, − spends. Debt: + borrows. */
+export interface LifeEffects {
+  money?: number;
+  health?: number;
+  sanity?: number;
+  debt?: number;
+}
+
+/**
+ * What to do when a spend is more than the wallet holds: 'block' (the choice can't be taken,
+ * e.g. paying a bill) or 'all' (a scammer takes whatever is there).
+ */
+export type ShortMode = 'block' | 'all';
+
+export type LifeBlock = 'not_enough_money' | 'already_worked' | 'already_at_school' | 'no_debt';
 
 /** A blocked action returns the input state unchanged (same object) and a zero delta. */
 export interface LifeOutcome<S extends LifeState> {
