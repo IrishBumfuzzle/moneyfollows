@@ -65,14 +65,14 @@ The new owner must also be in `public.staff`.
 
 ## Commands
 
-| Command                                   | What it does                                                                                                                                                             |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `pnpm check`                              | Typecheck, lint, all tests, content lint. Must pass before every commit. Without the test Postgres (below) the SQL tests skip locally; in CI (`CI` set) they always run. |
-| `pnpm test`                               | Vitest across packages, scripts and the SQL tests                                                                                                                        |
-| `pnpm db:test:up`                         | Starts Supabase's Postgres image (the hosted version) for the SQL tests, on port 54330                                                                                   |
-| `pnpm lint:content`                       | Guardrail linter over `packages/content` (`-- --strict` also fails on drafts; use it for release builds)                                                                 |
-| `pnpm seed`                               | Regenerates `supabase/seed.sql` from the engine and loads it into `SUPABASE_DB_URL`                                                                                      |
-| `pnpm dev:student` / `pnpm dev:dashboard` | The two apps                                                                                                                                                             |
+| Command                                   | What it does                                                                                                                                                                                           |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `pnpm check`                              | Typecheck, lint, all tests, content lint. Must pass before every commit. Without the test Postgres (below) the SQL tests skip locally; in CI (`CI` set) they always run.                               |
+| `pnpm test`                               | Vitest across packages, scripts and the SQL tests                                                                                                                                                      |
+| `pnpm db:test:up`                         | Starts Supabase's Postgres image (the hosted version) for the SQL tests, on port 54330. If Windows reserves that port, set `PAISA_TEST_DB_PORT` and `SUPABASE_TEST_DB_URL` to another (`.env.example`) |
+| `pnpm lint:content`                       | Guardrail linter over `packages/content` (`-- --strict` also fails on drafts; use it for release builds)                                                                                               |
+| `pnpm seed`                               | Regenerates `supabase/seed.sql` from the engine and loads it into `SUPABASE_DB_URL`                                                                                                                    |
+| `pnpm dev:student` / `pnpm dev:dashboard` | The two apps                                                                                                                                                                                           |
 
 ## Layout
 

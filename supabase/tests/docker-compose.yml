@@ -4,13 +4,15 @@
 # make-template.sh builds `paisa_template` from the initialised database; db.ts clones it for
 # every test database and applies the migrations as `postgres`, as `supabase db push` does.
 # `supabase start` works too: point SUPABASE_TEST_DB_URL at its database.
+# PAISA_TEST_DB_PORT picks another host port, e.g. where Windows reserves 54330 (Hyper-V port
+# exclusions); set SUPABASE_TEST_DB_URL to the same port.
 services:
   db:
     image: supabase/postgres:17.11.0.003
     environment:
       POSTGRES_PASSWORD: postgres
     ports:
-      - '54330:5432'
+      - '${PAISA_TEST_DB_PORT:-54330}:5432'
     volumes:
       - ./make-template.sh:/docker-entrypoint-initdb.d/zz-paisa-template.sh:ro
     # Fresh on every start: no stale data directory from an older image.
