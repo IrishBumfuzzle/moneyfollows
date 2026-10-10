@@ -4,7 +4,7 @@ The School place on the map opens the **Classroom**, a 5-question practice quiz.
 
 - **§2 Quiz API:** the client API. Built and tested.
 - **§4 Sync:** the event the client sends.
-- **§5 Backend:** what the backend needs. Proposed, **not built**.
+- **§5 Backend:** what the backend needs. Built (`20261010230000_classroom_quiz_events.sql`, `20261011120000_dashboard_data.sql`).
 - **§6 UI:** how the screen is put together.
 
 `CLAUDE.md` is still the source of truth for the frozen contracts (§5). Everything here is additive.
@@ -13,8 +13,9 @@ The School place on the map opens the **Classroom**, a 5-question practice quiz.
 |---|---|
 | ✅ built | Classroom backdrop, Kenney UI kit, `ClassroomScreen`, quiz API, 8 questions (en + hi), unit + browser tests |
 | ✅ built | Map → School → Classroom; the back button and Android back return to the map |
-| 🟡 proposed | Backend support for `quiz_type: 'classroom'` (§5). BE-2 to decide and build |
-| ⬜ todo | Send the result through the sync queue; move types and content into `packages/*` (§8) |
+| ✅ built | Backend support for `quiz_type: 'classroom'` (§5) and `classroom_quiz_summary` on the dashboard |
+| ✅ built | Results go through the sync queue (`App.tsx` → `track('quiz_submitted', …)`), and the baseline and end-line checks run in the same screen |
+| ⬜ todo | Move types and content into `packages/*` (§8) |
 
 ---
 
@@ -167,9 +168,9 @@ At the end of a quiz, the client builds one `SyncEvent` (CLAUDE.md §5.5) with `
 
 Unfinished or abandoned quizzes send nothing. "Play again" sends one more event (new `event_id`).
 
-> ⚠️ **Today's backend (`origin/Backend`) silently skips this event.** `quiz_payload_ok` only accepts `baseline | endline`, and `push_events` drops payload keys it doesn't list, so `quiz_id` would go too. Nothing breaks, because the event is skipped and not counted, but nothing is stored either. Hook the client up to the queue only after §5.1 ships.
+The backend accepts this event (migration `20261010230000_classroom_quiz_events.sql`). The app sends it with `track('quiz_submitted', quizSubmittedPayload(result))` (`apps/student/src/api/payloads.ts`).
 
-## 5. Backend API (proposed, not built)
+## 5. Backend API (built)
 
 The backend is owned by BE-2. Each change below is additive.
 
