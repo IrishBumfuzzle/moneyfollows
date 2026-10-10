@@ -1,0 +1,48 @@
+{
+  "onboarding.progress": "चरण {{n}} / {{total}}",
+  "onboarding.back": "वापस",
+  "onboarding.next": "आगे",
+  "onboarding.start": "खेलना शुरू करें",
+  "onboarding.joining": "क्लास से जुड़ रहे हैं…",
+  "onboarding.error.generic": "कुछ गड़बड़ हो गई। इंटरनेट चेक करें और फिर से कोशिश करें।",
+
+  "onboarding.lang.title": "अपनी भाषा चुनें",
+  "onboarding.lang.name": "हिन्दी",
+
+  "onboarding.class.title": "अपनी क्लास से जुड़ें",
+  "onboarding.class.label": "क्लास कोड",
+  "onboarding.class.hint": "यह कोड आपके टीचर देंगे।",
+  "onboarding.class.placeholder": "AB12CD",
+  "onboarding.class.join": "जुड़ें",
+  "onboarding.class.notFound": "यह क्लास नहीं मिली। टीचर से कोड दोबारा पूछें और फिर से कोशिश करें।",
+
+  "onboarding.nickname.title": "निकनेम और अवतार चुनें",
+  "onboarding.nickname.label": "निकनेम",
+  "onboarding.nickname.hint": "कोई निकनेम लिखें, अपना असली नाम नहीं। सिर्फ़ अक्षर और अंक, 16 तक।",
+  "onboarding.nickname.invalid": "सिर्फ़ अक्षर और अंक लिखें, बीच में स्पेस नहीं।",
+  "onboarding.nickname.rejected": "कृपया कोई दूसरा निकनेम चुनें।",
+  "onboarding.avatar.label": "अवतार",
+  "onboarding.avatar.tiger": "बाघ",
+  "onboarding.avatar.peacock": "मोर",
+  "onboarding.avatar.elephant": "हाथी",
+  "onboarding.avatar.parrot": "तोता",
+  "onboarding.avatar.lion": "शेर",
+  "onboarding.avatar.rabbit": "खरगोश",
+
+  "onboarding.persona.title": "अपना किरदार चुनें",
+  "onboarding.persona.age": "उम्र {{age}}",
+  "onboarding.persona.goal": "लक्ष्य: {{goal}}",
+  "persona.sana.name": "सना",
+  "persona.sana.story": "अपने परिवार में कॉलेज जाने वाली पहली। ट्यूशन पढ़ाती है।",
+  "persona.sana.income": "हर महीने {{amount}}, पक्की कमाई",
+  "persona.sana.goal": "कॉलेज एडमिशन की फ़ीस",
+  "persona.ravi.name": "रवि",
+  "persona.ravi.story": "ओल्ड सिटी में पापा के टिफ़िन स्टॉल पर हाथ बँटाता है।",
+  "persona.ravi.income": "हर महीने {{amount}}, बिक्री के हिसाब से कम-ज़्यादा",
+  "persona.ravi.goal": "सेकंड-हैंड बाइक, {{amount}}",
+
+  "onboarding.howto.title": "कैसे खेलें",
+  "onboarding.howto.pins": "खेलें दबाने पर मैप खुलता है। चमकते पिन इस हफ़्ते के काम दिखाते हैं।",
+  "onboarding.howto.choose": "चुनें और देखें क्या होता है। मन बदल गया? रिवाइंड करके फिर से कोशिश करें।",
+  "onboarding.howto.week": "हफ़्ता ख़त्म करने के लिए घर पर सो जाएँ। पैसा टाइम्स पढ़कर पेपर-रूट की कमाई पाएँ।"
+}

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { ClassroomScreen } from './features/classroom/ClassroomScreen';
 import type { Lang } from './features/classroom/types';
+import { Onboarding, loadProfile } from './features/onboarding';
+import type { Profile } from './features/onboarding';
 import { LocationScreen } from './screens/LocationScreen';
 
 type Screen = 'map' | 'classroom';
@@ -31,10 +33,17 @@ export function App() {
     else setScreen('map');
   };
 
+  // First launch shows onboarding; afterwards the saved profile skips it. undefined = still reading IndexedDB.
+  const [profile, setProfile] = useState<Profile | null>();
+  useEffect(() => void loadProfile().then((p) => setProfile(p ?? null)), []);
+  if (profile === undefined) return null;
+  if (profile === null) return <Onboarding initialLang={LANG} onDone={setProfile} />;
+  const lang = params.has('lang') ? LANG : profile.lang; // ?lang= still overrides for demos and tests
+
   if (screen === 'classroom') {
     return (
       <ClassroomScreen
-        lang={LANG}
+        lang={lang}
         seed={SEED}
         onExit={back}
         // TODO: queue toSubmittedEvent(result, …) once api-client's sync queue is on main (API.md).
