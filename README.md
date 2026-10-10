@@ -94,7 +94,7 @@ The new owner must also be in `public.staff`.
 | `scripts`                        | BE-1            | `lint-content.ts`, `seed.ts`                                                                                        |
 | `packages/api-client`            | BE-2            | Typed client for the Supabase functions, staff auth, and an offline sync queue                                      |
 | `supabase`                       | BE-2            | Migrations (tables, RLS, functions), seed, SQL tests                                                                |
-| `apps/student`, `apps/dashboard` | UI-1, UI-2      | Student PWA (talks to the backend only through `apps/student/src/api/`); staff dashboard                          |
+| `apps/student`, `apps/dashboard` | UI-1, UI-2      | Student PWA (talks to the backend only through `apps/student/src/api/`); staff dashboard                            |
 
 ## Backend API
 
@@ -136,28 +136,29 @@ Errors reach the apps as `ApiError` from `@paisa/api-client`, with a stable `cod
 
 Event types `push_events` accepts, with the payload keys it keeps (any other key is dropped; values must be numbers, booleans or short id-like strings):
 
-| `type`                   | Payload keys                                                                      |
-| ------------------------ | --------------------------------------------------------------------------------- |
-| `app_open`, `map_opened` | none                                                                              |
-| `onboarding_complete`    | `level`, `lang`, `persona_id` (as onboarding sends it), `personaId`               |
-| `persona_selected`       | `persona_id` (as onboarding sends it), `personaId`, `level`                       |
-| `decision_made`          | `scenarioId`, `choiceId`, `pillar`, `month`, `week`                               |
-| `rewind_used`            | `scenarioId`, `month`, `week`, `tokensLeft`                                       |
-| `event_triggered`        | `eventId`, `choiceId`, `month`, `week`                                            |
-| `minigame_complete`      | `game`, `correct`, `total`, `score`, `level`                                      |
-| `quiz_submitted`         | `quiz_type` (`baseline`, `endline` or `classroom`), `quiz_id`, `answers`, `score` |
-| `module_complete`        | `moduleId`, `pillar`                                                              |
-| `badge_earned`           | `badgeId`                                                                         |
-| `language_changed`       | `lang`                                                                            |
-| `sync_complete`          | `count`                                                                           |
-| `location_selected`      | `location_id` (a place, or a sub-map location such as `convenience.phone_shop`)   |
-| `week_slept`             | `month`, `week`                                                                   |
-| `glossary_term_opened`   | `term_id`, `article_id`                                                           |
-| `news_question_answered` | `edition`, `article_id`, `correct`, `attempt`                                     |
-| `news_edition_completed` | `edition`, `correct_count`                                                        |
-| `shop_purchase`          | `kind` (`necessity` or `want`), `price`, `health`, `sanity`, `month`, `week`      |
-| `work_shift`             | `wage`, `health`, `sanity`, `month`, `week`                                       |
-| `school_attended`        | `health`, `sanity`, `month`, `week`                                               |
+| `type`                   | Payload keys                                                                                   |
+| ------------------------ | ---------------------------------------------------------------------------------------------- |
+| `app_open`, `map_opened` | none                                                                                           |
+| `onboarding_complete`    | `level`, `lang`, `persona_id` (as onboarding sends it), `personaId`                            |
+| `persona_selected`       | `persona_id` (as onboarding sends it), `personaId`, `level`                                    |
+| `decision_made`          | `scenarioId`, `choiceId`, `pillar`, `month`, `week`                                            |
+| `rewind_used`            | `scenarioId`, `month`, `week`, `tokensLeft`                                                    |
+| `event_triggered`        | `eventId`, `choiceId`, `month`, `week`                                                         |
+| `minigame_complete`      | `game`, `correct`, `total`, `score`, `level`                                                   |
+| `quiz_submitted`         | `quiz_type` (`baseline`, `endline` or `classroom`), `quiz_id`, `answers`, `score`              |
+| `module_complete`        | `moduleId`, `pillar`                                                                           |
+| `badge_earned`           | `badgeId`                                                                                      |
+| `language_changed`       | `lang`                                                                                         |
+| `sync_complete`          | `count`                                                                                        |
+| `location_selected`      | `location_id` (a place, or a sub-map location such as `convenience.phone_shop`)                |
+| `week_slept`             | `month`, `week`                                                                                |
+| `glossary_term_opened`   | `term_id`, `article_id`                                                                        |
+| `news_question_answered` | `edition`, `article_id`, `correct`, `attempt`                                                  |
+| `news_edition_completed` | `edition`, `correct_count`                                                                     |
+| `shop_purchase`          | `kind` (`necessity` or `want`), `price`, `health`, `sanity`, `month`, `week`                   |
+| `work_shift`             | `wage`, `health`, `sanity`, `month`, `week`                                                    |
+| `school_attended`        | `health`, `sanity`, `month`, `week`                                                            |
+| `guide_completed`        | `guide_id` (e.g. `guide.bank_account`), `correct` (first answer to the guide's check question) |
 
 For the life events, `health` and `sanity` are the clamped changes (they can be negative), and `price` and `wage` are whole rupees.
 

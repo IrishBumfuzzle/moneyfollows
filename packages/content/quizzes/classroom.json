@@ -75,7 +75,7 @@
     "id": "quiz.classroom.invest.risk_return",
     "quiz": "classroom",
     "pillar": "understand_investing",
-    "concept": "risk_and_return",
+    "concept": "risk_return",
     "text": "t:quiz.classroom.invest.risk_return.q",
     "options": [
       "t:quiz.classroom.invest.risk_return.o1",
@@ -129,7 +129,7 @@
     "id": "quiz.classroom.safe.collect_request",
     "quiz": "classroom",
     "pillar": "stay_safe",
-    "concept": "upi_collect_request",
+    "concept": "upi_collect",
     "text": "t:quiz.classroom.safe.collect_request.q",
     "options": [
       "t:quiz.classroom.safe.collect_request.o1",

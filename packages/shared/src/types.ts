@@ -206,6 +206,28 @@ export interface Article {
   meta: { status: 'draft' | 'reviewed'; author: string; factsCheckedBy?: string };
 }
 
+/** Additive: one idea the game teaches (concepts.json). Content tags it by id in its `concept` field. */
+export interface Concept {
+  id: string;
+  pillar: Pillar;
+  name: TKey;
+  /** One line: "what this means". */
+  simple: TKey;
+}
+
+/** Additive: a short real-life guide (guides/*.json): steps, then one check question. */
+export interface Guide {
+  id: string; // e.g. "guide.bank_account"
+  pillar: Pillar;
+  icon: string;
+  concepts: string[];
+  title: TKey;
+  intro: TKey;
+  steps: TKey[];
+  check: { prompt: TKey; options: TKey[]; correct: number; explanation: TKey };
+  meta: { status: 'draft' | 'reviewed'; author: string; factsCheckedBy?: string };
+}
+
 /**
  * Additive: a map place or a sub-map location (places.json, 5.8). Top-level places use a
  * LocationId; sub-map locations use "<parent>.<name>" and set `parent`.
@@ -324,7 +346,9 @@ export type SyncEventType =
   // Additive: life meters (docs/life-meters-api.md section 5 on main).
   | 'shop_purchase'
   | 'work_shift'
-  | 'school_attended';
+  | 'school_attended'
+  // Additive: a real-life guide finished (packages/content/guides).
+  | 'guide_completed';
 
 export interface SyncEvent {
   event_id: string; // uuid, generated on device

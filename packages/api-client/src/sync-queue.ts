@@ -310,6 +310,8 @@ export interface SyncEventPayloads {
   /** wage is whole rupees, earned (never free money). */
   work_shift: { wage: number; health: number; sanity: number; month: number; week: number };
   school_attended: { health: number; sanity: number; month: number; week: number };
+  /** A real-life guide finished; correct is the first answer to its check question. */
+  guide_completed: { guide_id: string; correct: boolean };
 }
 
 export type SyncEventPayload<T extends SyncEventType> = T extends keyof SyncEventPayloads

@@ -1,0 +1,145 @@
+[
+  {
+    "id": "guide.bank_account",
+    "pillar": "save_manage",
+    "icon": "bank",
+    "concepts": ["savings_account", "kyc"],
+    "title": "t:guide.bank_account.title",
+    "intro": "t:guide.bank_account.intro",
+    "steps": [
+      "t:guide.bank_account.step1",
+      "t:guide.bank_account.step2",
+      "t:guide.bank_account.step3",
+      "t:guide.bank_account.step4",
+      "t:guide.bank_account.step5"
+    ],
+    "check": {
+      "prompt": "t:guide.bank_account.q",
+      "options": ["t:guide.bank_account.o1", "t:guide.bank_account.o2", "t:guide.bank_account.o3"],
+      "correct": 0,
+      "explanation": "t:guide.bank_account.why"
+    },
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "guide.upi_safety",
+    "pillar": "stay_safe",
+    "icon": "phone",
+    "concepts": ["upi_collect", "never_share_otp"],
+    "title": "t:guide.upi_safety.title",
+    "intro": "t:guide.upi_safety.intro",
+    "steps": [
+      "t:guide.upi_safety.step1",
+      "t:guide.upi_safety.step2",
+      "t:guide.upi_safety.step3",
+      "t:guide.upi_safety.step4",
+      "t:guide.upi_safety.step5"
+    ],
+    "check": {
+      "prompt": "t:guide.upi_safety.q",
+      "options": ["t:guide.upi_safety.o1", "t:guide.upi_safety.o2", "t:guide.upi_safety.o3"],
+      "correct": 0,
+      "explanation": "t:guide.upi_safety.why"
+    },
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "guide.if_scammed",
+    "pillar": "stay_safe",
+    "icon": "shield",
+    "concepts": ["reporting_fraud"],
+    "title": "t:guide.if_scammed.title",
+    "intro": "t:guide.if_scammed.intro",
+    "steps": [
+      "t:guide.if_scammed.step1",
+      "t:guide.if_scammed.step2",
+      "t:guide.if_scammed.step3",
+      "t:guide.if_scammed.step4",
+      "t:guide.if_scammed.step5"
+    ],
+    "check": {
+      "prompt": "t:guide.if_scammed.q",
+      "options": ["t:guide.if_scammed.o1", "t:guide.if_scammed.o2", "t:guide.if_scammed.o3"],
+      "correct": 0,
+      "explanation": "t:guide.if_scammed.why"
+    },
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "guide.first_pay",
+    "pillar": "plan_budget",
+    "icon": "wallet",
+    "concepts": ["gross_vs_net", "pay_goal_first", "job_offer_fee"],
+    "title": "t:guide.first_pay.title",
+    "intro": "t:guide.first_pay.intro",
+    "steps": [
+      "t:guide.first_pay.step1",
+      "t:guide.first_pay.step2",
+      "t:guide.first_pay.step3",
+      "t:guide.first_pay.step4"
+    ],
+    "check": {
+      "prompt": "t:guide.first_pay.q",
+      "options": ["t:guide.first_pay.o1", "t:guide.first_pay.o2", "t:guide.first_pay.o3"],
+      "correct": 0,
+      "explanation": "t:guide.first_pay.why"
+    },
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "guide.bank_sms",
+    "pillar": "stay_safe",
+    "icon": "message",
+    "concepts": ["tracking_spending", "never_share_otp"],
+    "title": "t:guide.bank_sms.title",
+    "intro": "t:guide.bank_sms.intro",
+    "steps": ["t:guide.bank_sms.step1", "t:guide.bank_sms.step2", "t:guide.bank_sms.step3", "t:guide.bank_sms.step4"],
+    "check": {
+      "prompt": "t:guide.bank_sms.q",
+      "options": ["t:guide.bank_sms.o1", "t:guide.bank_sms.o2", "t:guide.bank_sms.o3"],
+      "correct": 0,
+      "explanation": "t:guide.bank_sms.why"
+    },
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  },
+  {
+    "id": "guide.loan_cost",
+    "pillar": "save_manage",
+    "icon": "coins",
+    "concepts": ["interest_cost", "borrowing_safely", "loan_apps"],
+    "title": "t:guide.loan_cost.title",
+    "intro": "t:guide.loan_cost.intro",
+    "steps": [
+      "t:guide.loan_cost.step1",
+      "t:guide.loan_cost.step2",
+      "t:guide.loan_cost.step3",
+      "t:guide.loan_cost.step4",
+      "t:guide.loan_cost.step5"
+    ],
+    "check": {
+      "prompt": "t:guide.loan_cost.q",
+      "options": ["t:guide.loan_cost.o1", "t:guide.loan_cost.o2", "t:guide.loan_cost.o3"],
+      "correct": 0,
+      "explanation": "t:guide.loan_cost.why"
+    },
+    "meta": {
+      "status": "draft",
+      "author": "claude"
+    }
+  }
+]

@@ -12,6 +12,8 @@ Scenarios, events, personas, quizzes, the Scam or Safe? messages, the map places
 | `quizzes/baseline.json`, `quizzes/endline.json` | 6 parallel questions each, paired by pillar and concept (`.baseline` and `.endline` ids). |
 | `minigames/scam-or-safe.json` | 12 Scam or Safe? messages. |
 | `places.json` | The map: 5 places (`home`, `convenience` = the Shop, `school`, `hospital`, `bank`) and the Shop's 3 sub-map locations (`convenience.phone_shop`, `.kirana`, `.clothes_stall`). `position` is the pin's centre in percent of the map (sub-map locations: of the sub-map). Names are `t:place.<id>`. No `unlock` means open from month 1. |
+| `concepts.json` | Every idea the game teaches (29), with its pillar, `t:concept.<id>.name` and `.simple` (one line, at most 100 characters). Scenarios, events, quiz questions and guides tag one by id; the linter fails on a tag that is not here. |
+| `guides/real-life.json` | Short real-life guides (Learn, in the student app): `t:guide.<id>.title`, `.intro`, `.step1`…, then one check question `.q`, `.o1`…, `.why`. Each lists its `concepts`. They state real facts, so `--strict` needs `meta.factsCheckedBy`. |
 | `glossary.json` | Paisa Times words: `t:glossary.<id>.word`, `.simple` (one line, at most 100 characters) and `.example`. |
 | `news/<edition>.json` | One Paisa Times edition (e.g. `2026-W41`): 5 articles. Every file here is an edition; adding one needs no code change. Keys are `t:news.<edition>.<id>.headline`, `.body`, `.q`, `.o1`…, `.why`. |
 | `i18n/<code>.json` | Flat maps from key (without `t:`) to text. Every file here is a language. |
@@ -54,6 +56,7 @@ The linter enforces CLAUDE.md section 7.2 on every language file:
 - **Scam or Safe?**: message bodies may quote a scammer's promises, but links must use a reserved fake domain (`*.example`, `*.invalid`, `*.test`) and numbers must be on `scamPlaceholderNumbers`. The sender, hints and explanation get the full checks.
 - **Map**: every card's `location` is a top-level place in `places.json`, and its `sublocation` is one of that place's `children` (with `parent` set back to it).
 - **Paisa Times**: every `[[termId]]` in every language is in `glossary.json` and written in lower case; `terms` equals the English markers; every language marks the same terms. Articles, glossary entries and place names get all the text checks above (brands, promises, advice, links, numbers, tone). `--strict` also fails any article whose `meta` has no `factsCheckedBy` (`facts_unchecked`), because a human must check every real figure.
+- **Concepts and guides**: every `concept` on a scenario, event or quiz question, and every id in a guide's `concepts`, is in `concepts.json` (`unknown_concept`). Guides get all the text checks, and `--strict` fails any guide without `factsCheckedBy`.
 - **Content version**: `manifest.json` `version` is a date (`YYYY.MM.DD`, optional `.N`) or semver.
 
 ### Length caps
@@ -81,6 +84,9 @@ Caps count visible characters (a Hindi letter with its vowel sign is one) and ap
 | question, option, explanation | article `news.*.q`, `.o1`…, `.why` | 120, 60, 160 |
 | glossaryWord, glossarySimple, glossaryExample | `glossary.*.word`, `.simple`, `.example` | 30, 100, 140 |
 | placeName | `place.*` | 24 |
+| conceptName, glossarySimple | `concept.*.name`, `concept.*.simple` | 30, 100 |
+| guideTitle, guideStep | `guide.*.title`; `guide.*.intro`, `guide.*.step1`… | 50, 160 |
+| question, option, explanation | guide `guide.*.q`, `.o1`…, `.why` | 120, 60, 160 |
 
 Strings no card uses (reflections, buttons, the banner) get the same text checks.
 
