@@ -44,6 +44,7 @@ This split differs from CLAUDE.md, which gives onboarding and the Room hub to UI
 | `pnpm` on your laptop | Fixed; your `package.json` has a new `packageManager` line that is not committed yet |
 | Onboarding, main screen, Paisa Times, `apps/dashboard` | Nothing yet |
 | `packages/shared`, engine (`earn()`), content, api-client | Not on `main` yet (an `origin/Backend` branch exists) |
+| Life meters API (`src/features/life`, see `docs/life-meters-api.md`): one common money wallet, health, sanity; the store's necessity/want options, work, school | Frontend API and tests built; screens, engine and backend not yet |
 
 ### Which document wins
 
@@ -283,6 +284,7 @@ Your screens need things other people are building. Until each one lands, use a 
 | `join_class` | BE-2: `packages/api-client` | `src/api/joinClass.ts` that accepts any code |
 | Staff sign-in, `class_progress`, `learning_gain` | BE-2 | `apps/dashboard/src/api.ts` returning seed data |
 | Baseline and end-line quiz scores | Not decided (the classroom quiz is practice only) | Seed data, labelled "Demo data" on screen |
+| Health and sanity meters; store, work and school actions | BE-1: `buy`, `work`, `attendSchool`, `GameState.money` (one common wallet) and `GameState.vitals`; BE-2: three new event types (`docs/life-meters-api.md` §4–5) | `lifeApi` in `src/features/life/life.ts`, a local stand-in with the same rules |
 
 ### Setup is done when
 
@@ -345,6 +347,7 @@ Placeholders are fine in every phase: an emoji avatar or a grey box for an artic
 | Demo panel "mark a new edition" | Demo panel owner → you | Their panel calls your `markNewEdition()` |
 | `App.tsx` | Shared | You add `onboarding`, `main` and `news` screens the way `classroom` is added, and tell the other UI dev each time |
 | Quiz scores for the dashboard | Baseline/end-line owner → BE-2 → you | `quiz_submitted` events; your dashboard reads `learning_gain` |
+| Meters bar, store sheet, work and school | Other UI dev | They call `lifeApi.shopOffers / buy / work / attendSchool` and render the result (`docs/life-meters-api.md` §6) |
 
 **Prompt 0a — record the new lanes**
 
@@ -838,6 +841,7 @@ Tick this list as you go; each line points to its full "Done when" list in Secti
 - [ ] Other UI dev: the hand-off table; `App.tsx` is shared; an `earn()` you can call; that the main screen is now yours
 - [ ] BE-1: dates for a sample edition, `glossary.json` and `personas.json`
 - [ ] BE-2: api-client `join_class`, staff sign-in, `class_progress`, `learning_gain`, dashboard seed data, the deployed student URL for the QR; the pnpm pin
+- [ ] BE-1 and BE-2: the life meters proposal (`docs/life-meters-api.md` §4 engine functions, the common `money` wallet and `vitals`; §5 the `shop_purchase`, `work_shift` and `school_attended` events)
 - [ ] Team: owners for MessageInspector, Scam or Safe?, Time Machine, Me and Notes; where the baseline and end-line quizzes live; your sleep slot
 
 ### Glossary
@@ -852,6 +856,7 @@ Tick this list as you go; each line points to its full "Done when" list in Secti
 | Facilitator | The NGO teacher who runs sessions and uses the dashboard |
 | Feature freeze | 08:30 Sunday: after this, only bug fixes, copy and polish |
 | Glossary term | A money word with a simple meaning and an everyday example, shown in the thought cloud |
+| Health, sanity | The character's two 0–100 meters beside money. Store purchases raise sanity (wants more than necessities); work and school lower it |
 | Hook | A function starting with `use` that gives a component state or side effects |
 | i18n | Internationalisation: every visible word is a key, translated per language |
 | IndexedDB | Storage inside the browser that survives reloads and works offline |
