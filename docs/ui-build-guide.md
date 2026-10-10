@@ -43,7 +43,8 @@ This split differs from CLAUDE.md, which gives onboarding and the Room hub to UI
 | Paisa Times (`src/features/news`) | Works on `@paisa/content` (edition 2026-W41 + glossary); Word Wallet, `markNewEdition()` |
 | Map (`src/screens/LocationScreen.tsx`), store sheet, meters bar | Works |
 | Classroom (`src/features/classroom`) | Works; questions from `@paisa/content`, quiz logic from `@paisa/engine`; question count and pillars from the class (`API.md` §5.5, backend field proposed); bigger stage that fills the screen |
-| Sudden events and the phone (`src/features/events`) | Works: injury → hospital bill, 4 scams, 3 real offers, debt and Pay back |
+| Sudden events (`src/features/events`) | Works: injury → hospital bill, debt and Pay back |
+| Phone (`src/features/phone`, see `docs/phone-api.md`) | Works like a real phone: home screen with 4 apps (Messages with 4 scams and 3 real offers; Phone with incoming calls; Vanguard Learn with the growth explorer; Snake). Vanguard feed acceptor built; backend field proposed |
 | Shared game store (`src/game/useGame.ts`) | Works: common money wallet, health, sanity, debt, `earn`. Not yet on the engine's `GameState`: the engine pays into jars, the app uses one wallet; decide when building the game loop |
 | Crash screen (`src/ErrorBoundary.tsx`) | A crash shows "Back to the main screen" instead of a blank page, and logs the error |
 | Game loop (pins, place decisions, rewind, sleep, Month Recap), Bank, mini-games, Me/Notes/Settings, demo panel, PWA/offline banner | Not built |

@@ -26,7 +26,9 @@ export function SuddenEventSheet({ lang, name }: { lang: Lang; name: string }) {
 
   const ev = sudden ? getEvent(sudden.id) : undefined;
   const phase = sudden?.choice ? 'done' : step;
-  useEffect(() => focusRef.current?.focus(), [phase]);
+  useEffect(() => {
+    focusRef.current?.focus();
+  }, [phase]);
   useEffect(() => {
     if (!sudden) setStep('hit');
   }, [sudden]);

@@ -6,7 +6,9 @@ import { CLASSROOM_BANK } from './features/classroom/content';
 import { ClassroomScreen } from './features/classroom/ClassroomScreen';
 import { loadClassroomConfig } from './features/classroom/config';
 import type { ClassroomConfig } from './features/classroom/config';
-import { PhoneLayer, PhoneScreen, SuddenEventSheet, triggerEvent, useEvents } from './features/events';
+import { PhoneLayer, SuddenEventSheet, triggerEvent, useEvents } from './features/events';
+import { IncomingCall, PhoneScreen } from './features/phone';
+import type { PhoneNav } from './features/phone';
 import { MetersBar } from './features/life/MetersBar';
 import { StoreSheet } from './features/life/StoreSheet';
 import { trackLife } from './features/life/track';
@@ -70,10 +72,14 @@ function Game({ profile, setProfile, lang }: {
     if (hydrated && id) triggerEvent(id);
   }, [hydrated]);
 
+  const pops = useRef(0); // popstate events seen, for back()'s fallback
   // Each screen is a history entry, so Android's back button goes up a level (place → map →
   // main screen) instead of leaving the app (CLAUDE.md 6). Paisa Times adds its own levels.
   useEffect(() => {
-    const on = (e: PopStateEvent) => setScreen(screenOf(e.state));
+    const on = (e: PopStateEvent) => {
+      pops.current += 1;
+      setScreen(screenOf(e.state));
+    };
     window.addEventListener('popstate', on);
     return () => window.removeEventListener('popstate', on);
   }, []);
@@ -86,11 +92,13 @@ function Game({ profile, setProfile, lang }: {
   const back = useCallback(() => {
     const from = screenOf(window.history.state);
     if (!(window.history.state as { screen?: Screen } | null)?.screen) return setScreen((s) => parentOf(s));
+    const before = pops.current;
     window.history.back();
-    // If the browser drops the step (no earlier entry in this tab), go up a level anyway rather
-    // than leaving the player on a screen whose exit did nothing.
+    // If the browser drops the step (no earlier entry in this tab), no popstate arrives: go up a
+    // level anyway. Counting popstates (not reading the screen) means a quick re-open within the
+    // wait is never undone.
     window.setTimeout(() => {
-      if (screenOf(window.history.state) === from) setScreen(parentOf(from));
+      if (pops.current === before) setScreen(parentOf(from));
     }, 400);
   }, []);
 
@@ -117,15 +125,19 @@ function Game({ profile, setProfile, lang }: {
   if (profile === undefined || !hydrated) return null;
   if (profile === null) return <Onboarding initialLang={LANG} onDone={setProfile} />;
   const name = mainT(lang, `persona.${profile.persona}.name`);
-  const openPhone = (thread?: string) => {
+  // Opens the phone at its home screen, an app, or an item; one history entry per level so
+  // Android back walks out the same way (item → app → home → back here).
+  const openPhone = (to: PhoneNav = {}) => {
     window.history.pushState({ screen: 'phone' }, '');
-    if (thread) window.history.pushState({ screen: 'phone', thread }, '');
+    if (to.app) window.history.pushState({ screen: 'phone', app: to.app }, '');
+    if (to.app && to.item) window.history.pushState({ screen: 'phone', app: to.app, item: to.item }, '');
     setScreen('phone');
   };
   // Events and messages only surface on the map and main screen, never over a scene (CLAUDE.md 5.8).
   const eventLayer = (where: 'map' | 'main') => (
     <>
-      <PhoneLayer lang={lang} name={name} where={where} onOpen={openPhone} />
+      <PhoneLayer lang={lang} name={name} where={where} onOpen={(thread) => openPhone(thread ? { app: 'messages', item: thread } : {})} />
+      <IncomingCall lang={lang} name={name} onAnswer={(id) => openPhone({ app: 'calls', item: id })} />
       <SuddenEventSheet lang={lang} name={name} />
     </>
   );
@@ -147,7 +159,7 @@ function Game({ profile, setProfile, lang }: {
     );
   }
   if (screen === 'news') return <PaisaTimes lang={lang} onExit={back} />;
-  if (screen === 'phone') return <PhoneScreen lang={lang} name={name} onExit={back} />;
+  if (screen === 'phone') return <PhoneScreen lang={lang} name={name} profile={profile} onExit={back} />;
   if (screen === 'classroom') {
     if (!classroom) return <div className="cr-screen" aria-busy="true" />;
     return (

@@ -55,7 +55,9 @@ export function ClassroomScreen({ lang, seed, config, onExit, onFinish }: {
   const tr = (key: string, vars?: Record<string, string | number>) => t(lang, key, vars);
 
   // Move focus to the board when the question changes, so screen readers read it next.
-  useEffect(() => boardRef.current?.focus(), [phase.name, session.index]);
+  useEffect(() => {
+    boardRef.current?.focus();
+  }, [phase.name, session.index]);
 
   const q = currentQuestion(session);
 

@@ -53,7 +53,9 @@ export function Onboarding({ onDone, initialLang = 'en' }: { onDone: (profile: P
   }, []);
 
   // Move focus to the title on each step, so screen readers read it next.
-  useEffect(() => titleRef.current?.focus(), [step]);
+  useEffect(() => {
+    titleRef.current?.focus();
+  }, [step]);
 
   const nicknameOk = isValidNickname(nickname);
   const canContinue = [true, cleanCode(code) !== '', nicknameOk && avatar !== null, persona !== null, joined !== null][step];
