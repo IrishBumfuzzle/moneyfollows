@@ -16,7 +16,8 @@ All the numbers are placeholders. They live in one config file so BE-1 can tune 
 | ✅ built (frontend) | `lifeApi` with `shopOffers / buy / work / attendSchool`, the config, `toLifeEvent`, en + hi strings, 15 unit tests (`apps/student/src/features/life/`) |
 | 🟡 proposed | Engine: the same four functions in `packages/engine` plus `money` and `vitals` fields on `GameState` (§4). BE-1 to build |
 | 🟡 proposed | Backend: three new `SyncEvent` types in `push_events` (§5). BE-2 to build |
-| ⬜ todo | Screens: the store's two-option sheet, work and school buttons, a meters bar (§6). UI-1 |
+| ✅ built | Screens: `MetersBar` on the map and `StoreSheet` at the convenience store (§6) |
+| ⬜ todo | Work and school buttons; a shared game store to replace the local state in `App.tsx` (§6) |
 
 > **The backend is not built and must not be built from the frontend lane.** §4 and §5 describe what the frontend expects, so BE-1 and BE-2 can build it to match.
 
@@ -184,11 +185,27 @@ Each successful action becomes one `SyncEvent` (CLAUDE.md §5.5), queued offline
 
 **Optional for the dashboard:** a `class_wellbeing(class_id)` RPC (facilitator-only, same RLS check as `class_progress`) returning, per student, the counts of necessity vs want purchases and the work/school shifts. It would show who is overspending on wants. Ask the dashboard owner first; it is not on the demo path.
 
-## 6. UI (to build, UI-1)
+## 6. UI
 
-- **Meters bar** at the top of the map and places: money (the one common wallet), health and sanity, each with an **icon + label + number**, never colour alone (CLAUDE.md §6). Use `JarDelta`-style "+12" pops after an action.
-- **Store sheet** (`convenience`): two large cards from `lifeApi.shopOffers(state)`, each with its icon, label, hint, price (via `Intl.NumberFormat('en-IN')`) and the sanity change. A card with `affordable: false` (not enough money) is greyed out and shows the `not_enough_money` line, but stays readable.
+### 6.1 Built
+
+| Component | File | What it does |
+|---|---|---|
+| `MetersBar` | `MetersBar.tsx` | Fixed panel at the top of the map: money (₹, Indian grouping), health and sanity, each with a pixel icon, label, number and, for the two meters, a 0–100 bar (`role="meter"`). After an action a "+12" / "−₹400" pop shows next to the number (green up, red down; the sign is always in the text). |
+| `StoreSheet` | `StoreSheet.tsx` | Bottom sheet over the dimmed map with the two cards from `lifeApi.shopOffers(state)`: icon, label, hint, price and sanity change. Tapping buys through `lifeApi.buy` and reports `onBuy(kind, outcome)`; a status line says what changed. A card the wallet can't pay for is greyed out with "Not enough money." and stays readable (`aria-disabled`, not `disabled`, so screen readers still reach it). |
+| `PixelIcon` | `PixelIcon.tsx` | 8×8 pixel icons as SVG (coin, heart, smile, sack, headphones), so they look the same on every phone instead of depending on the emoji font. |
+
+- **Wiring (`App.tsx`):** tapping the convenience store pushes a `store` history entry, so the close button, a tap on the dim area, Escape and **Android back** all close the sheet (CLAUDE.md §6). `?screen=store` opens it directly.
+- The meters bar sits above the sheet's overlay so purchases show live.
+- **Life state lives in `App.tsx`** (`startLife()`: ₹2,000, health 80, sanity 70) until the shared game store exists; nothing is saved across reloads yet.
+- Motion: the sheet rises in 180 ms and pops fade in 1.2 s; with `prefers-reduced-motion` neither animates and the pop just shows.
+- Strings: `life.meters.*`, `life.meter.*`, `life.store.*` in en and hi.
+
+### 6.2 Still to build
+
 - **Work and school buttons:** one main button each. After use, disable it with the `already_*` line until the week ends.
+- **Shared game store:** move the life state out of `App.tsx` into the game store (with `money` and `vitals` from the engine, §4), saved to IndexedDB.
+- **Sync:** queue `toLifeEvent(...)` in `onBuy` once the backend accepts the events (§5).
 - Every word through the `life.*` keys, in en and hi. Tap targets at least 48 px at 360 px wide.
 - Frame wants without shaming (CLAUDE.md §7.2 tone): a want is a fair choice that costs more, not a mistake.
 
@@ -197,6 +214,7 @@ Each successful action becomes one `SyncEvent` (CLAUDE.md §5.5), queued offline
 | Command | What it checks |
 |---|---|
 | `pnpm --filter student test` | the 15 life tests plus the classroom tests |
+| Browser, 360×640, en and hi | map → Store → buy a want (money −₹400, sanity +12, pops show) → keep buying until both cards grey out → Android back closes the sheet; no text overflow, no sideways scroll, no console errors |
 | `pnpm --filter student typecheck` | types |
 
 The life tests cover: the config's ordering (rule 1), each action's money and sanity change, blocking when the wallet is short, repeat buys, once-per-week work and school and their reset next week, clamping at 0 and 100, immutability with extra `GameState` fields, determinism and JSON round-trip, `affordable`, the event payloads and their backend filter, no event when blocked, and en/hi key parity.
