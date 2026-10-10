@@ -1,0 +1,146 @@
+[
+  {
+    "id": "jar.sana_payday.01",
+    "personas": ["sana"],
+    "levels": ["starter", "explorer", "planner"],
+    "text": "t:jar.sana_payday.01.story",
+    "lesson": "t:jar.sana_payday.01.lesson",
+    "income": 4000,
+    "step": 100,
+    "checks": [
+      {
+        "id": "needs",
+        "kind": "min_jar",
+        "jar": "needs",
+        "amount": 2000,
+        "ok": "t:jar.check.needs.ok",
+        "fix": "t:jar.check.needs.fix"
+      },
+      {
+        "id": "save",
+        "kind": "min_share",
+        "jars": ["goals", "savings"],
+        "percent": 20,
+        "ok": "t:jar.check.save.ok",
+        "fix": "t:jar.check.save.fix"
+      },
+      {
+        "id": "wants",
+        "kind": "max_share",
+        "jars": ["wants"],
+        "percent": 30,
+        "ok": "t:jar.check.wants.ok",
+        "fix": "t:jar.check.wants.fix"
+      }
+    ],
+    "meta": { "status": "draft", "author": "claude" }
+  },
+  {
+    "id": "jar.ravi_payday.01",
+    "personas": ["ravi"],
+    "levels": ["starter", "explorer", "planner"],
+    "text": "t:jar.ravi_payday.01.story",
+    "lesson": "t:jar.ravi_payday.01.lesson",
+    "income": 3000,
+    "step": 100,
+    "checks": [
+      {
+        "id": "needs",
+        "kind": "min_jar",
+        "jar": "needs",
+        "amount": 1200,
+        "ok": "t:jar.check.needs.ok",
+        "fix": "t:jar.check.needs.fix"
+      },
+      {
+        "id": "save",
+        "kind": "min_share",
+        "jars": ["goals", "savings"],
+        "percent": 15,
+        "ok": "t:jar.check.save.ok",
+        "fix": "t:jar.check.save.fix"
+      },
+      {
+        "id": "wants",
+        "kind": "max_share",
+        "jars": ["wants"],
+        "percent": 30,
+        "ok": "t:jar.check.wants.ok",
+        "fix": "t:jar.check.wants.fix"
+      }
+    ],
+    "meta": { "status": "draft", "author": "claude" }
+  },
+  {
+    "id": "jar.festival_month.01",
+    "personas": ["sana", "ravi"],
+    "levels": ["starter", "explorer", "planner"],
+    "text": "t:jar.festival_month.01.story",
+    "lesson": "t:jar.festival_month.01.lesson",
+    "income": 5000,
+    "step": 100,
+    "checks": [
+      {
+        "id": "needs",
+        "kind": "min_jar",
+        "jar": "needs",
+        "amount": 2000,
+        "ok": "t:jar.check.needs.ok",
+        "fix": "t:jar.check.needs.fix"
+      },
+      {
+        "id": "save",
+        "kind": "min_share",
+        "jars": ["goals", "savings"],
+        "percent": 20,
+        "ok": "t:jar.check.save.ok",
+        "fix": "t:jar.check.save.fix"
+      },
+      {
+        "id": "wants",
+        "kind": "max_share",
+        "jars": ["wants"],
+        "percent": 40,
+        "ok": "t:jar.check.wants.ok",
+        "fix": "t:jar.check.wants.fix"
+      }
+    ],
+    "meta": { "status": "draft", "author": "claude" }
+  },
+  {
+    "id": "jar.exam_month.01",
+    "personas": ["sana", "ravi"],
+    "levels": ["explorer", "planner"],
+    "text": "t:jar.exam_month.01.story",
+    "lesson": "t:jar.exam_month.01.lesson",
+    "income": 4000,
+    "step": 100,
+    "checks": [
+      {
+        "id": "needs",
+        "kind": "min_jar",
+        "jar": "needs",
+        "amount": 1800,
+        "ok": "t:jar.check.needs.ok",
+        "fix": "t:jar.check.needs.fix"
+      },
+      {
+        "id": "save",
+        "kind": "min_share",
+        "jars": ["goals", "savings"],
+        "percent": 10,
+        "ok": "t:jar.check.save.ok",
+        "fix": "t:jar.check.save.fix"
+      },
+      {
+        "id": "wants",
+        "kind": "max_share",
+        "jars": ["wants"],
+        "percent": 20,
+        "ok": "t:jar.check.wants.ok",
+        "fix": "t:jar.check.wants.fix"
+      }
+    ],
+    "meta": { "status": "draft", "author": "claude" }
+  }
+]

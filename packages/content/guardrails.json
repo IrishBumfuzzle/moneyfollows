@@ -65,6 +65,7 @@
     "reflection": 140,
     "banner": 140,
     "badgeName": 24,
-    "badgeDesc": 100
+    "badgeDesc": 100,
+    "feedback": 120
   }
 }

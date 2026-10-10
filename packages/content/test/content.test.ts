@@ -8,6 +8,7 @@ import {
   content,
   i18n,
   isValidContentVersion,
+  jarSplitRounds,
   languages,
 } from '../src';
 import manifest from '../manifest.json';
@@ -116,6 +117,7 @@ describe('i18n', () => {
     const allowed = new Set([
       ...bundleKeys(),
       ...collectKeys(badges),
+      ...collectKeys(jarSplitRounds),
       ...Object.values(REFLECTION_KEYS).map((k) => k.slice(2)),
       'common.ok',
       'common.continue',

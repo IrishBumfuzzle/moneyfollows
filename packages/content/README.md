@@ -66,6 +66,7 @@ Caps count visible characters (a Hindi letter with its vowel sign is one) and ap
 | bio, name, goal | `persona.*` | 160, 20, 40 |
 | reflection, banner | `reflection.*`, `assumption.banner` | 140 |
 | badgeName, badgeDesc | `badge.*.name`, `badge.*.desc` | 24, 100 |
+| feedback | Jar Splitter `jar.check.*` | 120 |
 
 Strings no card uses (reflections, buttons, the banner) get the same text checks.
 

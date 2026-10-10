@@ -577,7 +577,7 @@ describe('the real content', () => {
       .sort()
       .map((f) => `${dir}/${f}`);
   const files: ContentFile[] = [
-    ...['scenarios', 'events', 'quizzes', 'minigames'].flatMap(jsonIn),
+    ...['scenarios', 'events', 'quizzes', 'minigames', 'rewards'].flatMap(jsonIn),
     'personas.json',
   ].map((path) => ({ path, data: readJson(path) }));
   const i18n: Record<string, Record<string, unknown>> = {};
@@ -639,5 +639,66 @@ describe('badges (rewards/badges.json)', () => {
     const brand = { ...badgeTexts, 'badge.first_step.desc': 'You paid with Paytm.' };
     expect(rules(runBadge(badgeItem(), brand))).toContain('real_brand');
     expect(rules(runBadge(badgeItem({ meta: { status: 'draft', author: 'x' } }), badgeTexts, true))).toContain('draft');
+  });
+});
+
+describe('Jar Splitter (minigames/jar-splitter.json)', () => {
+  const round = (over: Record<string, unknown> = {}) => ({
+    id: 'jar.test.01',
+    personas: ['sana'],
+    levels: ['starter'],
+    text: 't:jar.test.01.story',
+    lesson: 't:jar.test.01.lesson',
+    income: 4000,
+    step: 100,
+    checks: [
+      {
+        id: 'needs',
+        kind: 'min_jar',
+        jar: 'needs',
+        amount: 2000,
+        ok: 't:jar.check.needs.ok',
+        fix: 't:jar.check.needs.fix',
+      },
+    ],
+    meta,
+    ...over,
+  });
+  const texts = {
+    'jar.test.01.story': 'Payday! Split ₹4,000 into your jars.',
+    'jar.test.01.lesson': 'Bills first, then savings.',
+    'jar.check.needs.ok': 'Needs has ₹{{amount}}.',
+    'jar.check.needs.fix': 'Needs is ₹{{short}} short.',
+  };
+  const runJar = (item: unknown, en: Record<string, unknown> = texts, hi?: Record<string, unknown>) =>
+    run({ items: [item], file: 'minigames/jar-splitter.json', en, hi });
+
+  it('accepts a valid round and is not read as a Scam or Safe? message', () => {
+    expect(runJar(round())).toEqual([]);
+  });
+
+  it('rejects a step that does not divide the income and a bill bigger than the income', () => {
+    expect(rules(runJar(round({ step: 300 })))).toContain('schema');
+    const big = round({
+      checks: [
+        {
+          id: 'needs',
+          kind: 'min_jar',
+          jar: 'needs',
+          amount: 9000,
+          ok: 't:jar.check.needs.ok',
+          fix: 't:jar.check.needs.fix',
+        },
+      ],
+    });
+    expect(rules(runJar(big))).toContain('schema');
+  });
+
+  it('needs matching placeholders in hi and keeps feedback within its cap', () => {
+    const hi = { ...texts, 'jar.check.needs.fix': 'ज़रूरतों में पैसे कम हैं।' };
+    expect(rules(runJar(round(), texts, hi))).toContain('placeholders');
+    expect(capFor('jar.check.needs.ok')).toBe('feedback');
+    const long = { ...texts, 'jar.check.needs.ok': 'x'.repeat(121) };
+    expect(rules(runJar(round(), long))).toContain('length');
   });
 });

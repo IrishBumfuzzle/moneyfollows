@@ -9,6 +9,7 @@ import {
   ScenarioSchema,
 } from '@paisa/shared';
 import { BadgeSchema } from './badges';
+import { JarSplitRoundSchema } from './jar-splitter';
 
 export interface Guardrails {
   brands: string[];
@@ -53,7 +54,7 @@ export interface ValidateInput {
   contentVersion?: string;
 }
 
-type Kind = 'scenario' | 'event' | 'quiz' | 'scam' | 'persona' | 'badge';
+type Kind = 'scenario' | 'event' | 'quiz' | 'scam' | 'persona' | 'badge' | 'jar';
 
 interface Item {
   kind: Kind;
@@ -69,6 +70,7 @@ const SCHEMAS = {
   scam: ScamMessageSchema,
   persona: PersonaSchema,
   badge: BadgeSchema,
+  jar: JarSplitRoundSchema,
 } as const;
 
 function kindOf(path: string): Kind | null {
@@ -79,6 +81,7 @@ function kindOf(path: string): Kind | null {
   if (parts.includes('scenarios')) return 'scenario';
   if (parts.includes('events')) return 'event';
   if (parts.includes('quizzes')) return 'quiz';
+  if (parts.includes('minigames') && base === 'jar-splitter.json') return 'jar';
   if (parts.includes('minigames')) return 'scam';
   return null;
 }
@@ -284,7 +287,7 @@ export function visibleLength(text: string): number {
 
 /**
  * Which length cap applies to a key (README "Length caps"). Checked in order:
- * scam.why.* hints, reflections, the assumption banner, common.* buttons, badge.* strings, then key endings.
+ * scam.why.* hints, reflections, the assumption banner, common.* buttons, badge.* and jar.check.* strings, then key endings.
  */
 export function capFor(key: string): string | null {
   if (key.startsWith('scam.why.')) return 'hint';
@@ -293,6 +296,7 @@ export function capFor(key: string): string | null {
   if (key.startsWith('common.')) return 'label';
   if (key.startsWith('badge.') && key.endsWith('.name')) return 'badgeName';
   if (key.startsWith('badge.') && key.endsWith('.desc')) return 'badgeDesc';
+  if (key.startsWith('jar.check.')) return 'feedback';
   if (key.endsWith('.story')) return 'story';
   if (key.endsWith('.label')) return 'label';
   if (key.endsWith('.lesson')) return 'lesson';
