@@ -7,10 +7,20 @@ export interface QueueStorage {
   set<T>(key: string, value: T): Promise<void>;
 }
 
+/**
+ * push_events' result. `rejected` is additive (newer servers only): the event_id of every
+ * event the server skipped, so the queue can dead-letter just those.
+ */
+export type PushEventsResponse = PushEventsResult & { rejected?: string[] };
+
 /** A batch the queue gave up on. Kept so the app can show, export or re-queue it. */
 export interface DeadLetter {
-  /** 'rejected': the server refused the batch (4xx, validation). 'partial': it accepted fewer events than sent. */
-  reason: 'rejected' | 'partial';
+  /**
+   * 'rejected': the server refused the batch (4xx, validation). 'partial': it accepted fewer
+   * events than sent and did not say which (an older server). 'skipped' (additive): the events
+   * the server listed in `rejected`; the rest of their batch was accepted.
+   */
+  reason: 'rejected' | 'partial' | 'skipped';
   events: SyncEvent[];
   /** For 'partial': how many of `events` the server accepted. */
   accepted?: number;
@@ -25,7 +35,7 @@ export interface DeadLetter {
 export interface SyncQueueOptions {
   storage: QueueStorage;
   /** api.pushEvents fits as-is; `signal` is aborted when the request times out. */
-  push: (events: SyncEvent[], signal?: AbortSignal) => Promise<PushEventsResult>;
+  push: (events: SyncEvent[], signal?: AbortSignal) => Promise<PushEventsResponse>;
   key?: string;
   batchSize?: number;
   /** Per-request timeout in ms. Default 15 000. */
@@ -34,8 +44,11 @@ export interface SyncQueueOptions {
   maxRetries?: number;
   /** First backoff in ms; doubles each retry, capped at 30 s, with full jitter. Default 1000. */
   backoffMs?: number;
-  /** Called when the server accepted fewer events than a batch held (the batch is dead-lettered). */
-  onPartial?: (info: { batch: SyncEvent[]; accepted: number }) => void;
+  /**
+   * Called when the server accepted fewer events than a batch held. `rejected` (additive) is set
+   * when the server said which: only those are dead-lettered. Otherwise the whole batch is.
+   */
+  onPartial?: (info: { batch: SyncEvent[]; accepted: number; rejected?: SyncEvent[] }) => void;
   /** Called whenever a batch is moved to the dead-letter store. */
   onDeadLetter?: (entry: DeadLetter) => void;
   /** Override which errors are retried (default: isRetryableError). */
@@ -68,9 +81,11 @@ const defaultSleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
  * Failures: retryable errors (network, timeout, 5xx, 429) are retried with
  * exponential backoff, then the flush stops and the events stay queued.
  * Permanent errors (other 4xx, validation) move the batch to a dead-letter store
- * and the flush carries on with the next batch. A batch the server only partly
- * accepted is dead-lettered too, so drops are never silent; re-queueing it is
- * safe because accepted events are ignored the second time.
+ * and the flush carries on with the next batch. When the server skips some events
+ * of a batch, only the ones it lists in `rejected` are dead-lettered and the rest
+ * leave the queue. An older server that sends no `rejected` (or a list that does not
+ * add up) gets the whole batch dead-lettered, so drops are never silent; re-queueing
+ * it is safe because accepted events are ignored the second time.
  */
 export function createSyncQueue(options: SyncQueueOptions) {
   const key = options.key ?? 'paisa.syncQueue';
@@ -111,7 +126,7 @@ export function createSyncQueue(options: SyncQueueOptions) {
   };
 
   /** One push with a hard timeout, so a hung request can never wedge `flushing`. */
-  const pushOnce = async (batch: SyncEvent[]): Promise<PushEventsResult> => {
+  const pushOnce = async (batch: SyncEvent[]): Promise<PushEventsResponse> => {
     const controller = new AbortController();
     let timer: ReturnType<typeof setTimeout> | undefined;
     const timeout = new Promise<never>((_, reject) => {
@@ -191,7 +206,7 @@ export function createSyncQueue(options: SyncQueueOptions) {
             const batch = (await read()).slice(0, batchSize);
             if (batch.length === 0) return result({ remaining: 0 });
 
-            let res: PushEventsResult | undefined;
+            let res: PushEventsResponse | undefined;
             for (let attempt = 0; ; attempt++) {
               try {
                 res = await pushOnce(batch);
@@ -217,13 +232,21 @@ export function createSyncQueue(options: SyncQueueOptions) {
 
             sent += batch.length;
             const accepted = typeof res?.accepted === 'number' ? res.accepted : 0;
-            if (accepted < batch.length) {
-              dropped += batch.length - accepted;
+            if (accepted >= batch.length) {
+              await removeFromQueue(batch);
+              continue;
+            }
+            dropped += batch.length - accepted;
+            const rejected = rejectedEvents(batch, res, accepted);
+            if (rejected) {
+              deadLettered += rejected.length;
+              await deadLetter({ reason: 'skipped', events: rejected, at: new Date().toISOString() });
+              await removeFromQueue(batch);
+              options.onPartial?.({ batch, accepted, rejected });
+            } else {
               deadLettered += batch.length;
               await deadLetter({ reason: 'partial', events: batch, accepted, at: new Date().toISOString() });
               options.onPartial?.({ batch, accepted });
-            } else {
-              await removeFromQueue(batch);
             }
           }
         } catch (error) {
@@ -238,6 +261,17 @@ export function createSyncQueue(options: SyncQueueOptions) {
 }
 
 export type SyncQueue = ReturnType<typeof createSyncQueue>;
+
+/**
+ * The batch's events the server listed in `rejected`, or undefined when it sent no list
+ * (an older server) or one that does not account for every event it did not accept.
+ */
+function rejectedEvents(batch: SyncEvent[], res: PushEventsResponse, accepted: number): SyncEvent[] | undefined {
+  if (!Array.isArray(res.rejected)) return undefined;
+  const ids = new Set(res.rejected.filter((id): id is string => typeof id === 'string'));
+  const rejected = batch.filter((e) => ids.has(e.event_id));
+  return accepted + rejected.length === batch.length ? rejected : undefined;
+}
 
 export interface EventContext {
   anon_id: string;

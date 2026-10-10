@@ -5,10 +5,10 @@ import {
   type JoinClassResult,
   type Lang,
   type LearningGainRow,
-  type PushEventsResult,
   type SyncEvent,
 } from '@paisa/shared';
 import { ApiError, toApiError } from './errors';
+import type { PushEventsResponse } from './sync-queue';
 
 export interface ClassRow {
   id: string;
@@ -58,9 +58,9 @@ export function createApiClient(options: ApiClientOptions) {
     },
 
     /** `signal` aborts the request (the sync queue uses it for its timeout). */
-    pushEvents(events: SyncEvent[], signal?: AbortSignal): Promise<PushEventsResult> {
+    pushEvents(events: SyncEvent[], signal?: AbortSignal): Promise<PushEventsResponse> {
       if (events.length > SYNC_BATCH_MAX) throw new ApiError('too_many_events');
-      return rpc<PushEventsResult>('push_events', { events }, signal);
+      return rpc<PushEventsResponse>('push_events', { events }, signal);
     },
 
     // ---- Staff (dashboard) ----

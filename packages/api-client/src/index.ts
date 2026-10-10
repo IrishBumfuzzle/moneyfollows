@@ -11,6 +11,7 @@ export {
   type DeadLetter,
   type EventContext,
   type FlushResult,
+  type PushEventsResponse,
   type QueueStorage,
   type SyncQueue,
   type SyncQueueOptions,
