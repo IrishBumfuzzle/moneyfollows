@@ -199,3 +199,15 @@ describe('badges', () => {
       for (const lang of ['en', 'hi'] as const) expect(i18n[lang][key], `${lang}:${key}`).toBeTruthy();
   });
 });
+
+describe('classroom quiz (practice at School)', () => {
+  const classroom = content.quizzes.filter((q) => q.quiz === 'classroom');
+  it('has at least 2 questions per pillar, so a 5-question quiz covers all four', () => {
+    expect(classroom.length).toBeGreaterThanOrEqual(8);
+    for (const p of PILLARS) expect(classroom.filter((q) => q.pillar === p).length, p).toBeGreaterThanOrEqual(2);
+  });
+  it('every question string exists in en and hi', () => {
+    for (const key of collectKeys(classroom))
+      for (const lang of ['en', 'hi'] as const) expect(i18n[lang][key], `${lang}:${key}`).toBeTruthy();
+  });
+});

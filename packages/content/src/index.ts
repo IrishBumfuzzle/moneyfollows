@@ -23,6 +23,7 @@ import understandInvesting from '../scenarios/understand_investing.json';
 import staySafe from '../scenarios/stay_safe.json';
 import baseline from '../quizzes/baseline.json';
 import endline from '../quizzes/endline.json';
+import classroom from '../quizzes/classroom.json';
 import manifest from '../manifest.json';
 import placeDefs from '../places.json';
 import glossaryDefs from '../glossary.json';
@@ -58,7 +59,8 @@ export const content: ContentBundle = {
   personas: PersonaSchema.array().parse(personas),
   scenarios: ScenarioSchema.array().parse([...planBudget, ...saveManage, ...understandInvesting, ...staySafe]),
   events: EventCardSchema.array().parse(events),
-  quizzes: QuizQuestionSchema.array().parse([...baseline, ...endline]),
+  // Baseline and end-line feed learning_gain; classroom is the practice quiz at School.
+  quizzes: QuizQuestionSchema.array().parse([...baseline, ...endline, ...classroom]),
   scamMessages: ScamMessageSchema.array().parse(scamMessages),
   places,
   glossary,
