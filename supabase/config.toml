@@ -244,15 +244,15 @@ otp_expiry = 600
 
 # Production SMTP for sign-in codes. Locally, emails go to Inbucket ([local_smtp]), so this
 # stays disabled here; set enabled = true for the hosted project (`supabase config push`)
-# with the SUPABASE_SMTP_* variables from .env.example set in the shell.
+# with the SMTP_* variables from .env.example set in the shell.
 [auth.email.smtp]
 enabled = false
-host = "env(SUPABASE_SMTP_HOST)"
+host = "env(SMTP_HOST)"
 port = 587
-user = "env(SUPABASE_SMTP_USER)"
-pass = "env(SUPABASE_SMTP_PASS)"
-admin_email = "env(SUPABASE_SMTP_ADMIN_EMAIL)"
-sender_name = "env(SUPABASE_SMTP_SENDER_NAME)"
+user = "env(SMTP_USER)"
+pass = "env(SMTP_PASS)"
+admin_email = "env(SMTP_FROM)"
+sender_name = "Paisa Path"
 
 # Staff accept the invite link once (it confirms the account), then sign in with a code.
 # An OTP request before the invite is accepted fails with signup_disabled.
@@ -431,22 +431,25 @@ enabled = true
 # and column/key alignment. Set to "null" to emit raw, unformatted SQL.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":180,\"commaStyle\":\"trailing\"}"
 
-# Hosted project (ap-south-1). `npx supabase config push` sends this whole file, so
-# without these overrides the hosted project would get the localhost site_url and no
-# SMTP. Uncomment after creating the project, with its ref and the deployed dashboard
-# URL (README, "Deploy"). The ref is not a secret; SMTP values come from env().
-# [remotes.production]
-# project_id = "<project-ref>"
-#
-# [remotes.production.auth]
-# site_url = "https://<dashboard>.vercel.app"
-# additional_redirect_urls = ["https://<dashboard>.vercel.app"]
-#
-# [remotes.production.auth.email.smtp]
-# enabled = true
-# host = "env(SUPABASE_SMTP_HOST)"
-# port = 587
-# user = "env(SUPABASE_SMTP_USER)"
-# pass = "env(SUPABASE_SMTP_PASS)"
-# admin_email = "env(SUPABASE_SMTP_ADMIN_EMAIL)"
-# sender_name = "env(SUPABASE_SMTP_SENDER_NAME)"
+# Hosted project (ap-south-1, org "Paisa Path"). `npx supabase config push` sends this whole
+# file; these overrides apply when the linked project matches project_id. Run it with .env
+# loaded: `set -a && . ./.env && set +a && npx supabase config push` (README, "Hosted project").
+# Free-tier projects reject the custom email templates unless custom SMTP is on, so the
+# SMTP block below must stay enabled. The ref is not a secret; SMTP values come from env().
+[remotes.production]
+project_id = "verbvywwsxggqycpykec"
+
+# TODO: switch site_url and the redirect list to the deployed dashboard URL.
+
+# The local default (2 emails an hour) is too low for inviting staff. Gmail allows ~500 a day.
+[remotes.production.auth.rate_limit]
+email_sent = 60
+
+[remotes.production.auth.email.smtp]
+enabled = true
+host = "env(SMTP_HOST)"
+port = 587
+user = "env(SMTP_USER)"
+pass = "env(SMTP_PASS)"
+admin_email = "env(SMTP_FROM)"
+sender_name = "Paisa Path"
