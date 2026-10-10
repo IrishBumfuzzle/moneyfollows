@@ -589,8 +589,10 @@ describe('the real content', () => {
       .sort()
       .map((f) => `${dir}/${f}`);
   const files: ContentFile[] = [
-    ...['scenarios', 'events', 'quizzes', 'minigames', 'rewards'].flatMap(jsonIn),
+    ...['scenarios', 'events', 'quizzes', 'minigames', 'rewards', 'news'].flatMap(jsonIn),
     'personas.json',
+    'places.json',
+    'glossary.json',
   ].map((path) => ({ path, data: readJson(path) }));
   const i18n: Record<string, Record<string, unknown>> = {};
   for (const path of jsonIn('i18n')) i18n[basename(path, '.json')] = readJson(path) as Record<string, unknown>;
@@ -602,11 +604,16 @@ describe('the real content', () => {
     const issues = validateContent(input, { strict: false });
     expect(issues.filter((i) => i.severity === 'error')).toEqual([]);
   });
-  it('fails strict only because every item is still a draft', () => {
+  it('reads places, the glossary and every news edition', () => {
+    expect(files.map((f) => f.path)).toEqual(
+      expect.arrayContaining(['places.json', 'glossary.json', 'news/2026-W41.json']),
+    );
+  });
+  it('fails strict only because items are drafts and articles are not fact-checked yet', () => {
     const issues = validateContent(input, { strict: true });
     const errors = issues.filter((i) => i.severity === 'error');
     expect(errors.length).toBeGreaterThan(0);
-    expect(new Set(errors.map((e) => e.rule))).toEqual(new Set(['draft']));
+    expect(new Set(errors.map((e) => e.rule))).toEqual(new Set(['draft', 'facts_unchecked']));
   });
 });
 
@@ -712,5 +719,232 @@ describe('Jar Splitter (minigames/jar-splitter.json)', () => {
     expect(capFor('jar.check.needs.ok')).toBe('feedback');
     const long = { ...texts, 'jar.check.needs.ok': 'x'.repeat(121) };
     expect(rules(runJar(round(), long))).toContain('length');
+  });
+});
+
+// ---- Paisa Times and the map (CLAUDE.md 5.8, 7.2) ------------------------------------------
+
+const place = (id: string, over: Record<string, unknown> = {}) => ({
+  id,
+  name: `t:place.${id}`,
+  ...(id.includes('.') ? { parent: id.split('.')[0] } : {}),
+  position: { x: 50, y: 50 },
+  ...over,
+});
+const placesFixture = () => [
+  place('home'),
+  place('convenience', { children: ['convenience.kirana'] }),
+  place('convenience.kirana'),
+];
+const placeTexts = { 'place.home': 'Home', 'place.convenience': 'Shop', 'place.convenience.kirana': 'Kirana store' };
+
+const term = (id: string) => ({
+  id,
+  word: `t:glossary.${id}.word`,
+  simple: `t:glossary.${id}.simple`,
+  example: `t:glossary.${id}.example`,
+});
+const termTexts = (id: string, word: string) => ({
+  [`glossary.${id}.word`]: word,
+  [`glossary.${id}.simple`]: `A short meaning of ${word}.`,
+  [`glossary.${id}.example`]: `An everyday example of ${word}.`,
+});
+const glossaryTexts = { ...termTexts('upi', 'UPI'), ...termTexts('otp', 'OTP') };
+
+const capOf = (name: string): number => guardrails.lengthCaps[name] ?? 0;
+const ART = 'news.2026-W41.test_article';
+const article = (over: Record<string, unknown> = {}) => ({
+  id: 'test_article',
+  edition: '2026-W41',
+  headline: `t:${ART}.headline`,
+  body: `t:${ART}.body`,
+  terms: ['upi', 'otp'],
+  question: {
+    prompt: `t:${ART}.q`,
+    options: [`t:${ART}.o1`, `t:${ART}.o2`, `t:${ART}.o3`],
+    correct: 1,
+    explanation: `t:${ART}.why`,
+  },
+  reward: { wage: 60, xp: 12 },
+  meta: { status: 'reviewed', author: 'test', factsCheckedBy: 'teacher' },
+  ...over,
+});
+const articleTexts = (body = 'Paying by [[upi]] is quick. Never share an [[otp]] with a caller.') => ({
+  [`${ART}.headline`]: 'Codes are secrets',
+  [`${ART}.body`]: body,
+  [`${ART}.q`]: 'Who may see your OTP?',
+  [`${ART}.o1`]: 'A caller from the bank',
+  [`${ART}.o2`]: 'Nobody but you',
+  [`${ART}.o3`]: 'A friend',
+  [`${ART}.why`]: 'An OTP proves it is you, so it stays with you.',
+});
+const ptTexts = (over: Record<string, string> = {}) => ({
+  ...baseTexts(),
+  ...placeTexts,
+  ...glossaryTexts,
+  ...articleTexts(),
+  ...over,
+});
+
+function runPT(
+  opts: {
+    cards?: unknown[];
+    places?: unknown[];
+    glossary?: unknown[];
+    news?: unknown[];
+    en?: Record<string, string>;
+    hi?: Record<string, string>;
+    strict?: boolean;
+  } = {},
+): Issue[] {
+  const en = ptTexts(opts.en);
+  return run({
+    files: [
+      {
+        path: 'scenarios/plan_budget.json',
+        data: opts.cards ?? [scenario({ location: 'convenience', sublocation: 'convenience.kirana' })],
+      },
+      { path: 'places.json', data: opts.places ?? placesFixture() },
+      { path: 'glossary.json', data: opts.glossary ?? [term('upi'), term('otp')] },
+      { path: 'news/2026-W41.json', data: opts.news ?? [article()] },
+    ],
+    en,
+    hi: { ...en, ...opts.hi },
+    strict: opts.strict,
+  });
+}
+
+describe('Paisa Times and map files are read', () => {
+  it('accepts valid places, glossary and an article', () => {
+    expect(runPT()).toEqual([]);
+  });
+  it('validates places.json, glossary.json and news/*.json with their schemas', () => {
+    expect(
+      rules(
+        runPT({
+          places: [...placesFixture(), place('bank', { position: { x: 150, y: 0 } })],
+          en: { 'place.bank': 'Bank' },
+        }),
+      ),
+    ).toEqual(['schema']);
+    expect(rules(runPT({ glossary: [term('upi'), { ...term('otp'), word: 'OTP' }] }))).toEqual(['schema']);
+    expect(rules(runPT({ news: [article({ question: { ...article().question, correct: 3 } })] }))).toEqual(['schema']);
+  });
+  it('keeps ids per file kind and article ids per edition', () => {
+    const otherEdition = article({ edition: '2026-W42' });
+    expect(runPT({ news: [article(), otherEdition] })).toEqual([]);
+    expect(rules(runPT({ news: [article(), article()] }))).toEqual(['duplicate_id']);
+  });
+});
+
+describe('rule 1: places.json holds every card location and sublocation', () => {
+  it('accepts a card at a top-level place and one of its sub-map locations', () => {
+    expect(runPT({ cards: [scenario({ location: 'home' })] })).toEqual([]);
+    expect(runPT()).toEqual([]);
+  });
+  it('flags a location missing from places.json', () => {
+    expect(rules(runPT({ cards: [scenario({ location: 'bank' })] }))).toEqual(['unknown_location']);
+  });
+  it('flags a sublocation that is not a child of its location', () => {
+    const tailor = scenario({ location: 'convenience', sublocation: 'convenience.tailor' });
+    expect(rules(runPT({ cards: [tailor] }))).toEqual(['unknown_sublocation']);
+  });
+  it('flags a sub-map location its parent does not list', () => {
+    const places = [place('home'), place('convenience'), place('convenience.kirana')];
+    expect(rules(runPT({ places }))).toEqual(['place_tree', 'unknown_sublocation']);
+  });
+  it('skips the map checks when places.json is not linted', () => {
+    expect(run({ items: [scenario({ location: 'bank' })] })).toEqual([]);
+  });
+});
+
+describe('rule 1: [[termId]] markers', () => {
+  it('accepts markers that are in the glossary, match terms, and match in every language', () => {
+    const hi = { [`${ART}.body`]: '[[upi]] से पैसे भेजना आसान है। कॉल करने वाले को [[otp]] कभी न बताएँ।' };
+    expect(runPT({ hi })).toEqual([]);
+  });
+  it('flags a marker that is not in the glossary', () => {
+    const en = articleTexts('Paying by [[upi]] is quick. A [[pin]] is secret. Never share an [[otp]].');
+    expect(rules(runPT({ en, news: [article({ terms: ['upi', 'pin', 'otp'] })] }))).toEqual(['unknown_term']);
+  });
+  it('flags terms that differ from the markers in the en body', () => {
+    expect(rules(runPT({ news: [article({ terms: ['upi'] })] }))).toEqual(['article_terms']);
+  });
+  it('flags a language whose body marks different terms', () => {
+    const hi = { [`${ART}.body`]: '[[upi]] से पैसे भेजना आसान है। OTP कभी न बताएँ।' };
+    const issues = runPT({ hi });
+    expect(issues.map((i) => `${i.rule} ${i.message.split(' ')[0]}`)).toEqual([`term_markers hi:${ART}.body`]);
+  });
+  it('flags a marker that is not written as [[lower_case_id]]', () => {
+    const en = articleTexts('Paying by [[upi]] is quick. Never share an [[otp]] or a [[ PIN ]].');
+    expect(rules(runPT({ en }))).toEqual(['term_marker']);
+  });
+});
+
+describe('rule 7: Paisa Times length caps', () => {
+  it('maps article, glossary and place keys to their caps', () => {
+    expect(capFor('news.2026-W41.upi_fraud.headline')).toBe('headline');
+    expect(capFor('news.2026-W41.upi_fraud.body')).toBe('articleBody');
+    expect(capFor('news.2026-W41.upi_fraud.q')).toBe('question');
+    expect(capFor('news.2026-W41.upi_fraud.o2')).toBe('option');
+    expect(capFor('news.2026-W41.upi_fraud.why')).toBe('explanation');
+    expect(capFor('glossary.inflation.word')).toBe('glossaryWord');
+    expect(capFor('glossary.inflation.simple')).toBe('glossarySimple');
+    expect(capFor('glossary.inflation.example')).toBe('glossaryExample');
+    expect(capFor('place.convenience.phone_shop')).toBe('placeName');
+    expect(guardrails.lengthCaps).toMatchObject({ articleBody: 600, glossarySimple: 100 });
+  });
+  it('accepts an article body at the cap, counting each marker as its word', () => {
+    // Raw it is 608 characters; shown, "[[upi]]" is "UPI" and "[[otp]]" is "OTP": 3 + 1 + 590 + 1 + 3 + 2 = 600.
+    const body = `[[upi]] ${'x'.repeat(590)} [[otp]]..`;
+    expect(runPT({ en: articleTexts(body) })).toEqual([]);
+  });
+  it('flags text over each new cap', () => {
+    const over = (key: string, n: number) => rules(runPT({ en: { [key]: 'x'.repeat(n) } }), 'error');
+    expect(over(`${ART}.body`, 601)).toContain('length');
+    expect(over(`${ART}.headline`, capOf('headline') + 1)).toEqual(['length']);
+    expect(over('glossary.upi.simple', 101)).toEqual(['length']);
+    expect(over('glossary.upi.word', capOf('glossaryWord') + 1)).toEqual(['length']);
+    expect(over('glossary.upi.example', capOf('glossaryExample') + 1)).toEqual(['length']);
+    expect(over('place.home', capOf('placeName') + 1)).toEqual(['length']);
+    expect(over(`${ART}.why`, capOf('explanation') + 1)).toEqual(['length']);
+  });
+});
+
+describe('rule 8: strict mode and fact checks', () => {
+  it('passes a reviewed article that a human fact-checked', () => {
+    expect(runPT({ strict: true })).toEqual([]);
+  });
+  it('fails an article with no factsCheckedBy', () => {
+    const unchecked = article({ meta: { status: 'reviewed', author: 'test' } });
+    expect(rules(runPT({ news: [unchecked], strict: true }))).toEqual(['facts_unchecked']);
+    expect(runPT({ news: [unchecked] })).toEqual([]);
+  });
+  it('fails a draft article on both rules', () => {
+    const draftArticle = article({ meta: { status: 'draft', author: 'claude' } });
+    expect(rules(runPT({ news: [draftArticle], strict: true })).sort()).toEqual(['draft', 'facts_unchecked']);
+  });
+});
+
+describe('rules 3 and 6: guardrails apply to articles, glossary and places', () => {
+  it('allows the 1930 helpline and cybercrime.gov.in in an article', () => {
+    const en = articleTexts('Lost money by [[upi]]? Call 1930 or report on cybercrime.gov.in. Never share an [[otp]].');
+    expect(runPT({ en })).toEqual([]);
+  });
+  it('flags "invest now" advice and promises in an article', () => {
+    const advice = articleTexts('Use [[upi]] and your [[otp]] wisely. Invest now in Rocket Co before it is too late.');
+    expect(rules(runPT({ en: advice }))).toEqual(['advice']);
+    const promise = articleTexts('[[upi]] savings plans give guaranteed returns. Keep your [[otp]] safe.');
+    expect(rules(runPT({ en: promise }))).toEqual(['promise']);
+  });
+  it('flags a real brand, link or phone number in glossary and place text', () => {
+    expect(rules(runPT({ en: { 'glossary.upi.example': 'Ammi pays with Paytm.' } }))).toEqual(['real_brand']);
+    expect(rules(runPT({ en: { 'place.convenience.kirana': 'SBI corner' } }))).toEqual(['real_brand']);
+    expect(rules(runPT({ en: { 'glossary.otp.example': 'Report it at otp-help.in.' } }))).toEqual(['link']);
+    expect(rules(runPT({ en: { [`${ART}.why`]: 'Call 98765 43210 for help.' } }))).toEqual(['phone']);
+  });
+  it('flags Hindi advice in an article', () => {
+    const hi = { [`${ART}.body`]: '[[upi]] और [[otp]] समझिए। आज ही Rocket Co में निवेश करें।' };
+    expect(rules(runPT({ hi }))).toEqual(['advice']);
   });
 });

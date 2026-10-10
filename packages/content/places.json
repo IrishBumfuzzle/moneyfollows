@@ -1,0 +1,70 @@
+[
+  {
+    "id": "home",
+    "name": "t:place.home",
+    "position": {
+      "x": 45,
+      "y": 32
+    }
+  },
+  {
+    "id": "convenience",
+    "name": "t:place.convenience",
+    "position": {
+      "x": 88,
+      "y": 17
+    },
+    "children": ["convenience.phone_shop", "convenience.kirana", "convenience.clothes_stall"]
+  },
+  {
+    "id": "school",
+    "name": "t:place.school",
+    "position": {
+      "x": 37,
+      "y": 67
+    }
+  },
+  {
+    "id": "hospital",
+    "name": "t:place.hospital",
+    "position": {
+      "x": 89,
+      "y": 73
+    }
+  },
+  {
+    "id": "bank",
+    "name": "t:place.bank",
+    "position": {
+      "x": 14,
+      "y": 20
+    }
+  },
+  {
+    "id": "convenience.phone_shop",
+    "name": "t:place.convenience.phone_shop",
+    "parent": "convenience",
+    "position": {
+      "x": 22,
+      "y": 40
+    }
+  },
+  {
+    "id": "convenience.kirana",
+    "name": "t:place.convenience.kirana",
+    "parent": "convenience",
+    "position": {
+      "x": 50,
+      "y": 62
+    }
+  },
+  {
+    "id": "convenience.clothes_stall",
+    "name": "t:place.convenience.clothes_stall",
+    "parent": "convenience",
+    "position": {
+      "x": 78,
+      "y": 40
+    }
+  }
+]

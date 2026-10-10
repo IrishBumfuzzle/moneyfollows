@@ -1,9 +1,12 @@
 // Guardrail linter for content (CLAUDE.md 7.2). A pure library: no file or network access.
 // scripts/lint-content.ts reads the files and calls validateContent.
 import {
+  ArticleSchema,
   EventCardSchema,
+  GlossaryTermSchema,
   I18nFileSchema,
   PersonaSchema,
+  PlaceSchema,
   QuizQuestionSchema,
   ScamMessageSchema,
   ScenarioSchema,
@@ -54,7 +57,7 @@ export interface ValidateInput {
   contentVersion?: string;
 }
 
-type Kind = 'scenario' | 'event' | 'quiz' | 'scam' | 'persona' | 'badge' | 'jar';
+type Kind = 'scenario' | 'event' | 'quiz' | 'scam' | 'persona' | 'badge' | 'jar' | 'place' | 'glossary' | 'article';
 
 interface Item {
   kind: Kind;
@@ -71,12 +74,18 @@ const SCHEMAS = {
   persona: PersonaSchema,
   badge: BadgeSchema,
   jar: JarSplitRoundSchema,
+  place: PlaceSchema,
+  glossary: GlossaryTermSchema,
+  article: ArticleSchema,
 } as const;
 
 function kindOf(path: string): Kind | null {
   const parts = path.replace(/\\/g, '/').split('/');
   const base = parts[parts.length - 1] ?? '';
   if (base === 'personas.json') return 'persona';
+  if (base === 'places.json') return 'place';
+  if (base === 'glossary.json') return 'glossary';
+  if (parts.includes('news')) return 'article';
   if (parts.includes('rewards') && base === 'badges.json') return 'badge';
   if (parts.includes('scenarios')) return 'scenario';
   if (parts.includes('events')) return 'event';
@@ -272,6 +281,28 @@ export function findSingleRupeeProjection(text: string): string | null {
   return null;
 }
 
+// ---- Paisa Times term markers --------------------------------------------------------------
+
+/** A well-formed marker: [[termId]] with a lower-case glossary id. */
+const MARKER_RE = /\[\[([a-z0-9_]+)\]\]/g;
+/** Anything that looks like a marker, well formed or not: [[UPI]], [[ upi ]], [[loan-app]]. */
+const ANY_MARKER_RE = /\[\[([^\]]*)\]\]/g;
+
+/** The distinct glossary ids an article body marks with [[termId]], in order of first use. */
+export function termMarkers(text: string): string[] {
+  return [...new Set([...text.matchAll(MARKER_RE)].map((m) => m[1] ?? ''))];
+}
+
+/** Markers that are not [[lower_case_id]], e.g. "[[UPI]]" or "[[ upi ]]". */
+export function malformedMarkers(text: string): string[] {
+  return [...text.matchAll(ANY_MARKER_RE)].map((m) => m[0]).filter((m) => !/^\[\[[a-z0-9_]+\]\]$/.test(m));
+}
+
+/** The body as the reader sees it: each [[termId]] replaced by that term's word (or its id when unknown). */
+export function renderMarkers(text: string, words: Record<string, string>): string {
+  return text.replace(MARKER_RE, (_, id: string) => words[id] ?? id);
+}
+
 // ---- Placeholders, lengths, versions ------------------------------------------------------
 
 /** react-i18next default interpolation: {{name}}. */
@@ -286,10 +317,18 @@ export function visibleLength(text: string): number {
 }
 
 /**
- * Which length cap applies to a key (README "Length caps"). Checked in order:
- * scam.why.* hints, reflections, the assumption banner, common.* buttons, badge.* and jar.check.* strings, then key endings.
+ * Which length cap applies to a key (README "Length caps"). Checked in order: Paisa Times
+ * headlines and bodies, glossary words, meanings and examples, place names, scam.why.* hints,
+ * reflections, the assumption banner, common.* buttons, badge.* and jar.check.* strings, then key
+ * endings (so article questions reuse the question, option and explanation caps).
  */
 export function capFor(key: string): string | null {
+  if (key.startsWith('news.') && key.endsWith('.headline')) return 'headline';
+  if (key.startsWith('news.') && key.endsWith('.body')) return 'articleBody';
+  if (key.startsWith('glossary.') && key.endsWith('.word')) return 'glossaryWord';
+  if (key.startsWith('glossary.') && key.endsWith('.simple')) return 'glossarySimple';
+  if (key.startsWith('glossary.') && key.endsWith('.example')) return 'glossaryExample';
+  if (key.startsWith('place.')) return 'placeName';
   if (key.startsWith('scam.why.')) return 'hint';
   if (key.startsWith('reflection.')) return 'reflection';
   if (key === 'assumption.banner') return 'banner';
@@ -313,7 +352,8 @@ export function capFor(key: string): string | null {
   return null;
 }
 
-const SEMVER_RE = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9a-z-]+(?:\.[0-9a-z-]+)*)?(?:\+[0-9a-z-]+(?:\.[0-9a-z-]+)*)?$/i;
+const SEMVER_RE =
+  /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9a-z-]+(?:\.[0-9a-z-]+)*)?(?:\+[0-9a-z-]+(?:\.[0-9a-z-]+)*)?$/i;
 const DATE_VERSION_RE = /^(\d{4})([.-])(\d{2})\2(\d{2})(?:\.(0|[1-9]\d*))?$/;
 
 /** CONTENT_VERSION must be semver (1.2.3) or a real date (YYYY.MM.DD, optional .N). */
@@ -345,7 +385,9 @@ const choicesOf = (item: Item): Record<string, unknown>[] =>
 const delayedOf = (choice: Record<string, unknown>): Record<string, unknown>[] =>
   Array.isArray(choice.delayed) ? choice.delayed.filter(isRecord) : [];
 const flagsOf = (effects: unknown): string[] =>
-  isRecord(effects) && Array.isArray(effects.flags) ? effects.flags.filter((f): f is string => typeof f === 'string') : [];
+  isRecord(effects) && Array.isArray(effects.flags)
+    ? effects.flags.filter((f): f is string => typeof f === 'string')
+    : [];
 
 export function validateContent(input: ValidateInput, opts: { strict: boolean }): Issue[] {
   const { guardrails, i18n } = input;
@@ -391,9 +433,13 @@ export function validateContent(input: ValidateInput, opts: { strict: boolean })
         }
       }
       if (!id.startsWith('[')) {
-        const first = seenIds.get(id);
+        // Places, glossary terms and articles have their own id spaces; an article id is unique per edition.
+        const edition = isRecord(raw) && typeof raw.edition === 'string' ? raw.edition : '';
+        const scope =
+          kind === 'place' || kind === 'glossary' ? `${kind}:${id}` : kind === 'article' ? `news:${edition}:${id}` : id;
+        const first = seenIds.get(scope);
         if (first) add(file.path, id, 'duplicate_id', `id "${id}" is also used in ${first}`);
-        else seenIds.set(id, file.path);
+        else seenIds.set(scope, file.path);
       }
       if (isRecord(raw)) items.push({ kind, file: file.path, id, data: raw });
     });
@@ -408,12 +454,20 @@ export function validateContent(input: ValidateInput, opts: { strict: boolean })
       for (const d of delayedOf(choice)) for (const f of flagsOf(d.effects)) setFlags.add(f);
     }
   const personaIds = new Set(
-    items.filter((i) => i.kind === 'persona').map((i) => i.id).filter((id) => !id.startsWith('[')),
+    items
+      .filter((i) => i.kind === 'persona')
+      .map((i) => i.id)
+      .filter((id) => !id.startsWith('[')),
   );
   for (const card of cards) {
     const flag = card.data.requiresFlag;
     if (typeof flag === 'string' && !setFlags.has(flag)) {
-      add(card.file, card.id, 'requires_flag', `requiresFlag "${flag}" is never set by any choice, so this card never shows`);
+      add(
+        card.file,
+        card.id,
+        'requires_flag',
+        `requiresFlag "${flag}" is never set by any choice, so this card never shows`,
+      );
     }
     for (const choice of choicesOf(card))
       for (const d of delayedOf(choice)) {
@@ -428,7 +482,60 @@ export function validateContent(input: ValidateInput, opts: { strict: boolean })
       }
     const personas = Array.isArray(card.data.personas) ? card.data.personas : [];
     if (personaIds.size > 0 && !personas.some((p) => typeof p === 'string' && personaIds.has(p))) {
-      add(card.file, card.id, 'no_persona', `targets only personas that are not in personas.json (${personas.join(', ')})`);
+      add(
+        card.file,
+        card.id,
+        'no_persona',
+        `targets only personas that are not in personas.json (${personas.join(', ')})`,
+      );
+    }
+  }
+
+  // ---- Places: every card's location and sublocation is on the map (5.8) ----------------
+  // Checked only when places.json is part of the input, so a test or tool can lint cards alone.
+  const placeItems = items.filter((i) => i.kind === 'place');
+  if (placeItems.length > 0) {
+    const placeById = new Map(placeItems.map((p) => [p.id, p]));
+    const childrenOf = (p: Item | undefined): string[] =>
+      p && Array.isArray(p.data.children) ? p.data.children.filter((c): c is string => typeof c === 'string') : [];
+    for (const place of placeItems) {
+      const parentId = place.data.parent;
+      if (typeof parentId === 'string') {
+        const parent = placeById.get(parentId);
+        if (!parent || typeof parent.data.parent === 'string') {
+          add(place.file, place.id, 'place_tree', `parent "${parentId}" is not a top-level place in places.json`);
+        } else if (!childrenOf(parent).includes(place.id)) {
+          add(place.file, place.id, 'place_tree', `"${parentId}" does not list "${place.id}" in its children`);
+        }
+      }
+      for (const child of childrenOf(place)) {
+        if (placeById.get(child)?.data.parent !== place.id) {
+          add(
+            place.file,
+            place.id,
+            'place_tree',
+            `child "${child}" must be a place in places.json with parent "${place.id}"`,
+          );
+        }
+      }
+    }
+    for (const card of cards) {
+      const location = card.data.location;
+      const place = typeof location === 'string' ? placeById.get(location) : undefined;
+      if (typeof location === 'string' && (!place || typeof place.data.parent === 'string')) {
+        add(card.file, card.id, 'unknown_location', `location "${location}" is not a top-level place in places.json`);
+      }
+      const sub = card.data.sublocation;
+      if (typeof sub === 'string') {
+        if (placeById.get(sub)?.data.parent !== location || !childrenOf(place).includes(sub)) {
+          add(
+            card.file,
+            card.id,
+            'unknown_sublocation',
+            `sublocation "${sub}" is not a sub-map location of "${String(location)}" in places.json`,
+          );
+        }
+      }
     }
   }
 
@@ -459,6 +566,18 @@ export function validateContent(input: ValidateInput, opts: { strict: boolean })
     required.has(lang) || !isDraftLang(lang) ? 'error' : 'warning';
   const reference = required.has('en') ? 'en' : (langs[0] ?? 'en');
 
+  // Glossary words per language, so an article body's length counts what the reader sees.
+  const glossaryItems = items.filter((i) => i.kind === 'glossary');
+  const termIds = new Set(glossaryItems.map((g) => g.id));
+  const wordsIn = (lang: string): Record<string, string> => {
+    const out: Record<string, string> = {};
+    for (const g of glossaryItems) {
+      const word = typeof g.data.word === 'string' ? table(lang)[g.data.word.slice(2)] : undefined;
+      if (word !== undefined) out[g.id] = word;
+    }
+    return out;
+  };
+
   /** Checks one text. `relaxed` is for Scam or Safe? message bodies, which quote a scammer on purpose. */
   const checkText = (
     file: string,
@@ -479,7 +598,14 @@ export function validateContent(input: ValidateInput, opts: { strict: boolean })
       const promise = findTerm(stripped, promises);
       if (promise) add(file, id, 'promise', `${where} uses "${promise}". Educate, never promise or recommend.`, sev);
       const push = findImperativeAdvice(text, guardrails.fictionalAssets);
-      if (push) add(file, id, 'advice', `${where} tells the reader to invest or buy ("${push}"). Explain, never recommend.`, sev);
+      if (push)
+        add(
+          file,
+          id,
+          'advice',
+          `${where} tells the reader to invest or buy ("${push}"). Explain, never recommend.`,
+          sev,
+        );
     }
     const shame = findTerm(stripped, shaming);
     if (shame) add(file, id, 'tone', `${where} uses "${shame}". Avoid shaming words.`, 'warning');
@@ -488,14 +614,28 @@ export function validateContent(input: ValidateInput, opts: { strict: boolean })
     const okDomains = ctx.relaxed ? [...guardrails.allowedLinks, ...placeholderDomains] : guardrails.allowedLinks;
     for (const link of findLinks(text)) {
       if (!hostAllowed(linkHost(link), okDomains)) {
-        const hint = ctx.relaxed ? ` Scam messages may use a reserved fake domain (${placeholderDomains.map((d) => `*.${d}`).join(', ')}).` : '';
-        add(file, id, 'link', `${where} links to "${link}". Only ${guardrails.allowedLinks.join(', ')} is allowed.${hint}`, sev);
+        const hint = ctx.relaxed
+          ? ` Scam messages may use a reserved fake domain (${placeholderDomains.map((d) => `*.${d}`).join(', ')}).`
+          : '';
+        add(
+          file,
+          id,
+          'link',
+          `${where} links to "${link}". Only ${guardrails.allowedLinks.join(', ')} is allowed.${hint}`,
+          sev,
+        );
       }
     }
     for (const num of findPhoneNumbers(text)) {
       const digits = digitsOf(num);
       if (!allowedNumbers.has(digits) && !(ctx.relaxed && placeholderNumbers.has(digits))) {
-        add(file, id, 'phone', `${where} has the number "${num.trim()}". Only ${guardrails.allowedNumbers.join(', ')} is allowed.`, sev);
+        add(
+          file,
+          id,
+          'phone',
+          `${where} has the number "${num.trim()}". Only ${guardrails.allowedNumbers.join(', ')} is allowed.`,
+          sev,
+        );
       }
     }
 
@@ -516,14 +656,20 @@ export function validateContent(input: ValidateInput, opts: { strict: boolean })
       }
       const single = findSingleRupeeProjection(text);
       if (single) {
-        add(file, id, 'single_number', `${where} projects one ₹ outcome ("${single}"). Show a range (low to high) instead.`, sev);
+        add(
+          file,
+          id,
+          'single_number',
+          `${where} projects one ₹ outcome ("${single}"). Show a range (low to high) instead.`,
+          sev,
+        );
       }
     }
 
     // Rule 7: length caps in every language, counted in visible characters.
     const cap = capFor(key);
     const limit = cap ? guardrails.lengthCaps[cap] : undefined;
-    const length = visibleLength(text);
+    const length = visibleLength(cap === 'articleBody' ? renderMarkers(text, wordsIn(lang)) : text);
     if (cap && limit !== undefined && length > limit) {
       add(file, id, 'length', `${where} is ${length} characters; the ${cap} cap is ${limit}.`, sev);
     }
@@ -543,6 +689,57 @@ export function validateContent(input: ValidateInput, opts: { strict: boolean })
     }
   };
 
+  /** An article's [[termId]] markers: well formed, in the glossary, equal to `terms`, the same in every language. */
+  const checkArticleTerms = (item: Item) => {
+    const body = item.data.body;
+    if (typeof body !== 'string' || !body.startsWith('t:')) return;
+    const bodyKey = body.slice(2);
+    const refText = table(reference)[bodyKey];
+    const refMarkers = refText === undefined ? null : termMarkers(refText);
+    const sameSet = (a: string[], b: string[]) => [...new Set(a)].sort().join(',') === [...new Set(b)].sort().join(',');
+    for (const lang of langs) {
+      const text = table(lang)[bodyKey];
+      if (text === undefined) continue;
+      const where = `${lang}:${bodyKey}`;
+      const sev = severityFor(lang);
+      for (const bad of malformedMarkers(text)) {
+        add(
+          item.file,
+          item.id,
+          'term_marker',
+          `${where} has "${bad}". Write markers as [[termId]] with a glossary id.`,
+          sev,
+        );
+      }
+      const marks = termMarkers(text);
+      for (const id of marks) {
+        if (!termIds.has(id))
+          add(item.file, item.id, 'unknown_term', `${where} marks [[${id}]], which is not in glossary.json`, sev);
+      }
+      if (lang !== reference && refMarkers && !sameSet(marks, refMarkers)) {
+        add(
+          item.file,
+          item.id,
+          'term_markers',
+          `${where} marks [${marks.join(', ')}] but ${reference} marks [${refMarkers.join(', ')}]`,
+          sev,
+        );
+      }
+    }
+    const terms = Array.isArray(item.data.terms)
+      ? item.data.terms.filter((t): t is string => typeof t === 'string')
+      : [];
+    if (refMarkers && !sameSet(terms, refMarkers)) {
+      add(
+        item.file,
+        item.id,
+        'article_terms',
+        `terms [${terms.join(', ')}] must equal the [[termId]] markers in the ${reference} body [${refMarkers.join(', ')}]`,
+      );
+    }
+    if (new Set(terms).size !== terms.length) add(item.file, item.id, 'article_terms', 'terms lists an id twice');
+  };
+
   const usedKeys = new Set<string>();
   for (const item of items) {
     const keys = [...collectKeys(item.data)];
@@ -552,7 +749,8 @@ export function validateContent(input: ValidateInput, opts: { strict: boolean })
     const scamBodies = new Set<string>();
     if (item.kind === 'scam' && Array.isArray(item.data.segments)) {
       for (const seg of item.data.segments)
-        if (isRecord(seg) && typeof seg.text === 'string' && seg.text.startsWith('t:')) scamBodies.add(seg.text.slice(2));
+        if (isRecord(seg) && typeof seg.text === 'string' && seg.text.startsWith('t:'))
+          scamBodies.add(seg.text.slice(2));
     }
 
     // ---- Rule 2: every key exists in en and hi (and any other language file present) -------
@@ -586,10 +784,22 @@ export function validateContent(input: ValidateInput, opts: { strict: boolean })
       }
     }
 
-    // ---- Rule 8: strict mode fails on drafts -----------------------------------------------
+    // ---- Rule 1: every [[termId]] is in the glossary; terms and markers agree --------------
+    if (item.kind === 'article') checkArticleTerms(item);
+
+    // ---- Rule 8: strict mode fails on drafts and on articles nobody fact-checked ----------
     const meta = item.data.meta;
     if (opts.strict && isRecord(meta) && meta.status === 'draft') {
       add(item.file, item.id, 'draft', 'status is "draft". A human must review it and set "reviewed".');
+    }
+    const checkedBy = isRecord(meta) ? meta.factsCheckedBy : undefined;
+    if (opts.strict && item.kind === 'article' && !(typeof checkedBy === 'string' && checkedBy.trim())) {
+      add(
+        item.file,
+        item.id,
+        'facts_unchecked',
+        'meta.factsCheckedBy is missing. A human must check every real figure first.',
+      );
     }
   }
 
