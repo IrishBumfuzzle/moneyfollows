@@ -42,7 +42,7 @@ export function Onboarding({ onDone, initialLang = 'en' }: { onDone: (profile: P
   const tr = (key: string, vars?: Record<string, string | number>) => t(lang, key, vars);
 
   // Android back steps back through onboarding instead of leaving the app (CLAUDE.md 6). The
-  // entries have no `screen` key, so App's popstate handler reads them as the map once we're done.
+  // entries have no `screen` key, so App's popstate handler reads them as the main screen once we're done.
   useEffect(() => {
     const on = (e: PopStateEvent) => {
       const s = (e.state as { onboardingStep?: number } | null)?.onboardingStep ?? 0;
