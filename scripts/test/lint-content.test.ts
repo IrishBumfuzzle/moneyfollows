@@ -191,6 +191,10 @@ describe('rule 3: educate, never recommend', () => {
     const hi = { ...baseTexts(), 'budget.test.01.story': 'इसमें पक्का मुनाफ़ा मिलेगा।' };
     expect(rules(run({ hi }), 'error')).toContain('promise');
   });
+  it('flags the old classroom distractor "splitting doubles the money" in Hindi', () => {
+    const hi = { ...baseTexts(), 'budget.test.01.story': 'बाँटने से पैसा दोगुना होता है' };
+    expect(rules(run({ hi }), 'error')).toContain('promise');
+  });
 });
 
 describe('rule 4: investing text names only fictional assets', () => {

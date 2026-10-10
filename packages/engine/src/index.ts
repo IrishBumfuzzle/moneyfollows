@@ -22,3 +22,15 @@ export { scoreJarSplit, jarSplitterRounds, emptySplit } from './jar-splitter';
 export type { JarSplit, JarSplitResult, JarCheckResult } from './jar-splitter';
 export { EngineError } from './errors';
 export type { EngineErrorCode } from './errors';
+// Additive: quiz sessions (classroom quiz at School; baseline and end-line tests), one question at a time.
+export {
+  startQuiz,
+  currentQuestion,
+  isQuizFinished,
+  isQuestionAnswered,
+  answerQuestion,
+  nextQuestion,
+  quizResult,
+  quizSubmittedEvent,
+} from './quiz-session';
+export type { QuizOptions, QuizSession, AnswerFeedback, QuizResult } from './quiz-session';
