@@ -1,0 +1,75 @@
+/* Kenney UI Pack Pixel Adventure (CC0), 9-sliced with border-image.
+   Tiles are cut by tools/build-classroom.py into public/assets/ui/. Art pixels are drawn
+   at 2 screen px (small tiles) or 1 px (32 px large tiles) so both read the same size. */
+
+.k-panel {
+  border: 8px solid transparent;
+  border-image: url(/assets/ui/panel.png) 8 fill / 8px stretch;
+  image-rendering: pixelated;
+  color: #4a2b17;
+}
+.k-panel-dark { border-image-source: url(/assets/ui/panel-dark.png); color: #fff3dc; }
+
+.k-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  box-sizing: border-box;
+  padding: 2px 6px;
+  border: 8px solid transparent;
+  border-image: url(/assets/ui/button.png) 4 fill / 8px stretch;
+  image-rendering: pixelated;
+  background: none;
+  color: #4a2b17;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.k-btn:active:not(:disabled) { transform: translateY(2px); }
+.k-btn:focus-visible { outline: 3px solid #ffd23f; outline-offset: 1px; }
+.k-btn:disabled { cursor: default; }
+.k-btn.is-primary { border-image-source: url(/assets/ui/button-primary.png); color: #fff; justify-content: center; text-shadow: 0 2px #1c3d6e; }
+.k-btn.is-correct { border-image-source: url(/assets/ui/button-correct.png); color: #fff; text-shadow: 0 2px #2a5a1f; }
+.k-btn.is-wrong { border-image-source: url(/assets/ui/button-wrong.png); color: #fff; text-shadow: 0 2px #6b1f1f; }
+.k-btn.is-dim { border-image-source: url(/assets/ui/button-disabled.png); color: #3d4a5c; }
+
+.k-banner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  min-width: 120px;
+  box-sizing: border-box;
+  padding: 0 4px 3px;
+  border-style: solid;
+  border-color: transparent;
+  border-width: 0 26px;
+  border-image: url(/assets/ui/banner.png) 0 26 fill / 0 26px stretch;
+  image-rendering: pixelated;
+  color: #fff3dc;
+  text-shadow: 0 2px #7a2626;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.k-pip { width: 14px; height: 14px; image-rendering: pixelated; background: url(/assets/ui/pip-todo.png) center / 100% 100% no-repeat; }
+.k-pip.is-now { background-image: url(/assets/ui/pip-now.png); }
+.k-pip.is-right { background-image: url(/assets/ui/pip-right.png); }
+.k-pip.is-wrong { background-image: url(/assets/ui/pip-wrong.png); }
+
+.k-round {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: url(/assets/ui/round.png) center / 28px 28px no-repeat;
+  image-rendering: pixelated;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.k-round::before { content: ''; position: absolute; inset: -8px; } /* 48 px tap target */
+.k-round:active { transform: translateY(1px); }
+.k-round:focus-visible { outline: 3px solid #ffd23f; border-radius: 50%; }

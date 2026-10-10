@@ -4,3 +4,4 @@
 node_modules
 dist
 apps/student/assets-src/schwarnhild/
+apps/student/tests/e2e-output/

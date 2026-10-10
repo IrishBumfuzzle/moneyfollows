@@ -442,6 +442,7 @@ Append decisions here as `YYYY-MM-DD HH:MM — decision — who`.
 - 2026-10-10 — App = room hub + Map (game) + Paisa Times + Me + Notes; more sections via config — team.
 - 2026-10-10 — Map places: home, convenience (Shop, with sub-map), school, hospital, bank; weekly pins, sleep at Home ends the week — team.
 - 2026-10-10 — Paisa Times: original explainers bundled in the content pack; reward is an earned paper-route wage, once per edition — team.
+- 2026-10-10 22:30 — School opens the Classroom: a repeatable 5-question practice quiz across all four pillars. Its own question bank, separate from baseline/end-line so practice can't inflate learning gain. Additive `QuizKind 'classroom'`; client API built, backend change proposed in `API.md` §5 — UI-1.
 
 Open questions:
 - Which license does Section 11 of the brief require for the `LICENSE` file?
