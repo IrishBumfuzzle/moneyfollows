@@ -1,15 +1,18 @@
-// Stand-in for the shared event queue (CLAUDE.md 5.5: SyncEvent, push_events). Logs to the console.
-// To connect: replace the body with the api-client queue, which adds event_id, anon_id, class_id,
-// client_ts and content_version. Events fired before join_class (language_changed on the first
-// onboarding step) have no anon_id yet, so the queue should hold them until the profile exists.
+// Fire-and-forget analytics (CLAUDE.md 5.5: SyncEvent, push_events). Events are saved on the
+// phone first and sent when online, so play never waits for the network. The tracker adds
+// event_id, anon_id, class_id, client_ts and content_version. Events fired before join_class
+// (language_changed on the first onboarding step) are held until identify() runs.
+import type { SyncEventType } from '@paisa/shared';
+import type { SyncEventPayload } from '@paisa/api-client';
+import { afterTrack, tracker } from './backend';
 
-export type TrackType =
-  | 'app_open' | 'onboarding_complete' | 'persona_selected' | 'decision_made'
-  | 'rewind_used' | 'event_triggered' | 'minigame_complete' | 'quiz_submitted'
-  | 'module_complete' | 'badge_earned' | 'language_changed' | 'sync_complete'
-  | 'map_opened' | 'location_selected'
-  | 'week_slept' | 'glossary_term_opened' | 'news_question_answered' | 'news_edition_completed';
+export type TrackType = SyncEventType;
 
-export function track(type: TrackType, payload: Record<string, unknown> = {}): void {
-  console.info('[track]', type, payload);
+/**
+ * Records one event. Returns at once and never throws. Payload keys are checked per type
+ * (push_events drops keys it doesn't list; see SyncEventPayloads in @paisa/api-client).
+ */
+export function track<T extends SyncEventType>(type: T, payload?: SyncEventPayload<T>): void {
+  tracker.track(type, payload);
+  afterTrack();
 }

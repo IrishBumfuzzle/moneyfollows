@@ -49,8 +49,11 @@ async function layout(p) {
   });
 }
 
+// A fresh student is offered the start-of-term check first; these tests play the practice quiz.
+const PRACTICE = /^(Practice quiz|प्रैक्टिस क्विज़)|^(Start|शुरू करो)$/;
+
 async function playThrough(p, tag, pickWrongFirst) {
-  await p.getByRole('button', { name: /Start|शुरू/ }).click();
+  await p.getByRole('button', { name: PRACTICE }).click();
   for (let i = 0; i < 5; i++) {
     const opts = p.locator('.cr-options .k-btn');
     const n = await opts.count();
@@ -116,7 +119,7 @@ async function playThrough(p, tag, pickWrongFirst) {
   const texts = [];
   for (let k = 0; k < 2; k++) {
     const { p, ctx } = await page(360, 740, `${BASE}?screen=classroom&seed=7`);
-    await p.getByRole('button', { name: 'Start' }).click();
+    await p.getByRole('button', { name: PRACTICE }).click();
     texts.push(await p.locator('.cr-board').innerText() + (await p.locator('.cr-options').innerText()));
     await ctx.close();
   }

@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-export default defineConfig({ plugins: [react()] });
+// .env lives at the repo root (shared with the dashboard and scripts); only VITE_* keys reach the browser.
+export default defineConfig({ plugins: [react()], envDir: '../..' });

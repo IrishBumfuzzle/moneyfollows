@@ -1,4 +1,4 @@
-import { get, set } from 'idb-keyval';
+import { del, get, set } from 'idb-keyval';
 import type { Profile } from './types';
 
 const KEY = 'paisa.profile';
@@ -15,4 +15,13 @@ export async function loadProfile(): Promise<Profile | undefined> {
 
 export async function saveProfile(p: Profile): Promise<void> {
   await set(KEY, p);
+}
+
+/** Forgets who this phone is (the server no longer knows the saved ids), so onboarding shows again. Game progress is kept. */
+export async function clearProfile(): Promise<void> {
+  try {
+    await del(KEY);
+  } catch {
+    // IndexedDB unavailable (private mode): nothing was saved, so nothing to clear
+  }
 }

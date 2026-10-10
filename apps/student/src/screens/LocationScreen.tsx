@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { track } from '../api/track';
 import { PixelText } from '../PixelText';
 
 // Backdrop: public/assets/world.png (1920x1280, 32px-tile art, built by tools/build-world.py) is pure
@@ -40,6 +41,7 @@ const LOCATIONS: { id: LocationId; label: string; x: number; y: number }[] = [
 
 export function LocationScreen({ onSelect }: { onSelect: (id: LocationId) => void }) {
   const cam = useCamera();
+  useEffect(() => track('map_opened'), []);
   return (
     <div className="screen">
       <div
@@ -51,7 +53,10 @@ export function LocationScreen({ onSelect }: { onSelect: (id: LocationId) => voi
             key={l.id}
             className="loc"
             aria-label={l.label}
-            onClick={() => onSelect(l.id)}
+            onClick={() => {
+              track('location_selected', { location_id: l.id });
+              onSelect(l.id);
+            }}
             style={{ left: ORIGIN.x + l.x - SPRITE_PAD, top: ORIGIN.y + l.y - SPRITE_PAD, width: HOUSE.w }}
           >
             <span className="stack">

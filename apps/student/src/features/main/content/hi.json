@@ -3,6 +3,7 @@
   "main.week": "महीना {{month}} · हफ़्ता {{week}}",
   "main.money": "पैसे",
   "main.greeting": "नमस्ते, {{nickname}}!",
+  "main.rejoin": "वापसी कोड: {{code}}",
   "main.persona": "तुम {{name}} बनकर खेल रहे हो।",
   "main.news": "Paisa Times",
   "main.news.open": "Paisa Times खोलो",

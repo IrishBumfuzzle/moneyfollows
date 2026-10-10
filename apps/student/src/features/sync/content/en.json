@@ -1,0 +1,11 @@
+{
+  "sync.offline": "You're offline. Keep playing: your progress is saved on this phone and will sync later.",
+  "sync.offline.short": "Offline: saved on this phone",
+  "sync.offline.join": "Offline: you need internet to join your class",
+  "sync.waiting.one": "1 update waiting to send",
+  "sync.waiting.many": "{{count}} updates waiting to send",
+  "sync.waiting.short": "{{count}} waiting to send",
+  "sync.retry": "Try now",
+  "sync.retrying": "Sending…",
+  "sync.synced": "All synced"
+}

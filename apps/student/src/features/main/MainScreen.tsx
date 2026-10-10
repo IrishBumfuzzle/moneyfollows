@@ -4,6 +4,7 @@ import { lifeApi } from '../life/life';
 import { useHasUnread } from '../news';
 import type { Profile } from '../onboarding';
 import { PERSONAS } from '../onboarding/presets';
+import { formatRejoinCode } from '../onboarding/validate';
 import { trackAppOpen } from './appOpen';
 import { formatRupees, t } from './content';
 import '../../design/kenney.css';
@@ -95,6 +96,7 @@ export function MainScreen({ profile, lang, onPlay, onOpenNews }: {
             {paid !== null && life.debt === 0 ? tr('main.paid_back', { amount: formatRupees(paid) }) : ''}
           </p>
           <p className="ms-greeting">{tr('main.greeting', { nickname: profile.nickname })}</p>
+          {profile.rejoinCode && <p className="ms-rejoin">{tr('main.rejoin', { code: formatRejoinCode(profile.rejoinCode) })}</p>}
           <button className="k-btn is-primary ms-play" onClick={onPlay}>
             <svg viewBox="0 0 5 9" width="15" height="27" aria-hidden="true" shapeRendering="crispEdges">
               <path fill="currentColor" d="M0 0h1v9H0zM1 1h1v7H1zM2 2h1v5H2zM3 3h1v3H3zM4 4h1v1H4z" />

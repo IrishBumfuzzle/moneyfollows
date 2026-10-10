@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { CLASSROOM_BANK, t } from './content';
+import { assessmentKind, nextAssessment, resultNote, useAssessments, useAssessmentsHydrated } from './assessments';
+import type { AssessmentKind } from './assessments';
+import { ASSESSMENT_BANK, CLASSROOM_BANK, t } from './content';
 import { answer, currentQuestion, isFinished, next, result, startQuiz } from './quiz';
 import type { AnswerFeedback, QuizResult, QuizSession } from './quiz';
 import { PILLARS } from './types';
@@ -29,26 +31,56 @@ function useStageScale() {
   return scale;
 }
 
-type Phase = { name: 'intro' } | { name: 'quiz'; feedback: AnswerFeedback | null; chosen: number | null } | { name: 'result'; result: QuizResult };
+type Note = { key: string; vars: Record<string, number> };
+type Phase =
+  | { name: 'intro' }
+  | { name: 'quiz'; feedback: AnswerFeedback | null; chosen: number | null }
+  | { name: 'result'; result: QuizResult; note: Note | null };
 
-export function ClassroomScreen({ lang, seed, onExit, onFinish }: {
+const practice = (seed: number) => startQuiz(CLASSROOM_BANK, { kind: 'classroom', seed, count: QUESTIONS });
+
+export function ClassroomScreen({ lang, seed, endlineOpen = false, onExit, onFinish }: {
   lang: Lang;
   seed: number;
+  /** The teacher has opened the end-of-term check (class_status.endline_open). */
+  endlineOpen?: boolean;
   onExit: () => void;
-  /** Called once per finished quiz; turn it into a quiz_submitted event with toSubmittedEvent. */
+  /** Called once per finished quiz, practice or check; turn it into a quiz_submitted event with toSubmittedEvent. */
   onFinish?: (r: QuizResult) => void;
 }) {
   const scale = useStageScale();
   const [round, setRound] = useState(0);
-  const [session, setSession] = useState<QuizSession>(() => startQuiz(CLASSROOM_BANK, { kind: 'classroom', seed, count: QUESTIONS }));
+  const [session, setSession] = useState<QuizSession>(() => practice(seed));
   const [phase, setPhase] = useState<Phase>({ name: 'intro' });
   const boardRef = useRef<HTMLDivElement>(null);
+  const nextRef = useRef<HTMLButtonElement>(null);
   const tr = (key: string, vars?: Record<string, string | number>) => t(lang, key, vars);
+
+  // A check hides right and wrong until the result, so no green or red and no explanation.
+  const hidden = session.feedback === 'end';
+  // Until the saved record is read, offer no check (it may already be done).
+  const hydrated = useAssessmentsHydrated();
+  const done = useAssessments((s) => s.done);
+  const offered = hydrated ? nextAssessment(done, endlineOpen) : null;
 
   // Move focus to the board when the question changes, so screen readers read it next.
   useEffect(() => boardRef.current?.focus(), [phase.name, session.index]);
+  // Answering locks the option buttons, which drops keyboard focus; put it on Next.
+  const answeredHidden = hidden && phase.name === 'quiz' && !!phase.feedback;
+  useEffect(() => {
+    if (answeredHidden) nextRef.current?.focus();
+  }, [answeredHidden]);
 
   const q = currentQuestion(session);
+
+  function begin(s: QuizSession) {
+    setSession(s);
+    setPhase({ name: 'quiz', feedback: null, chosen: null });
+  }
+
+  function startCheck(kind: AssessmentKind) {
+    begin(startQuiz(ASSESSMENT_BANK, { kind, seed, quizId: kind, feedback: 'end' }));
+  }
 
   function choose(i: number) {
     if (phase.name !== 'quiz' || phase.feedback) return;
@@ -62,20 +94,28 @@ export function ClassroomScreen({ lang, seed, onExit, onFinish }: {
     setSession(s);
     if (isFinished(s)) {
       const r = result(s);
+      const kind = assessmentKind(r.kind);
+      let note: Note | null = null;
+      if (kind) {
+        const store = useAssessments.getState();
+        note = resultNote(kind, r.score, store.done.baseline?.score);
+        store.record(kind, r.score);
+      }
       onFinish?.(r);
-      setPhase({ name: 'result', result: r });
+      setPhase({ name: 'result', result: r, note });
     } else setPhase({ name: 'quiz', feedback: null, chosen: null });
   }
 
+  // Practice again. After a check this is the way on, because a check is never repeated.
   function replay() {
     const n = round + 1;
     setRound(n);
-    setSession(startQuiz(CLASSROOM_BANK, { kind: 'classroom', seed: seed + n, count: QUESTIONS }));
-    setPhase({ name: 'quiz', feedback: null, chosen: null });
+    begin(practice(seed + n));
   }
 
   const optionClass = (i: number) => {
     if (phase.name !== 'quiz' || !phase.feedback) return '';
+    if (hidden) return i === phase.chosen ? 'is-picked' : 'is-dim';
     if (i === phase.feedback.correctChoice) return 'is-correct';
     if (i === phase.chosen) return 'is-wrong';
     return 'is-dim';
@@ -94,13 +134,14 @@ export function ClassroomScreen({ lang, seed, onExit, onFinish }: {
           <ol className="cr-pips" aria-label={tr('classroom.progress', { n: session.index + 1, total: session.questions.length })}>
             {session.questions.map((x, i) => {
               const a = session.answers[i];
-              return <li key={x.id} className={`k-pip ${a ? (a.correct ? 'is-right' : 'is-wrong') : i === session.index ? 'is-now' : ''}`} />;
+              const state = a ? (hidden ? 'is-done' : a.correct ? 'is-right' : 'is-wrong') : i === session.index ? 'is-now' : '';
+              return <li key={x.id} className={`k-pip ${state}`} />;
             })}
           </ol>
         )}
 
         <div className="cr-board" ref={boardRef} tabIndex={-1} aria-live="polite">
-          {phase.name === 'intro' && <p>{tr('classroom.intro')}</p>}
+          {phase.name === 'intro' && <p>{tr(offered ? `classroom.assess.${offered}.intro` : 'classroom.intro')}</p>}
           {phase.name === 'quiz' && q && (
             <>
               <p className="cr-board-label">{tr('classroom.progress', { n: session.index + 1, total: session.questions.length })}</p>
@@ -109,7 +150,7 @@ export function ClassroomScreen({ lang, seed, onExit, onFinish }: {
           )}
           {phase.name === 'result' && (
             <>
-              <p className="cr-board-label">{tr('classroom.result.title')}</p>
+              <p className="cr-board-label">{tr(assessmentKind(phase.result.kind) ? `classroom.assess.${phase.result.kind}.title` : 'classroom.result.title')}</p>
               <p className="cr-score">{phase.result.score}%</p>
               <p>{tr('classroom.result.score', { correct: phase.result.correct, total: phase.result.total })}</p>
             </>
@@ -120,9 +161,20 @@ export function ClassroomScreen({ lang, seed, onExit, onFinish }: {
 
         {phase.name === 'intro' && (
           <div className="cr-floor cr-floor-end">
-            <button className="k-btn is-primary cr-wide" onClick={() => setPhase({ name: 'quiz', feedback: null, chosen: null })}>
-              {tr('classroom.start')}
-            </button>
+            {offered ? (
+              <>
+                <button className="k-btn is-primary cr-wide" onClick={() => startCheck(offered)}>
+                  {tr(`classroom.assess.${offered}.start`)}
+                </button>
+                <button className="k-btn cr-wide cr-center" onClick={() => setPhase({ name: 'quiz', feedback: null, chosen: null })}>
+                  {tr('classroom.assess.practice')}
+                </button>
+              </>
+            ) : (
+              <button className="k-btn is-primary cr-wide" onClick={() => setPhase({ name: 'quiz', feedback: null, chosen: null })}>
+                {tr('classroom.start')}
+              </button>
+            )}
           </div>
         )}
 
@@ -136,7 +188,12 @@ export function ClassroomScreen({ lang, seed, onExit, onFinish }: {
                 </button>
               ))}
             </div>
-            {phase.feedback && (
+            {phase.feedback && hidden && (
+              <button ref={nextRef} className="k-btn is-primary cr-wide cr-next" onClick={advance}>
+                {tr(session.index + 1 >= session.questions.length ? 'classroom.finish' : 'classroom.next')}
+              </button>
+            )}
+            {phase.feedback && !hidden && (
               <div className="k-panel cr-feedback" role="status">
                 <p className={`cr-verdict ${phase.feedback.correct ? 'is-right' : 'is-wrong'}`}>
                   {tr(phase.feedback.correct ? 'classroom.correct' : 'classroom.wrong')}
@@ -152,6 +209,7 @@ export function ClassroomScreen({ lang, seed, onExit, onFinish }: {
 
         {phase.name === 'result' && (
           <div className="cr-floor cr-floor-end">
+            {phase.note && <p className="k-panel cr-note">{tr(phase.note.key, phase.note.vars)}</p>}
             <ul className="k-panel cr-pillars">
               {PILLARS.filter((p) => phase.result.byPillar[p]).map((p) => {
                 const b = phase.result.byPillar[p]!;
@@ -163,7 +221,9 @@ export function ClassroomScreen({ lang, seed, onExit, onFinish }: {
                 );
               })}
             </ul>
-            <button className="k-btn is-primary cr-wide" onClick={replay}>{tr('classroom.retry')}</button>
+            <button className="k-btn is-primary cr-wide" onClick={replay}>
+              {tr(assessmentKind(phase.result.kind) ? 'classroom.assess.practice_next' : 'classroom.retry')}
+            </button>
             <button className="k-btn cr-wide cr-center" onClick={onExit}>{tr('classroom.back')}</button>
           </div>
         )}

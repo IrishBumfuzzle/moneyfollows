@@ -1,12 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useClassStatus } from './api/classStatus';
+import { quizSubmittedPayload } from './api/payloads';
+import { track } from './api/track';
+import { useBackendSync } from './api/useBackendSync';
 import { ClassroomScreen } from './features/classroom/ClassroomScreen';
 import { PhoneLayer, PhoneScreen, SuddenEventSheet, triggerEvent, useEvents } from './features/events';
 import type { Lang } from './features/classroom/types';
 import { MetersBar } from './features/life/MetersBar';
+import { shopPurchasePayload } from './features/life/life';
 import { StoreSheet } from './features/life/StoreSheet';
 import { t as mainT } from './features/main/content';
 import { MainScreen } from './features/main/MainScreen';
 import { PaisaTimes } from './features/news';
+import { OfflineBanner } from './features/sync/OfflineBanner';
 import { Onboarding, loadProfile } from './features/onboarding';
 import type { Profile } from './features/onboarding';
 import { useStoresHydrated } from './game/hydration';
@@ -26,6 +32,27 @@ const SEED = Number(params.get('seed')) || Math.floor(Math.random() * 2 ** 31);
 const screenOf = (state: unknown): Screen => (state as { screen?: Screen } | null)?.screen ?? 'main';
 
 export function App() {
+  // First launch shows onboarding; afterwards the saved profile skips it. undefined = still reading IndexedDB.
+  const [profile, setProfile] = useState<Profile | null>();
+  useEffect(() => void loadProfile().then((p) => setProfile(p ?? null)), []);
+  const refreshStatus = useBackendSync(profile, setProfile);
+  // The language picked in onboarding, for the banner while there is no profile yet.
+  const [obLang, setObLang] = useState<Lang>();
+  return (
+    <>
+      <Game profile={profile} onProfile={setProfile} onLang={setObLang} onOpenClassroom={refreshStatus} />
+      <OfflineBanner lang={profile && !params.has('lang') ? profile.lang : (obLang ?? LANG)} top={profile === null} />
+    </>
+  );
+}
+
+function Game({ profile, onProfile, onLang, onOpenClassroom }: {
+  profile: Profile | null | undefined;
+  onProfile: (p: Profile) => void;
+  onLang: (lang: Lang) => void;
+  /** The Classroom just opened: re-read the class settings (the teacher may have opened the end-line). */
+  onOpenClassroom: () => void;
+}) {
   // A reload keeps the history entry, so start where it says (else ?screen=, else main).
   const [screen, setScreen] = useState<Screen>(() => {
     const s = (window.history.state as { screen?: Screen } | null)?.screen ?? (params.get('screen') as Screen | null);
@@ -42,6 +69,10 @@ export function App() {
     const id = params.get('event');
     if (hydrated && id) triggerEvent(id);
   }, [hydrated]);
+
+  useEffect(() => {
+    if (screen === 'classroom') onOpenClassroom();
+  }, [screen, onOpenClassroom]);
 
   // Each screen is a history entry, so Android's back button goes up a level (place → map →
   // main screen) instead of leaving the app (CLAUDE.md 6). Paisa Times adds its own levels.
@@ -60,11 +91,9 @@ export function App() {
     else setScreen((s) => (s === 'store' || s === 'classroom' ? 'map' : 'main'));
   }, []);
 
-  // First launch shows onboarding; afterwards the saved profile skips it. undefined = still reading IndexedDB.
-  const [profile, setProfile] = useState<Profile | null>();
-  useEffect(() => void loadProfile().then((p) => setProfile(p ?? null)), []);
+  const endlineOpen = useClassStatus((s) => s.endlineOpen);
   if (profile === undefined || !hydrated) return null;
-  if (profile === null) return <Onboarding initialLang={LANG} onDone={setProfile} />;
+  if (profile === null) return <Onboarding initialLang={LANG} onLang={onLang} onDone={onProfile} />;
   const lang = params.has('lang') ? LANG : profile.lang; // ?lang= still overrides for demos and tests
   const name = mainT(lang, `persona.${profile.persona}.name`);
   const openPhone = (thread?: string) => {
@@ -104,8 +133,8 @@ export function App() {
         lang={lang}
         seed={SEED}
         onExit={back}
-        // TODO: queue toSubmittedEvent(result, …) once api-client's sync queue is on main (API.md).
-        onFinish={(r) => console.info('quiz finished', r)}
+        endlineOpen={endlineOpen === true}
+        onFinish={(r) => track('quiz_submitted', quizSubmittedPayload(r))}
       />
     );
   }
@@ -121,13 +150,13 @@ export function App() {
       />
       <MetersBar lang={lang} state={life} pop={last} />
       {screen === 'map' && eventLayer('map')}
-      {/* TODO: queue toLifeEvent(...) once the backend accepts the life events (docs/life-meters-api.md §5). */}
       {screen === 'store' && (
         <StoreSheet
           lang={lang}
           state={life}
-          onBuy={(_, out) => {
+          onBuy={(kind, out) => {
             apply(out);
+            if (!out.blocked) track('shop_purchase', shopPurchasePayload(kind, life, out.delta));
             tick();
           }}
           onClose={back}

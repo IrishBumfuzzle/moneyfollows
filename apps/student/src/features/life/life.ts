@@ -131,6 +131,15 @@ export interface LifeEventCtx {
 }
 
 /**
+ * The `shop_purchase` payload (docs/life-meters-api.md §5): price is whole rupees spent, health
+ * and sanity the clamped changes, month and week those of `state`, the state it was bought in.
+ * Same keys as @paisa/api-client's SyncEventPayloads['shop_purchase'].
+ */
+export function shopPurchasePayload(kind: ShopKind, state: LifeState, delta: LifeDelta) {
+  return { kind, price: -delta.money, health: delta.health, sanity: delta.sanity, month: state.month, week: state.week };
+}
+
+/**
  * Builds the SyncEvent for a successful action (docs/life-meters-api.md §5). Returns null for
  * a blocked action, which sends nothing. `state` is the state the action was played in.
  */
@@ -147,7 +156,7 @@ export function toLifeEvent(
   let payload: Record<string, string | number>;
   if (action.kind === 'buy') {
     type = 'shop_purchase';
-    payload = { ...base, kind: action.shop, price: -delta.money };
+    payload = shopPurchasePayload(action.shop, state, delta);
   } else if (action.kind === 'work') {
     type = 'work_shift';
     payload = { ...base, wage: delta.money };

@@ -1,0 +1,24 @@
+/* Learning gains screen. Tokens come from the dashboard's styles.css. */
+
+.gains-head { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.gains-head h2 { margin: 0; }
+
+.gains-summary { font-size: 1.125rem; font-weight: 700; margin: 8px 0 16px; }
+.gains-chart { width: 100%; }
+
+.gains-n-title { margin: 24px 0 8px; }
+.gains-n { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 0 24px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+.gains-n li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+
+.gains-toggle { margin-top: 8px; }
+.gains-table { margin-top: 16px; }
+/* Row headers are the question / skill area: plain text, not a shaded header cell. */
+table.data th.gains-q, .gains-table table.data th[scope='row'] { font-weight: 400; font-size: 1rem; background: transparent; white-space: normal; }
+table.data th.gains-q { min-width: 240px; max-width: 400px; }
+.gains-wrong { min-width: 160px; }
+
+/* % correct: a small bar plus the number, so the value is never shown by length alone. */
+.gains-meter { display: inline-flex; align-items: center; justify-content: flex-end; gap: 12px; }
+.gains-bar { flex: 0 0 72px; height: 12px; border-radius: 6px; overflow: hidden; background: #efe7d6; }
+.gains-bar > span { display: block; height: 100%; background: var(--brand); }
+.gains-pct { min-width: 3ch; text-align: right; font-weight: 700; }

@@ -1,0 +1,195 @@
+/* Progress screen. Everything is prefixed `progress-` so it cannot clash with other screens. */
+
+.progress > .row h2 {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.progress-summary {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.progress-error {
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.progress-error p {
+  margin: 0;
+  flex: 1 1 240px;
+}
+
+.progress-tools {
+  align-items: flex-end;
+}
+.progress-tools .field {
+  flex: 1 1 260px;
+  max-width: 420px;
+}
+.progress-tools p {
+  margin: 0;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+}
+
+/* ---- table ---- */
+.progress-table {
+  min-width: 1040px;
+}
+.progress-table th,
+.progress-table td {
+  white-space: nowrap;
+}
+/* Sort buttons fill their header cell (styles.css); numbers sit at the right edge. */
+.progress-table th.num button.sort {
+  justify-content: flex-end;
+}
+.progress-arrow {
+  color: var(--ink-soft);
+}
+.progress-arrow.on {
+  color: var(--brand);
+}
+
+/* Nickname stays in view while the rest scrolls sideways on a phone. */
+.progress-table th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  box-shadow: 1px 0 0 var(--line);
+}
+.progress-table tbody th {
+  background: var(--surface);
+  font-weight: 700;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  min-width: 7rem;
+  max-width: 12rem;
+}
+.progress-last {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.table-wrap:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ---- empty class ---- */
+.progress-empty {
+  text-align: center;
+}
+.progress-empty .banner {
+  text-align: left;
+  margin-bottom: 16px;
+}
+.progress-code-label {
+  margin: 16px 0 0;
+}
+.progress-empty .class-code {
+  margin: 0 0 16px;
+  overflow-wrap: anywhere;
+}
+.progress-qr {
+  display: inline-block;
+  padding: 8px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.progress-qr svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.progress-link {
+  overflow-wrap: anywhere;
+}
+
+/* ---- students and rejoin codes ---- */
+.progress-students > summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  cursor: pointer;
+  list-style: none;
+}
+.progress-students > summary::-webkit-details-marker {
+  display: none;
+}
+.progress-students > summary::before {
+  content: '▸';
+  font-size: 1.25rem;
+  color: var(--brand);
+}
+.progress-students[open] > summary::before {
+  content: '▾';
+}
+.progress-students > summary h2 {
+  margin: 0;
+}
+.progress-students > summary:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.progress-student-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.progress-student-list li {
+  border-top: 1px solid var(--line);
+  padding: 8px 0;
+}
+.progress-student-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+.progress-student-name {
+  flex: 1 1 8rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.progress-code-cell {
+  flex: 0 1 9rem;
+  min-width: 7rem;
+}
+.progress-code {
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+}
+.progress-code.muted {
+  font-weight: 400;
+}
+.progress-student-row .btn[aria-pressed='true'] {
+  background: var(--accent-soft);
+}
+.progress-confirm {
+  flex-direction: column;
+  margin-top: 8px;
+}
+.progress-confirm p {
+  margin: 0;
+}
+.progress-student-list .banner {
+  margin-top: 8px;
+}
+.progress-student-list p.banner {
+  margin-bottom: 0;
+}
+
+/* Rejoin codes are credentials: never on paper. */
+@media print {
+  .progress-students {
+    display: none !important;
+  }
+}
