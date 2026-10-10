@@ -18,6 +18,8 @@ import staySafe from '../scenarios/stay_safe.json';
 import baseline from '../quizzes/baseline.json';
 import endline from '../quizzes/endline.json';
 import manifest from '../manifest.json';
+import badgeDefs from '../rewards/badges.json';
+import { BadgeSchema, type Badge } from './badges';
 import { buildI18n, buildLanguages, type ContentManifest, type LanguageInfo } from './languages';
 
 const contentManifest: ContentManifest = manifest;
@@ -33,6 +35,9 @@ export const content: ContentBundle = {
   quizzes: QuizQuestionSchema.array().parse([...baseline, ...endline]),
   scamMessages: ScamMessageSchema.array().parse(scamMessages),
 };
+
+/** Badges the engine's rewards module can award (rewards/badges.json). Kept outside ContentBundle so the frozen contract is unchanged. */
+export const badges: Badge[] = BadgeSchema.array().parse(badgeDefs);
 
 /**
  * Every i18n/<code>.json file, found at build time. Vite and Vitest turn the import.meta.glob
@@ -84,5 +89,6 @@ export const i18n = buildI18n(rawI18n, contentManifest);
 /** Every language with a file: code, display name, text direction, and whether it ships or is a machine draft. */
 export const languages: LanguageInfo[] = buildLanguages(rawI18n, contentManifest);
 
+export * from './badges';
 export * from './languages';
 export * from './validate';

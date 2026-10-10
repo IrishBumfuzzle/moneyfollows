@@ -8,6 +8,7 @@ import {
   ScamMessageSchema,
   ScenarioSchema,
 } from '@paisa/shared';
+import { BadgeSchema } from './badges';
 
 export interface Guardrails {
   brands: string[];
@@ -52,7 +53,7 @@ export interface ValidateInput {
   contentVersion?: string;
 }
 
-type Kind = 'scenario' | 'event' | 'quiz' | 'scam' | 'persona';
+type Kind = 'scenario' | 'event' | 'quiz' | 'scam' | 'persona' | 'badge';
 
 interface Item {
   kind: Kind;
@@ -67,12 +68,14 @@ const SCHEMAS = {
   quiz: QuizQuestionSchema,
   scam: ScamMessageSchema,
   persona: PersonaSchema,
+  badge: BadgeSchema,
 } as const;
 
 function kindOf(path: string): Kind | null {
   const parts = path.replace(/\\/g, '/').split('/');
   const base = parts[parts.length - 1] ?? '';
   if (base === 'personas.json') return 'persona';
+  if (parts.includes('rewards') && base === 'badges.json') return 'badge';
   if (parts.includes('scenarios')) return 'scenario';
   if (parts.includes('events')) return 'event';
   if (parts.includes('quizzes')) return 'quiz';
@@ -281,13 +284,15 @@ export function visibleLength(text: string): number {
 
 /**
  * Which length cap applies to a key (README "Length caps"). Checked in order:
- * scam.why.* hints, reflections, the assumption banner, common.* buttons, then key endings.
+ * scam.why.* hints, reflections, the assumption banner, common.* buttons, badge.* strings, then key endings.
  */
 export function capFor(key: string): string | null {
   if (key.startsWith('scam.why.')) return 'hint';
   if (key.startsWith('reflection.')) return 'reflection';
   if (key === 'assumption.banner') return 'banner';
   if (key.startsWith('common.')) return 'label';
+  if (key.startsWith('badge.') && key.endsWith('.name')) return 'badgeName';
+  if (key.startsWith('badge.') && key.endsWith('.desc')) return 'badgeDesc';
   if (key.endsWith('.story')) return 'story';
   if (key.endsWith('.label')) return 'label';
   if (key.endsWith('.lesson')) return 'lesson';

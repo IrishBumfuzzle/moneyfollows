@@ -4,5 +4,18 @@ export { monthReport } from './score';
 export { projectGrowth } from './projection';
 export { scoreQuiz, quizFor, shuffleOptions } from './quiz';
 export { createDemoGame, DEMO_SEED } from './demo';
+// Additive: XP, badges and the weekly streak. Kept beside GameState, not inside it.
+export {
+  createRewards,
+  rewardStep,
+  checkBadges,
+  awardXp,
+  recordWeekPlayed,
+  isoWeekKey,
+  isoWeeksInYear,
+  nextIsoWeek,
+  XP,
+} from './rewards';
+export type { Rewards, RewardGain } from './rewards';
 export { EngineError } from './errors';
 export type { EngineErrorCode } from './errors';

@@ -30,7 +30,10 @@ function jsonIn(dir: string): string[] {
 
 const strict = process.argv.includes('--strict');
 
-const files: ContentFile[] = [...['scenarios', 'events', 'quizzes', 'minigames'].flatMap(jsonIn), 'personas.json'].map(
+const files: ContentFile[] = [
+  ...['scenarios', 'events', 'quizzes', 'minigames', 'rewards'].flatMap(jsonIn),
+  'personas.json',
+].map(
   (path) => ({ path, data: readJson(path) }),
 );
 

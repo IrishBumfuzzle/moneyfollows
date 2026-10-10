@@ -408,5 +408,15 @@
   "reflection.pay_down_debt": "अगले महीने जो उधार लिया है, उसमें से थोड़ा लौटाने की कोशिश करें।",
   "reflection.great_month": "बहुत बढ़िया महीना! आपकी योजना काम कर रही है। यही आदतें बनाए रखें।",
   "common.continue": "आगे बढ़ें",
-  "assumption.banner": "ये अनुमानित संख्याएँ हैं, वादे नहीं। असली नतीजे इससे ज़्यादा या कम हो सकते हैं।"
+  "assumption.banner": "ये अनुमानित संख्याएँ हैं, वादे नहीं। असली नतीजे इससे ज़्यादा या कम हो सकते हैं।",
+  "badge.first_step.name": "पहला क़दम",
+  "badge.first_step.desc": "आपने पैसों का अपना पहला फ़ैसला लिया।",
+  "badge.safety_shield.name": "सुरक्षा कवच",
+  "badge.safety_shield.desc": "आपने ठगी और सुरक्षा वाले 3 अलग-अलग हालात सँभाले।",
+  "badge.rainy_day_ready.name": "मुश्किल दिन के लिए तैयार",
+  "badge.rainy_day_ready.desc": "आपकी बचत गुल्लक में आधे महीने की ज़रूरतों जितने पैसे हैं।",
+  "badge.goal_getter.name": "लक्ष्य पूरा",
+  "badge.goal_getter.desc": "आपने अपने लक्ष्य के लिए पूरे पैसे जोड़ लिए।",
+  "badge.steady_streak.name": "लगातार खिलाड़ी",
+  "badge.steady_streak.desc": "आपने लगातार 3 हफ़्ते खेला।"
 }

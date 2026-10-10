@@ -1,0 +1,47 @@
+[
+  {
+    "id": "first_step",
+    "name": "t:badge.first_step.name",
+    "description": "t:badge.first_step.desc",
+    "icon": "footprints",
+    "xp": 10,
+    "rule": { "kind": "decisions", "n": 1 },
+    "meta": { "status": "draft", "author": "claude" }
+  },
+  {
+    "id": "safety_shield",
+    "name": "t:badge.safety_shield.name",
+    "description": "t:badge.safety_shield.desc",
+    "icon": "shield",
+    "xp": 20,
+    "rule": { "kind": "pillar_decisions", "pillar": "stay_safe", "n": 3 },
+    "meta": { "status": "draft", "author": "claude" }
+  },
+  {
+    "id": "rainy_day_ready",
+    "name": "t:badge.rainy_day_ready.name",
+    "description": "t:badge.rainy_day_ready.desc",
+    "icon": "umbrella",
+    "xp": 20,
+    "rule": { "kind": "emergency_fund", "percent": 50 },
+    "meta": { "status": "draft", "author": "claude" }
+  },
+  {
+    "id": "goal_getter",
+    "name": "t:badge.goal_getter.name",
+    "description": "t:badge.goal_getter.desc",
+    "icon": "target",
+    "xp": 30,
+    "rule": { "kind": "goal_reached" },
+    "meta": { "status": "draft", "author": "claude" }
+  },
+  {
+    "id": "steady_streak",
+    "name": "t:badge.steady_streak.name",
+    "description": "t:badge.steady_streak.desc",
+    "icon": "flame",
+    "xp": 20,
+    "rule": { "kind": "streak", "weeks": 3 },
+    "meta": { "status": "draft", "author": "claude" }
+  }
+]
