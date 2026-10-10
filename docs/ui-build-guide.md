@@ -35,6 +35,8 @@ This split differs from CLAUDE.md §3, which puts onboarding with UI-1. Phase 0 
 | Thing | State |
 | --- | --- |
 | Student app: Vite + React, one map screen (`LocationScreen`), the `PixelText` component | Works |
+| Classroom quiz at School (`features/classroom`, see `API.md`) | Works |
+| Life meters API: money, health, sanity; the store's necessity/want options, work, school (`features/life`, see `docs/life-meters-api.md`) | Frontend API and tests built; screens, engine and backend not yet |
 | Onboarding, Paisa Times, dashboard | Nothing yet |
 | `apps/dashboard` | Folder does not exist; `pnpm dev:dashboard` is in CLAUDE.md but not in `package.json` |
 | `packages/shared` (types), engine (`earn()`), content (editions, glossary, personas), api-client | Not created yet (backend lanes) |
@@ -270,6 +272,7 @@ Your screens need things other people are building. Until each one lands, use a 
 | `join_class` | BE-2: `packages/api-client` | `src/api/joinClass.ts` that accepts any code |
 | Staff sign-in, `class_progress`, `learning_gain` | BE-2 | `apps/dashboard/src/api.ts` returning seed data |
 | Baseline and end-line quiz scores | The other UI dev's School quizzes, stored by BE-2 | Seed data, labelled "Demo data" on screen |
+| Health and sanity meters; store, work and school actions | BE-1: `buy`, `work`, `attendSchool`, `GameState.money` (one common wallet) and `GameState.vitals`; BE-2: three new event types (`docs/life-meters-api.md` §4–5) | `lifeApi` in `src/features/life/life.ts`, a local stand-in with the same rules |
 
 ### Setup is done when
 
@@ -329,6 +332,7 @@ Placeholders are fine in every phase: an emoji avatar or a grey box for an artic
 | Notes shows the Word Wallet | Other UI dev → you | They render your `<WordWallet />` inside Notes |
 | Demo panel "mark a new edition" | Other UI dev → you | Their panel calls your `markNewEdition()` |
 | Quiz scores for the dashboard | Other UI dev → BE-2 → you | Their `quiz_submitted` events; your dashboard reads `learning_gain` |
+| Meters bar, store sheet, work and school | Other UI dev | They call `lifeApi.shopOffers / buy / work / attendSchool` and render the result (`docs/life-meters-api.md` §6) |
 
 **Prompt 0a — record the new lanes**
 
@@ -757,6 +761,7 @@ Tick this list as you go; each line points to its full "Done when" list in Secti
 - [ ] Other UI dev: who owns the foundations; the hand-off table; `useGame.earn`; that you touched `App.tsx` (if you did)
 - [ ] BE-1: dates for a sample edition, `glossary.json` and `personas.json`
 - [ ] BE-2: api-client `join_class`, staff sign-in, `class_progress`, `learning_gain`, dashboard seed data, the deployed student URL for the QR
+- [ ] BE-1 and BE-2: the life meters proposal (`docs/life-meters-api.md` §4 engine functions, the common `money` wallet and `vitals`; §5 the `shop_purchase`, `work_shift` and `school_attended` events)
 - [ ] Team: owners for MessageInspector, Scam or Safe? and Time Machine; your sleep slot
 
 ### Glossary
@@ -771,6 +776,7 @@ Tick this list as you go; each line points to its full "Done when" list in Secti
 | Facilitator | The NGO teacher who runs sessions and uses the dashboard |
 | Feature freeze | 08:30 Sunday: after this, only bug fixes, copy and polish |
 | Glossary term | A money word with a simple meaning and an everyday example, shown in the thought cloud |
+| Health, sanity | The character's two 0–100 meters beside money. Store purchases raise sanity (wants more than necessities); work and school lower it |
 | Hook | A function starting with `use` that gives a component state or side effects |
 | i18n | Internationalisation: every visible word is a key, translated per language |
 | IndexedDB | Storage inside the browser that survives reloads and works offline |

@@ -1,0 +1,16 @@
+{
+  "life.meter.money": "Money",
+  "life.meter.health": "Health",
+  "life.meter.sanity": "Sanity",
+  "life.shop.necessity.label": "Buy necessities",
+  "life.shop.necessity.hint": "Rice, dal, soap. Costs less, lifts your mood a little.",
+  "life.shop.want.label": "Buy something you want",
+  "life.shop.want.hint": "A treat for yourself. Costs a lot, lifts your mood a lot.",
+  "life.work.label": "Go to work",
+  "life.work.hint": "Earn money. Work is tiring, so sanity goes down.",
+  "life.school.label": "Go to school",
+  "life.school.hint": "Classes take energy, so sanity goes down.",
+  "life.blocked.not_enough_money": "Not enough money.",
+  "life.blocked.already_worked": "You already worked this week.",
+  "life.blocked.already_at_school": "You already went to school this week."
+}

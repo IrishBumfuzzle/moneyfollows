@@ -1,0 +1,16 @@
+{
+  "life.meter.money": "पैसे",
+  "life.meter.health": "सेहत",
+  "life.meter.sanity": "मन की शांति",
+  "life.shop.necessity.label": "ज़रूरी चीज़ें खरीदो",
+  "life.shop.necessity.hint": "चावल, दाल, साबुन। कम खर्च, मन थोड़ा अच्छा होता है।",
+  "life.shop.want.label": "अपनी पसंद की चीज़ खरीदो",
+  "life.shop.want.hint": "अपने लिए कुछ खास। ज़्यादा खर्च, मन बहुत अच्छा होता है।",
+  "life.work.label": "काम पर जाओ",
+  "life.work.hint": "पैसे कमाओ। काम थकाता है, इसलिए मन की शांति कम होती है।",
+  "life.school.label": "स्कूल जाओ",
+  "life.school.hint": "पढ़ाई में मेहनत लगती है, इसलिए मन की शांति कम होती है।",
+  "life.blocked.not_enough_money": "पैसे कम हैं।",
+  "life.blocked.already_worked": "इस हफ़्ते तुम काम कर चुके हो।",
+  "life.blocked.already_at_school": "इस हफ़्ते तुम स्कूल जा चुके हो।"
+}
