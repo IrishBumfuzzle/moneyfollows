@@ -145,6 +145,9 @@ importers:
       playwright-core:
         specifier: 1.56.1
         version: 1.56.1
+      tsx:
+        specifier: ^4.23.15
+        version: 4.23.15
       typescript:
         specifier: ^5.5.4
         version: 5.9.3
@@ -154,6 +157,9 @@ importers:
       vitest:
         specifier: ^3.2.7
         version: 3.2.7(@types/node@22.20.5)(tsx@4.23.15)
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
 
   packages/api-client:
     dependencies:
