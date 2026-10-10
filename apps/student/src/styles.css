@@ -1,0 +1,18 @@
+@import '@fontsource/pixelify-sans/400.css';
+@import '@fontsource/noto-sans-devanagari/400.css';
+@import '@fontsource/noto-sans-telugu/400.css';
+
+body { margin: 0; background: #38cbab; }
+
+.screen { position: relative; height: 100dvh; overflow: hidden; }
+.world { position: absolute; left: 0; top: 0; transform-origin: 0 0; background: url(/assets/world.png) 0 0 / 100% 100%; image-rendering: pixelated; }
+.loc { position: absolute; background: none; border: 0; padding: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; -webkit-tap-highlight-color: transparent; outline: none; }
+.stack { position: relative; width: 100%; display: block; }
+.stack > img:last-child { position: relative; z-index: 1; }
+.stack img { display: block; width: 100%; image-rendering: pixelated; }
+.stack .halo { position: absolute; inset: 0; opacity: 0; }
+.loc:hover .halo-hover, .loc:focus-visible .halo-hover { opacity: 1; }
+.loc:active .halo-hover { opacity: 0; }
+.loc:active .halo-active { opacity: 1; }
+
+@media (prefers-reduced-motion: no-preference) { .stack img { transition: none; } }
