@@ -164,7 +164,8 @@ export function ProgressScreen({ api, cls, lang }: ClassScreenProps) {
                 onChange={(e) => setQuery(e.target.value)}
               />
             </div>
-            {summary.inactive > 0 && (
+            {/* Stays while ticked, so a refresh that leaves nobody inactive can't hide it switched on. */}
+            {(summary.inactive > 0 || onlyInactive) && (
               <label className="progress-filter">
                 <input type="checkbox" checked={onlyInactive} onChange={(e) => setOnlyInactive(e.target.checked)} />
                 <span>{tr('filter.inactive', { n: formatNumber(summary.inactive) })}</span>
