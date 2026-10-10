@@ -221,11 +221,13 @@ web3 = 30
 # secret = ""
 
 [auth.email]
-# Allow/disallow new user signups via email to your project. Off: see [auth] enable_signup.
+# Must stay true. Despite its name, this switches the whole email provider on or off
+# (GOTRUE_EXTERNAL_EMAIL_ENABLED): false means nobody, invited staff included, can sign
+# in by email. Self-registration is blocked by [auth] enable_signup = false above.
 # Staff sign in with an emailed one-time code (signInWithOtp, shouldCreateUser: false).
 # Password sign-in cannot be switched off separately for the email provider; invited
 # staff never set a password, so only the local demo facilitator has one (pnpm seed).
-enable_signup = false
+enable_signup = true
 # If enabled, a user will be required to confirm any email change on both the old, and new email
 # addresses. If disabled, only the new email is required to confirm.
 double_confirm_changes = true
@@ -242,20 +244,27 @@ otp_expiry = 600
 
 # Production SMTP for sign-in codes. Locally, emails go to Inbucket ([local_smtp]), so this
 # stays disabled here; set enabled = true for the hosted project (`supabase config push`)
-# with the SUPABASE_SMTP_* variables from .env.example set in the shell.
+# with the SMTP_* variables from .env.example set in the shell.
 [auth.email.smtp]
 enabled = false
-host = "env(SUPABASE_SMTP_HOST)"
+host = "env(SMTP_HOST)"
 port = 587
-user = "env(SUPABASE_SMTP_USER)"
-pass = "env(SUPABASE_SMTP_PASS)"
-admin_email = "env(SUPABASE_SMTP_ADMIN_EMAIL)"
-sender_name = "env(SUPABASE_SMTP_SENDER_NAME)"
+user = "env(SMTP_USER)"
+pass = "env(SMTP_PASS)"
+admin_email = "env(SMTP_FROM)"
+sender_name = "Paisa Path"
 
-# Uncomment to customize email template
-# [auth.email.template.invite]
-# subject = "You have been invited"
-# content_path = "./supabase/templates/invite.html"
+# Staff accept the invite link once (it confirms the account), then sign in with a code.
+# An OTP request before the invite is accepted fails with signup_disabled.
+[auth.email.template.invite]
+subject = "You have been invited to Paisa Path"
+content_path = "./supabase/templates/invite.html"
+
+# The default sign-in email has only a link; the dashboard asks for the 6-digit code
+# (api-client verifyEmailCode), so the template must include {{ .Token }}.
+[auth.email.template.magic_link]
+subject = "Your Paisa Path sign-in code"
+content_path = "./supabase/templates/magic_link.html"
 
 # Uncomment to customize notification email template
 # [auth.email.notification.password_changed]
@@ -421,3 +430,26 @@ enabled = true
 # formatted with uppercase keywords, indent 2, max width 180, trailing commas,
 # and column/key alignment. Set to "null" to emit raw, unformatted SQL.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":180,\"commaStyle\":\"trailing\"}"
+
+# Hosted project (ap-south-1, org "Paisa Path"). `npx supabase config push` sends this whole
+# file; these overrides apply when the linked project matches project_id. Run it with .env
+# loaded: `set -a && . ./.env && set +a && npx supabase config push` (README, "Hosted project").
+# Free-tier projects reject the custom email templates unless custom SMTP is on, so the
+# SMTP block below must stay enabled. The ref is not a secret; SMTP values come from env().
+[remotes.production]
+project_id = "verbvywwsxggqycpykec"
+
+# TODO: switch site_url and the redirect list to the deployed dashboard URL.
+
+# The local default (2 emails an hour) is too low for inviting staff. Gmail allows ~500 a day.
+[remotes.production.auth.rate_limit]
+email_sent = 60
+
+[remotes.production.auth.email.smtp]
+enabled = true
+host = "env(SMTP_HOST)"
+port = 587
+user = "env(SMTP_USER)"
+pass = "env(SMTP_PASS)"
+admin_email = "env(SMTP_FROM)"
+sender_name = "Paisa Path"
