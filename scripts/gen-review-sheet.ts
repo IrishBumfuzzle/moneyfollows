@@ -54,6 +54,9 @@ function choiceFacts(item: Obj): string[] {
 
 function kindOf(path: string): string {
   if (path === 'personas.json') return 'persona';
+  if (path === 'glossary.json') return 'glossary';
+  if (path === 'places.json') return 'place';
+  if (path.startsWith('news/')) return 'article';
   if (path.startsWith('rewards/')) return 'badge';
   if (path.endsWith('jar-splitter.json')) return 'jar';
   if (path.startsWith('minigames/')) return 'scam';
@@ -72,6 +75,10 @@ function factsOf(kind: string, item: Obj): string[] {
       out.push(
         `- Pillar: ${str(item.pillar)} · concept: ${str(item.concept)} · personas: ${list(item.personas)}` +
           (kind === 'scenario' ? ` · difficulty ${str(item.difficulty)}` : ` · levels: ${list(item.levels)}`),
+      );
+      out.push(
+        `- Place: ${str(item.location)}${typeof item.sublocation === 'string' ? ` › ${item.sublocation}` : ''} · ` +
+          `${item.channel === 'phone' ? 'phone chat' : 'in person'} · speaker \`${str(item.speaker)}\``,
       );
       if (typeof item.requiresFlag === 'string') out.push(`- Shows only after flag \`${item.requiresFlag}\``);
       if (item.assumption === true) out.push('- Shows the AssumptionBanner');
@@ -99,6 +106,32 @@ function factsOf(kind: string, item: Obj): string[] {
       );
       break;
     }
+    case 'article': {
+      const q = isObj(item.question) ? item.question : {};
+      const options = Array.isArray(q.options) ? q.options : [];
+      const reward = isObj(item.reward) ? item.reward : {};
+      const checked =
+        isObj(item.meta) && typeof item.meta.factsCheckedBy === 'string' ? item.meta.factsCheckedBy : null;
+      out.push(
+        `- Edition ${str(item.edition)} · glossary words: ${list(item.terms)} · pays ${money(reward.wage)} and ${str(reward.xp)} XP`,
+      );
+      out.push(`- Correct answer: option ${Number(q.correct) + 1} (\`${str(options[Number(q.correct)])}\`)`);
+      out.push(
+        checked
+          ? `- Facts checked by: ${checked}`
+          : '- [ ] Facts checked by: ________ (needed before release: check every real rule, rate, price or date, then set `meta.factsCheckedBy`)',
+      );
+      break;
+    }
+    case 'glossary':
+      break;
+    case 'place': {
+      const pos = isObj(item.position) ? `${str(item.position.x)}%, ${str(item.position.y)}%` : '?';
+      const parent = typeof item.parent === 'string' ? ` · inside ${item.parent}` : '';
+      const children = Array.isArray(item.children) ? ` · opens ${list(item.children)}` : '';
+      out.push(`- Map position ${pos}${parent}${children}`);
+      break;
+    }
     case 'badge':
       out.push(`- Earned when: ${JSON.stringify(item.rule)} · pays ${str(item.xp)} XP · icon: ${str(item.icon)}`);
       break;
@@ -119,6 +152,20 @@ function factsOf(kind: string, item: Obj): string[] {
   return out;
 }
 
+/** A reference section: items without a review status (glossary terms, map places), shown for checking. */
+function referenceSection(path: string, kind: string, items: Obj[], input: ReviewInput): string {
+  const body: string[] = [`## \`${path}\` (reference: ${items.length}, no status to flip)`, ''];
+  for (const item of items) {
+    body.push(`### ${str(item.id)}`, '', ...factsOf(kind, item));
+    body.push('', '| Key | English | हिन्दी |', '| --- | --- | --- |');
+    for (const key of collectKeys(item)) {
+      body.push(`| \`${key}\` | ${cell(textOf(input.i18n, 'en', key))} | ${cell(textOf(input.i18n, 'hi', key))} |`);
+    }
+    body.push('');
+  }
+  return body.join('\n');
+}
+
 const textOf = (i18n: ReviewInput['i18n'], lang: string, key: string): string | undefined => {
   const v = i18n[lang]?.[key];
   return typeof v === 'string' ? v : undefined;
@@ -127,12 +174,17 @@ const textOf = (i18n: ReviewInput['i18n'], lang: string, key: string): string | 
 /** Builds the Markdown review sheet. Pure: the same files always give the same text. */
 export function buildReviewSheet(input: ReviewInput): string {
   const sections: string[] = [];
+  const references: string[] = [];
   let total = 0;
   let reviewed = 0;
   for (const file of [...input.files].sort((a, b) => a.path.localeCompare(b.path))) {
     if (!Array.isArray(file.data)) continue;
     const kind = kindOf(file.path);
     const items = file.data.filter(isObj);
+    if (kind === 'glossary' || kind === 'place') {
+      references.push(referenceSection(file.path, kind, items, input));
+      continue;
+    }
     total += items.length;
     const drafts = items.filter((i) => isObj(i.meta) && i.meta.status === 'draft');
     reviewed += items.length - drafts.length;
@@ -164,11 +216,14 @@ export function buildReviewSheet(input: ReviewInput): string {
     '2. Check the facts: the effects add up and match the story, the "best"-rated choice really is the better habit, quiz answers are right, and scam verdicts are right.',
     '3. Check the guardrails (CLAUDE.md 7.2): no real brands, no promises or advice to invest, fictional assets only, no shaming, about Class 8 reading level.',
     '4. If it is good, open the JSON file named in the section heading, find the item by its id, and change `"status": "draft"` to `"status": "reviewed"` in its `meta`. Fix or flag anything that is wrong instead.',
-    '5. Run `pnpm lint:content` (and `pnpm lint:content --strict` once everything is reviewed).',
+    '5. Paisa Times articles also need a fact check: confirm every real rule, rate, price or date, then add `"factsCheckedBy": "<name>"` to the article\'s `meta`. `--strict` fails without it.',
+    '6. Glossary terms and map places have no status of their own. Check them with the articles that use them (sections at the end).',
+    '7. Run `pnpm lint:content` (and `pnpm lint:content --strict` once everything is reviewed).',
     '',
   ].join('\n');
   const done = drafts === 0 ? '\nEvery item is reviewed. `pnpm lint:content --strict` should pass.\n' : '';
-  return `${header}${done}\n${sections.join('\n')}`.replace(/\n{3,}/g, '\n\n').trimEnd() + '\n';
+  const refs = references.length > 0 ? `\n${references.join('\n')}` : '';
+  return `${header}${done}\n${sections.join('\n')}${refs}`.replace(/\n{3,}/g, '\n\n').trimEnd() + '\n';
 }
 
 // ---- CLI ----------------------------------------------------------------------------------
@@ -189,8 +244,10 @@ const jsonIn = (dir: string): string[] => {
 /** Reads packages/content from disk, the same files lint:content checks. */
 export function readContent(): ReviewInput {
   const files: ContentFile[] = [
-    ...['scenarios', 'events', 'quizzes', 'minigames', 'rewards'].flatMap(jsonIn),
+    ...['scenarios', 'events', 'quizzes', 'minigames', 'rewards', 'news'].flatMap(jsonIn),
     'personas.json',
+    'glossary.json',
+    'places.json',
   ].map((path) => ({ path, data: readJson(path) }));
   const i18n: ReviewInput['i18n'] = {};
   for (const path of jsonIn('i18n')) i18n[basename(path, '.json')] = readJson(path) as Record<string, unknown>;
@@ -208,6 +265,6 @@ if (isMain) {
   const sheet = buildReviewSheet(readContent());
   mkdirSync(dirname(out), { recursive: true });
   writeFileSync(out, sheet, 'utf8');
-  const drafts = (sheet.match(/^### /gm) ?? []).length;
+  const drafts = /\*\*(\d+) draft\*\*/.exec(sheet)?.[1] ?? '0';
   console.log(`Wrote ${out}: ${drafts} draft item(s) to review.`);
 }
