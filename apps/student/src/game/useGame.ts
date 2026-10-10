@@ -53,7 +53,13 @@ export const useGame = create<GameStore>()(
     }),
     {
       name: 'paisa.game',
-      version: 1,
+      version: 2,
+      // v1 saves had no debt.
+      migrate: (saved, version) => {
+        const s = saved as { life: LifeState };
+        if (version < 2) s.life = { ...s.life, debt: s.life.debt ?? 0 };
+        return s as GameStore;
+      },
       storage: createJSONStorage(() => idbStorage),
       partialize: (s) => ({ life: s.life }),
     },

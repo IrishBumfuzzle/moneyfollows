@@ -18,5 +18,6 @@
   "life.school.hint": "पढ़ाई में मेहनत लगती है, इसलिए मन की शांति कम होती है।",
   "life.blocked.not_enough_money": "पैसे कम हैं।",
   "life.blocked.already_worked": "इस हफ़्ते तुम काम कर चुके हो।",
-  "life.blocked.already_at_school": "इस हफ़्ते तुम स्कूल जा चुके हो।"
+  "life.blocked.already_at_school": "इस हफ़्ते तुम स्कूल जा चुके हो।",
+  "life.meter.debt": "उधार {{debt}}"
 }

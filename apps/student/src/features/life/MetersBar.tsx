@@ -30,6 +30,7 @@ export function MetersBar({ lang, state, pop }: { lang: Lang; state: LifeState; 
             </span>
           )}
         </span>
+        {state.debt > 0 && <span className="lf-debt">{tr('life.meter.debt', { debt: rupees(state.debt) })}</span>}
       </div>
       <Vital lang={lang} id="health" icon="heart" value={state.vitals.health} change={d?.health} popId={pop?.id} />
       <Vital lang={lang} id="sanity" icon="smile" value={state.vitals.sanity} change={d?.sanity} popId={pop?.id} />

@@ -7,12 +7,14 @@ import { LIFE_CONTENT_VERSION, SCHOOL, SHOP, START_MONEY, START_VITALS, VITALS_M
 import type {
   LifeBlock,
   LifeDelta,
+  LifeEffects,
   LifeEventType,
   LifeOutcome,
   LifeState,
   LifeSyncEvent,
   ShopKind,
   ShopOffer,
+  ShortMode,
   Vitals,
 } from './types';
 
@@ -21,6 +23,10 @@ export interface LifeApi {
   buy<S extends LifeState>(state: S, kind: ShopKind): LifeOutcome<S>;
   work<S extends LifeState>(state: S): LifeOutcome<S>;
   attendSchool<S extends LifeState>(state: S): LifeOutcome<S>;
+  /** Applies an event or phone choice's effects. A spend beyond the wallet follows `ifShort`. */
+  applyEffects<S extends LifeState>(state: S, effects: LifeEffects, ifShort?: ShortMode): LifeOutcome<S>;
+  /** Pays back as much debt as the wallet allows. */
+  repay<S extends LifeState>(state: S): LifeOutcome<S>;
 }
 
 const clamp = (n: number) => Math.min(VITALS_MAX, Math.max(VITALS_MIN, Math.round(n)));
@@ -32,7 +38,7 @@ export function startVitals(): Vitals {
 
 /** A fresh life state for screens to play with until the shared game store exists. */
 export function startLife(): LifeState {
-  return { month: 1, week: 1, money: START_MONEY, flags: [], earned: [], vitals: startVitals() };
+  return { month: 1, week: 1, money: START_MONEY, debt: 0, flags: [], earned: [], vitals: startVitals() };
 }
 
 /** Once-per-week keys. Work uses the engine's earn() sourceId convention. */
@@ -89,6 +95,27 @@ export const localLifeApi: LifeApi = {
     return {
       state: { ...state, flags: [...state.flags, flag], vitals: v.vitals },
       delta: { money: 0, health: v.health, sanity: v.sanity },
+    };
+  },
+
+  applyEffects(state, effects, ifShort = 'block') {
+    const spend = Math.min(0, effects.money ?? 0);
+    if (-spend > state.money && ifShort === 'block') return blocked(state, 'not_enough_money');
+    // 'all': a spend can take the wallet to zero, never below (CLAUDE.md 5.2 rule 3).
+    const money = Math.max(0, state.money + (effects.money ?? 0)) - state.money;
+    const debt = Math.max(0, state.debt + (effects.debt ?? 0)) - state.debt;
+    const v = applyVitals(state.vitals, effects.health ?? 0, effects.sanity ?? 0);
+    const delta: LifeDelta = { money, health: v.health, sanity: v.sanity, ...(debt ? { debt } : {}) };
+    return { state: { ...state, money: state.money + money, debt: state.debt + debt, vitals: v.vitals }, delta };
+  },
+
+  repay(state) {
+    if (state.debt <= 0) return blocked(state, 'no_debt');
+    const pay = Math.min(state.debt, state.money);
+    if (pay <= 0) return blocked(state, 'not_enough_money');
+    return {
+      state: { ...state, money: state.money - pay, debt: state.debt - pay },
+      delta: { money: -pay, health: 0, sanity: 0, debt: -pay },
     };
   },
 };
