@@ -1,6 +1,7 @@
 // Guardrail linter CLI (CLAUDE.md 7.2): pnpm lint:content [--strict]
 // Reads packages/content/** from disk, runs validateContent, prints issues. Exits 1 on any error.
-// Warnings never fail the run. --strict also turns "status: draft" into errors (release builds).
+// Warnings never fail the run. --strict also turns "status: draft", and articles without
+// meta.factsCheckedBy, into errors (release builds).
 import { readdirSync, readFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -31,11 +32,11 @@ function jsonIn(dir: string): string[] {
 const strict = process.argv.includes('--strict');
 
 const files: ContentFile[] = [
-  ...['scenarios', 'events', 'quizzes', 'minigames', 'rewards'].flatMap(jsonIn),
+  ...['scenarios', 'events', 'quizzes', 'minigames', 'rewards', 'news'].flatMap(jsonIn),
   'personas.json',
-].map(
-  (path) => ({ path, data: readJson(path) }),
-);
+  'places.json',
+  'glossary.json',
+].map((path) => ({ path, data: readJson(path) }));
 
 const i18n: Record<string, Record<string, unknown>> = {};
 for (const path of jsonIn('i18n')) i18n[basename(path, '.json')] = readJson(path) as Record<string, unknown>;
