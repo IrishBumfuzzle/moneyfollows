@@ -141,6 +141,7 @@ function Game({ profile, setProfile, lang, onLang, onOpenClassroom }: {
   const rest = () => {
     const before = useGame.getState().life;
     const out = lifeApi.rest(before);
+    trackLife({ kind: 'rest' }, before, out);
     apply(out);
     setRestDelta(out.delta);
     if (out.state.week !== before.week || out.state.month !== before.month) {
@@ -259,6 +260,9 @@ function Game({ profile, setProfile, lang, onLang, onOpenClassroom }: {
     }
     apply(out);
     tick();
+    // The trip's two checks: everything on Ammi's list, and within the plan.
+    const correct = Number(r.listDone) + Number(r.withinPlan);
+    track('minigame_complete', { game: 'kirana_run', correct, total: 2, score: correct * 50 });
     return true;
   };
   if (screen === 'kirana') {
@@ -280,9 +284,15 @@ function Game({ profile, setProfile, lang, onLang, onOpenClassroom }: {
         // A new customer queue each day; ?seed= fixes it for demos and tests.
         seed={daySeed}
         practice={worked}
-        onFinish={(wage) => {
+        onFinish={({ wage, correct, total }) => {
           // One paid shift a day, after school (lifeApi.work blocks the rest); practice pays nothing.
-          if (!worked) apply(lifeApi.work(useGame.getState().life, wage));
+          if (!worked) {
+            const before = useGame.getState().life;
+            const out = lifeApi.work(before, wage);
+            trackLife({ kind: 'work' }, before, out);
+            apply(out);
+          }
+          track('minigame_complete', { game: 'counter_shift', correct, total, score: Math.round((100 * correct) / total) });
         }}
         onExit={back}
       />

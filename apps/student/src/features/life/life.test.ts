@@ -164,7 +164,12 @@ describe('toLifeEvent', () => {
   it('builds one event per successful action with backend-safe values', () => {
     const buy = toLifeEvent({ kind: 'buy', shop: 'want' }, base, api.buy(base, 'want'), ctx)!;
     expect(buy.type).toBe('shop_purchase');
-    expect(buy.payload).toEqual({ month: 1, week: 2, health: 0, sanity: SHOP.want.sanity, kind: 'want', price: SHOP.want.price });
+    expect(buy.payload).toEqual({ month: 1, week: 2, day: 3, health: 0, sanity: SHOP.want.sanity, kind: 'want', price: SHOP.want.price });
+    // A night's rest: the day that ended, and what resting changed.
+    const low = { ...base, vitals: { health: 10, sanity: 5 } };
+    const rest = toLifeEvent({ kind: 'rest' }, low, api.rest(low), ctx)!;
+    expect(rest.type).toBe('day_rested');
+    expect(rest.payload).toEqual({ month: 1, week: 2, day: 3, health: REST.health, sanity: REST.sanity });
     expect(toLifeEvent({ kind: 'work' }, schooled, api.work(schooled), ctx)!.payload.wage).toBe(WORK.wage);
     expect(toLifeEvent({ kind: 'school' }, base, api.attendSchool(base), ctx)!.type).toBe('school_attended');
     // push_events keeps only numbers and id-like strings (^[A-Za-z0-9_.:-]{1,64}$).

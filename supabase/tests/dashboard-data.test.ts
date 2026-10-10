@@ -108,6 +108,15 @@ describe.skipIf(skipDbTests)('dashboard data', () => {
       ev(asha, 'school_attended', { health: 0, sanity: -2, month: 1, week: 1 }),
       ev(asha, 'school_attended', { health: 0, sanity: -2 }),
       ev(bilal, 'shop_purchase', { kind: 'want', price: 100, health: 0, sanity: 4, month: 1, week: 1 }),
+      // Daily clients send a day: Bilal works days 1 and 2 of week 1 (day 2 re-sent), goes to school
+      // on day 1, and rests on days 1 and 2 (day 1 re-sent).
+      ev(bilal, 'work_shift', { wage: 100, health: 0, sanity: -4, month: 1, week: 1, day: 1 }),
+      ev(bilal, 'work_shift', { wage: 100, health: 0, sanity: -4, month: 1, week: 1, day: 2 }),
+      ev(bilal, 'work_shift', { wage: 100, health: 0, sanity: -4, month: 1, week: 1, day: 2 }),
+      ev(bilal, 'school_attended', { health: 0, sanity: -3, month: 1, week: 1, day: 1 }),
+      ev(bilal, 'day_rested', { month: 1, week: 1, day: 1, health: 2, sanity: 6 }),
+      ev(bilal, 'day_rested', { month: 1, week: 1, day: 1, health: 2, sanity: 6 }),
+      ev(bilal, 'day_rested', { month: 1, week: 1, day: 2, health: 0, sanity: 6 }),
       ev(zoya, 'shop_purchase', { kind: 'want', price: 5000, month: 1, week: 1 }),
 
       // Personas. Asha picks sana, then ravi (older client spelling), then sends one with no persona.
@@ -150,7 +159,7 @@ describe.skipIf(skipDbTests)('dashboard data', () => {
     });
   });
 
-  it('class_wellbeing: purchases by kind, want spending and weeks worked or at school, per student', async () => {
+  it('class_wellbeing: purchases by kind, want spending, and days worked, at school or rested, per student', async () => {
     const rows = await call(facilitator, 'class_wellbeing', cls.id);
     expect(rows).toEqual([
       {
@@ -159,8 +168,10 @@ describe.skipIf(skipDbTests)('dashboard data', () => {
         necessity_purchases: 1,
         want_purchases: 2,
         want_spend: 650,
+        // Older events without a day count per week.
         work_shifts: 2,
         school_days: 2,
+        rest_days: 0,
       },
       {
         anon_id: bilal.anon_id,
@@ -168,8 +179,9 @@ describe.skipIf(skipDbTests)('dashboard data', () => {
         necessity_purchases: 0,
         want_purchases: 1,
         want_spend: 100,
-        work_shifts: 0,
-        school_days: 0,
+        work_shifts: 2,
+        school_days: 1,
+        rest_days: 2,
       },
       {
         anon_id: chitra.anon_id,
@@ -179,6 +191,7 @@ describe.skipIf(skipDbTests)('dashboard data', () => {
         want_spend: 0,
         work_shifts: 0,
         school_days: 0,
+        rest_days: 0,
       },
     ]);
   });

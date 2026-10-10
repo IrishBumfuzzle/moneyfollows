@@ -173,7 +173,7 @@ export interface LifeEventCtx {
  * Builds the SyncEvent for a successful action (docs/life-meters-api.md §5). Returns null for
  * a blocked action, which sends nothing. `state` is the state the action was played in.
  */
-export type LifeAction = { kind: 'buy'; shop: ShopKind } | { kind: 'work' } | { kind: 'school' };
+export type LifeAction = { kind: 'buy'; shop: ShopKind } | { kind: 'work' } | { kind: 'school' } | { kind: 'rest' };
 
 /** The type and payload to track for a successful action (src/api/track adds the ids); null if blocked. */
 export function lifeEvent(
@@ -183,7 +183,8 @@ export function lifeEvent(
 ): Pick<LifeSyncEvent, 'type' | 'payload'> | null {
   if (outcome.blocked) return null;
   const { delta } = outcome;
-  const base = { month: state.month, week: state.week, health: delta.health, sanity: delta.sanity };
+  // The day it happened (for rest: the day that ended), so the backend counts once per day.
+  const base = { month: state.month, week: state.week, day: state.day, health: delta.health, sanity: delta.sanity };
   let type: LifeEventType;
   let payload: Record<string, string | number>;
   if (action.kind === 'buy') {
@@ -192,8 +193,11 @@ export function lifeEvent(
   } else if (action.kind === 'work') {
     type = 'work_shift';
     payload = { ...base, wage: delta.money };
-  } else {
+  } else if (action.kind === 'school') {
     type = 'school_attended';
+    payload = base;
+  } else {
+    type = 'day_rested';
     payload = base;
   }
   return { type, payload };

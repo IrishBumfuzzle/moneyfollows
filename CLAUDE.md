@@ -449,6 +449,7 @@ Append decisions here as `YYYY-MM-DD HH:MM — decision — who`.
 - 2026-10-11 — The Room hub is replaced by a main screen: character on a couch, a Play button to the map, a news rack to Paisa Times — team.
 - 2026-10-11 — Translations stay per feature (`content/en.json` + `hi.json` + a small `t()`), not react-i18next: the pattern is already used by three features and keeps the bundle small. Shared game state is one Zustand store (`src/game/useGame.ts`) saved to IndexedDB — team.
 - 2026-10-11 02:40 — Frontends wired to the backend. The student app goes only through `apps/student/src/api/` (join/rejoin, tracker + IndexedDB sync queue, `class_status`, offline banner). The staff dashboard is built on `@paisa/api-client`. The start-of-term check is offered in School; the end-of-term check only while the teacher has it open. `class_wellbeing` is not shown on the dashboard (per-child spending; DPDP open question) — BE-2.
+- 2026-10-11 05:00 — Day-by-day play: a day count (7 days a week); school, then work, at most once each a day; resting at Home ends the day (Ammi's tuck-in scene). Health and sanity out of 25, every effect halved. Store mini-games: Kirana Run (needs vs wants: needs more sanity per rupee + health, wants more sanity each) and Counter Shift (cash change, UPI checks). Additive contract: `SyncEvent` type `day_rested`; life events keep `day`; `class_wellbeing` gains `rest_days` (migration `20261011130000_daily_life_events.sql`) — UI-1, to review: BE-2.
 
 Open questions:
 - Which license does Section 11 of the brief require for the `LICENSE` file?

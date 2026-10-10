@@ -74,7 +74,7 @@ export interface LifeOutcome<S extends LifeState> {
 }
 
 /** Proposed additive SyncEvent types (docs/life-meters-api.md §5). */
-export type LifeEventType = 'shop_purchase' | 'work_shift' | 'school_attended';
+export type LifeEventType = 'shop_purchase' | 'work_shift' | 'school_attended' | 'day_rested';
 
 export interface LifeSyncEvent {
   event_id: string;
