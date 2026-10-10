@@ -212,12 +212,27 @@ export interface SyncEvent {
   class_id: string;
   type: 'app_open' | 'onboarding_complete' | 'persona_selected' | 'decision_made'
       | 'rewind_used' | 'event_triggered' | 'minigame_complete' | 'quiz_submitted'
-      | 'module_complete' | 'badge_earned' | 'language_changed' | 'sync_complete';
+      | 'module_complete' | 'badge_earned' | 'language_changed' | 'sync_complete'
+      | 'map_opened' | 'location_selected';
   payload: Record<string, unknown>;
   client_ts: string;           // ISO
   content_version: string;
 }
 ```
+
+Map signals (added 2026-10-10, additive; emitted by the student app's `LocationScreen`, `apps/student/src/screens/LocationScreen.tsx`):
+
+| `type` | When | `payload` |
+|---|---|---|
+| `map_opened` | The overworld map screen is shown | `{}` |
+| `location_selected` | The student taps a building (`onSelect(id)`) | `{ location_id: LocationId }` |
+
+```ts
+// ids are stable keys, not labels (the "Shop" place is `convenience`); labels are localised separately
+export type LocationId = 'school' | 'hospital' | 'convenience' | 'home';
+```
+
+Both are fire-and-forget like all `SyncEvent`s: queued offline, pushed via `push_events`, idempotent on `event_id`. `location_selected` fires on tap, before any sub-map or scenario opens. Sub-map locations, once decided, will reuse `location_selected` with a new `LocationId` value (additive).
 
 ### 5.6 Database (MVP tables)
 
