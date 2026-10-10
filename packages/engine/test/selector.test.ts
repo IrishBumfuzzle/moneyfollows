@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import { BASICS_BEFORE_INVESTING, RECENT_DECISIONS, RECENT_EVENTS, UNSEEN_WEIGHT } from '@paisa/shared';
 import type { Level, PersonaId } from '@paisa/shared';
-import { createGame, nextCard } from '../src';
-import { bundle, fixture } from './fixtures';
+import { EngineError, createGame, nextCard } from '../src';
+import { bundle, event, fixture, scenario } from './fixtures';
 
 const noEvents = bundle({ events: [] });
 
@@ -51,13 +52,60 @@ describe('decision selector', () => {
     expect([...ids].sort()).toEqual(['flag.set', 'invest.a']);
   });
 
-  it('relaxes difficulty and the lock when nothing else is eligible, but keeps flag gates', () => {
+  it('never drops the difficulty or investing gates: nothing eligible is a clear no_cards error', () => {
     const hardOnly = bundle({
       events: [],
-      scenarios: fixture.scenarios.filter((s) => s.id === 'safe.hard' || s.id === 'flag.req'),
+      scenarios: fixture.scenarios.filter((s) => s.id === 'safe.hard' || s.id === 'flag.req' || s.id === 'invest.a'),
     });
-    const card = nextCard(createGame('sana', 'starter', 1, hardOnly), hardOnly);
-    expect(card.kind === 'decision' && card.scenario.id).toBe('safe.hard');
+    const s = createGame('sana', 'starter', 1, hardOnly);
+    try {
+      nextCard(s, hardOnly);
+      expect.unreachable();
+    } catch (e) {
+      expect(e).toBeInstanceOf(EngineError);
+      expect((e as EngineError).code).toBe('no_cards');
+      expect((e as EngineError).message).toMatch(/gates/);
+    }
+    // the same content is fine for a planner, who passes the difficulty gate
+    expect(nextCard(createGame('sana', 'planner', 1, hardOnly), hardOnly).kind).toBe('decision');
+  });
+
+  it('relaxes recency first, keeping the gates', () => {
+    const c = bundle({ events: [], scenarios: [scenario('easy'), scenario('hard', { difficulty: 3 })] });
+    for (let seed = 0; seed < 50; seed++) {
+      const s = { ...createGame('sana', 'starter', seed, c), seen: ['easy'] };
+      const card = nextCard(s, c);
+      expect(card.kind === 'decision' && card.scenario.id).toBe('easy');
+    }
+  });
+
+  it('events do not shrink the decision recency window', () => {
+    // three events after budget.a: budget.a is still one of the last RECENT_DECISIONS decisions
+    const seen = ['budget.a', 'event.rain', 'event.ok', 'event.rain'];
+    for (let seed = 0; seed < 200; seed++) {
+      const s = { ...createGame('sana', 'starter', seed, fixture), seen, stage: 'decision' as const };
+      const card = nextCard(s, fixture);
+      expect(card.kind === 'decision' && card.scenario.id).not.toBe('budget.a');
+    }
+  });
+
+  it('decisions do not shrink the event recency window', () => {
+    const c = bundle({ events: [event('event.rain'), event('event.sun')] });
+    const seen = ['event.rain', 'budget.a', 'save.a', 'save.delayed', 'flag.set', 'budget.sana_only', 'invest.a'];
+    for (let seed = 0; seed < 50; seed++) {
+      const s = { ...createGame('sana', 'explorer', seed, c), seen, stage: 'event' as const };
+      const card = nextCard(s, c);
+      expect(card.kind === 'event' && card.scenario.id).toBe('event.sun');
+    }
+  });
+
+  it('selector tuning lives in the shared constants', () => {
+    expect({ RECENT_EVENTS, RECENT_DECISIONS, UNSEEN_WEIGHT, BASICS_BEFORE_INVESTING }).toEqual({
+      RECENT_EVENTS: 6,
+      RECENT_DECISIONS: 3,
+      UNSEEN_WEIGHT: 5,
+      BASICS_BEFORE_INVESTING: 2,
+    });
   });
 
   it('weights unseen cards above seen ones', () => {

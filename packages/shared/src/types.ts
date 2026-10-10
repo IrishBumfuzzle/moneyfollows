@@ -51,6 +51,11 @@ export interface PendingEffect {
   dueWeek: number;
   effects: Effects;
   note: TKey;
+  /**
+   * Additive: savings/goals principal this effect will pay back (e.g. money moved into an
+   * investment). The Money Health Score counts it as still saved while it is in flight.
+   */
+  principal?: Partial<Record<JarId, number>>;
 }
 
 export interface GameState {
@@ -74,7 +79,20 @@ export interface GameState {
   /** Which card nextCard shows. Absent means 'decision'. */
   stage?: Stage;
   /** Balances and income at payday, for the month-end score. */
-  monthStart?: { jars: Record<JarId, number>; debt: number; income: number; needsBudget: number };
+  monthStart?: {
+    /** Jar balances just after the payday split. */
+    jars: Record<JarId, number>;
+    debt: number;
+    income: number;
+    /** One month of Needs: the persona's Needs share of income (fixed costs are paid out of it). */
+    needsBudget: number;
+    /** Additive: rupees the payday split put into savings + goals. Counts towards the savings rate. */
+    paydaySaved?: number;
+    /** Additive: savings + goals principal in flight (PendingEffect.principal) at payday. */
+    inFlight?: number;
+    /** Additive: the persona's typical monthly income, used as a denominator when this month's income is 0. */
+    baseIncome?: number;
+  };
   /** Money Health Score of every finished month, oldest first. */
   scores?: number[];
   /** Lesson cards collected so far ("My Notes"). */

@@ -1,13 +1,22 @@
-import { LEVEL_MAX_DIFFICULTY } from '@paisa/shared';
+import { BASICS_BEFORE_INVESTING, LEVEL_MAX_DIFFICULTY, RECENT_DECISIONS, RECENT_EVENTS, UNSEEN_WEIGHT } from '@paisa/shared';
 import type { ContentBundle, EventCard, GameState, Scenario } from '@paisa/shared';
 import { unit, weightedPick } from './hash';
 
-const RECENT_EVENTS = 6;
-const RECENT_DECISIONS = 3;
-const UNSEEN_WEIGHT = 5;
-const BASICS_BEFORE_INVESTING = 2;
+/**
+ * Recency windows per card kind. `seen` mixes event and scenario ids, so each window only
+ * counts its own kind: events never shrink the decision window and vice versa.
+ */
+function recentEventIds(state: GameState, content: ContentBundle): Set<string> {
+  const ids = new Set(content.events.map((e) => e.id));
+  return new Set(state.seen.filter((id) => ids.has(id)).slice(-RECENT_EVENTS));
+}
 
-/** Events the persona and level allow, whose flag is set, not shown in the last 6 cards (relaxed if that leaves none). */
+function recentDecisionIds(state: GameState, content: ContentBundle): Set<string> {
+  const ids = new Set(content.events.map((e) => e.id));
+  return new Set(state.seen.filter((id) => !ids.has(id)).slice(-RECENT_DECISIONS));
+}
+
+/** Events the persona and level allow, whose flag is set, not among the last RECENT_EVENTS events seen (relaxed if that leaves none). */
 export function eligibleEvents(state: GameState, content: ContentBundle): EventCard[] {
   const base = content.events.filter(
     (e) =>
@@ -15,7 +24,7 @@ export function eligibleEvents(state: GameState, content: ContentBundle): EventC
       e.levels.includes(state.level) &&
       (e.requiresFlag === undefined || state.flags.includes(e.requiresFlag)),
   );
-  const recent = new Set(state.seen.slice(-RECENT_EVENTS));
+  const recent = recentEventIds(state, content);
   const fresh = base.filter((e) => !recent.has(e.id));
   return fresh.length > 0 ? fresh : base;
 }
@@ -36,24 +45,33 @@ function investingUnlocked(state: GameState, content: ContentBundle): boolean {
   return state.seen.filter((id) => basics.has(id)).length >= BASICS_BEFORE_INVESTING;
 }
 
-function decisionPool(state: GameState, content: ContentBundle, relaxed: boolean): Scenario[] {
+/**
+ * Scenarios that pass every gate (persona, flag, level difficulty, starter investing lock),
+ * minus the last RECENT_DECISIONS decisions. Only recency is ever relaxed: if every gated
+ * card is recent, the recent ones come back. The gates are never dropped.
+ */
+export function decisionPool(state: GameState, content: ContentBundle): Scenario[] {
   const maxDifficulty = LEVEL_MAX_DIFFICULTY[state.level];
   const locked = state.level === 'starter' && !investingUnlocked(state, content);
   const base = content.scenarios.filter(
     (s) =>
       s.personas.includes(state.personaId) &&
       (s.requiresFlag === undefined || state.flags.includes(s.requiresFlag)) &&
-      (relaxed || (s.difficulty <= maxDifficulty && !(locked && s.pillar === 'understand_investing'))),
+      s.difficulty <= maxDifficulty &&
+      !(locked && s.pillar === 'understand_investing'),
   );
-  const recent = new Set(state.seen.slice(-RECENT_DECISIONS));
+  const recent = recentDecisionIds(state, content);
   const fresh = base.filter((s) => !recent.has(s.id));
   return fresh.length > 0 ? fresh : base;
 }
 
-/** The weekly decision card: filtered by persona, level, flags and the starter investing lock, then weighted towards unseen cards. */
+/**
+ * The weekly decision card: from decisionPool, weighted towards unseen cards. Undefined when
+ * no scenario passes the gates; nextCard turns that into a `no_cards` EngineError.
+ */
 export function pickDecision(state: GameState, content: ContentBundle): Scenario | undefined {
-  let pool = decisionPool(state, content, false);
-  if (pool.length === 0) pool = decisionPool(state, content, true);
+  const pool = decisionPool(state, content);
+  if (pool.length === 0) return undefined;
   const seen = new Set(state.seen);
   return weightedPick(
     pool,

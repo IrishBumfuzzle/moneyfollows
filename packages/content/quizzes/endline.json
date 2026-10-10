@@ -46,7 +46,7 @@
       "t:quiz.save.emergency.endline.o2",
       "t:quiz.save.emergency.endline.o3"
     ],
-    "answer": 0,
+    "answer": 1,
     "explanation": "t:quiz.save.emergency.endline.why",
     "meta": {
       "status": "draft",
@@ -64,7 +64,7 @@
       "t:quiz.invest.compound.endline.o2",
       "t:quiz.invest.compound.endline.o3"
     ],
-    "answer": 0,
+    "answer": 2,
     "explanation": "t:quiz.invest.compound.endline.why",
     "meta": {
       "status": "draft",
@@ -97,7 +97,8 @@
     "text": "t:quiz.safe.collect.endline.q",
     "options": [
       "t:quiz.safe.collect.endline.o1",
-      "t:quiz.safe.collect.endline.o2"
+      "t:quiz.safe.collect.endline.o2",
+      "t:quiz.safe.collect.endline.o3"
     ],
     "answer": 0,
     "explanation": "t:quiz.safe.collect.endline.why",

@@ -1,17 +1,41 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { createTestDb, type TestDb } from '../../supabase/tests/db';
-import { buildSeedSql, DEMO } from '../seed-data';
+import { createTestDb, skipDbTests, type TestDb } from '../../supabase/tests/db';
+import { buildSeedSql, DEMO, seedTargetProblem } from '../seed-data';
 
 describe('demo seed', () => {
+  it('is deterministic', () => {
+    expect(buildSeedSql()).toBe(buildSeedSql());
+  });
+
+  it('is labelled as demo data and puts the demo facilitator on the staff allowlist', () => {
+    const sql = buildSeedSql();
+    expect(sql).toContain('DEMO DATA');
+    expect(sql).toContain(`insert into public.staff (email) values ('${DEMO.email}')`);
+  });
+
+  it('only loads into a local or CI database unless --allow-remote-demo is passed', () => {
+    for (const url of [
+      'postgres://postgres:postgres@127.0.0.1:54322/postgres',
+      'postgres://postgres:postgres@localhost:54330/postgres',
+      'postgres://postgres:postgres@[::1]:5432/postgres',
+      'postgres://postgres:postgres@postgres:5432/postgres',
+    ]) {
+      expect(seedTargetProblem(url, []), url).toBeNull();
+    }
+    const remote = 'postgres://postgres:secret@db.abcdefgh.supabase.co:5432/postgres';
+    expect(seedTargetProblem(remote, [])).toMatch(/Refusing/);
+    expect(seedTargetProblem(remote, ['--allow-remote-demo'])).toBeNull();
+    expect(seedTargetProblem('not a url', [])).toMatch(/not a valid URL/);
+  });
+});
+
+// Skips locally when no test database is running; always runs in CI (see supabase/tests/db.ts).
+describe.skipIf(skipDbTests)('demo seed in the database', () => {
   let db: TestDb;
   beforeAll(async () => {
     db = await createTestDb();
   });
   afterAll(() => db?.drop());
-
-  it('is deterministic', () => {
-    expect(buildSeedSql()).toBe(buildSeedSql());
-  });
 
   it('loads (twice) and gives the dashboard something to show', async () => {
     // The seed runs its own transaction, so it needs one dedicated connection.
@@ -26,6 +50,7 @@ describe('demo seed', () => {
     const gains = await db.asUser(DEMO.userId, (tx) => tx`select * from learning_gain(${DEMO.classId})`);
     for (const row of gains) {
       expect(row.baseline_n).toBeGreaterThan(0);
+      expect(row.n).toBe(row.baseline_n);
       expect(Number(row.endline_avg)).toBeGreaterThan(Number(row.baseline_avg));
     }
     const [{ code }] = (await db.sql`select class_code as code from classes where id = ${DEMO.classId}`) as [

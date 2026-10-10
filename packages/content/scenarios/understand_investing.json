@@ -23,7 +23,18 @@
           }
         },
         "lesson": "t:invest.compound.01.a.lesson",
-        "rating": "best"
+        "rating": "best",
+        "delayed": [
+          {
+            "afterWeeks": 6,
+            "effects": {
+              "jars": {
+                "savings": 101
+              }
+            },
+            "note": "t:invest.compound.01.a.later"
+          }
+        ]
       },
       {
         "id": "b",
@@ -44,7 +55,7 @@
         },
         "delayed": [
           {
-            "afterWeeks": 8,
+            "afterWeeks": 6,
             "effects": {
               "jars": {
                 "savings": 70
@@ -87,7 +98,7 @@
         },
         "delayed": [
           {
-            "afterWeeks": 10,
+            "afterWeeks": 6,
             "effects": {
               "jars": {
                 "savings": 50
@@ -110,10 +121,10 @@
         },
         "delayed": [
           {
-            "afterWeeks": 10,
+            "afterWeeks": 6,
             "effects": {
               "jars": {
-                "savings": 96
+                "savings": 90
               }
             },
             "note": "t:invest.diversify.01.b.later"
@@ -133,10 +144,10 @@
         },
         "delayed": [
           {
-            "afterWeeks": 10,
+            "afterWeeks": 6,
             "effects": {
               "jars": {
-                "savings": 102
+                "savings": 106
               }
             },
             "note": "t:invest.diversify.01.c.later"
@@ -248,7 +259,7 @@
         "effects": {},
         "delayed": [
           {
-            "afterWeeks": 12,
+            "afterWeeks": 6,
             "effects": {},
             "note": "t:invest.inflation.01.a.later"
           }
@@ -262,15 +273,15 @@
         "icon": "chart",
         "effects": {
           "jars": {
-            "savings": -100
+            "savings": -300
           }
         },
         "delayed": [
           {
-            "afterWeeks": 12,
+            "afterWeeks": 6,
             "effects": {
               "jars": {
-                "savings": 104
+                "savings": 302
               }
             },
             "note": "t:invest.inflation.01.b.later"
@@ -285,7 +296,7 @@
         "icon": "basket",
         "effects": {
           "jars": {
-            "wants": -100
+            "savings": -300
           }
         },
         "lesson": "t:invest.inflation.01.c.lesson",
@@ -376,15 +387,15 @@
         "icon": "coins",
         "effects": {
           "jars": {
-            "savings": -100
+            "savings": -300
           }
         },
         "delayed": [
           {
-            "afterWeeks": 12,
+            "afterWeeks": 6,
             "effects": {
               "jars": {
-                "savings": 103
+                "savings": 302
               }
             },
             "note": "t:invest.risk.01.a.later"
@@ -399,15 +410,15 @@
         "icon": "basket",
         "effects": {
           "jars": {
-            "savings": -100
+            "savings": -300
           }
         },
         "delayed": [
           {
-            "afterWeeks": 12,
+            "afterWeeks": 6,
             "effects": {
               "jars": {
-                "savings": 96
+                "savings": 288
               }
             },
             "note": "t:invest.risk.01.b.later"
@@ -422,15 +433,15 @@
         "icon": "rocket",
         "effects": {
           "jars": {
-            "savings": -100
+            "savings": -300
           }
         },
         "delayed": [
           {
-            "afterWeeks": 12,
+            "afterWeeks": 6,
             "effects": {
               "jars": {
-                "savings": 55
+                "savings": 165
               }
             },
             "note": "t:invest.risk.01.c.later"

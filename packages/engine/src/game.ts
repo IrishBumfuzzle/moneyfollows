@@ -7,6 +7,7 @@ import type {
   Consequence,
   Effects,
   GameState,
+  PendingEffect,
   Persona,
   Stage,
   TKey,
@@ -14,7 +15,7 @@ import type {
 import { content as bundledContent } from '@paisa/content';
 import { EngineError } from './errors';
 import { unit } from './hash';
-import { monthReport } from './score';
+import { inFlightOf, monthReport } from './score';
 import { eligibleEvents, pickDecision, pickEvent } from './selector';
 import { applyToWallet } from './wallet';
 
@@ -22,7 +23,8 @@ type Landed = Consequence['landed'];
 
 const stageOf = (state: GameState): Stage => state.stage ?? 'decision';
 const absWeek = (month: number, week: number): number => (month - 1) * WEEKS_PER_MONTH + week;
-const lastWeek = GAME_MONTHS * WEEKS_PER_MONTH;
+const dueOf = (p: PendingEffect): number => absWeek(p.dueMonth, p.dueWeek);
+const UINT32_MAX = 0xffffffff;
 
 function cloneEffects(e: Effects): Effects {
   const out: Effects = {};
@@ -40,7 +42,11 @@ function draftOf(state: GameState): GameState {
     goal: { ...state.goal },
     flags: [...state.flags],
     seen: [...state.seen],
-    pending: state.pending.map((p) => ({ ...p, effects: cloneEffects(p.effects) })),
+    pending: state.pending.map((p) => {
+      const copy: PendingEffect = { ...p, effects: cloneEffects(p.effects) };
+      if (p.principal) copy.principal = { ...p.principal };
+      return copy;
+    }),
     history: [...state.history],
     scores: [...(state.scores ?? [])],
     lessons: [...(state.lessons ?? [])],
@@ -73,16 +79,19 @@ function incomeFor(persona: Persona, seed: number, month: number): number {
   }
 }
 
+/** The persona's typical monthly income: a fallback denominator for a zero-income month. */
+function baseIncomeOf(persona: Persona): number {
+  const p = persona.income;
+  return p.pattern === 'irregular' ? Math.round((p.min + p.max) / 2) : p.amount;
+}
+
 function findPersona(content: ContentBundle, id: GameState['personaId']): Persona {
   const persona = content.personas.find((p) => p.id === id);
   if (!persona) throw new EngineError('unknown_persona', `unknown persona: ${id}`);
   return persona;
 }
 
-/** Month start: income split into jars, fixed costs out of Needs (borrowing if short), then the month-end baseline. */
-function payday(d: GameState, content: ContentBundle): NonNullable<Consequence['payday']> {
-  const persona = findPersona(content, d.personaId);
-  const income = incomeFor(persona, d.seed, d.month);
+function splitIncome(income: number, persona: Persona): Record<(typeof JARS)[number], number> {
   const shares = {} as Record<(typeof JARS)[number], number>;
   let allocated = 0;
   for (const jar of JARS) {
@@ -90,12 +99,30 @@ function payday(d: GameState, content: ContentBundle): NonNullable<Consequence['
     allocated += shares[jar];
   }
   shares.needs += income - allocated; // remainder rupees go to Needs
+  return shares;
+}
+
+/**
+ * Month start: income split into jars, fixed costs out of Needs (borrowing if short), then
+ * the month-end baseline. `paydaySaved` records what the split put into savings + goals so
+ * the savings rate counts it; `needsBudget` is one month of Needs (the Needs share, which
+ * already pays the fixed costs), taken from the persona's base income in a zero-income month.
+ */
+function payday(d: GameState, content: ContentBundle): NonNullable<Consequence['payday']> {
+  const persona = findPersona(content, d.personaId);
+  const income = incomeFor(persona, d.seed, d.month);
+  const baseIncome = baseIncomeOf(persona);
+  const shares = splitIncome(income, persona);
+  const inFlight = inFlightOf(d.pending, 'savings') + inFlightOf(d.pending, 'goals');
   const applied = applyEffects(d, { jars: { ...shares, needs: shares.needs - persona.fixedCosts } });
   d.monthStart = {
     jars: { ...d.jars },
     debt: d.debt,
     income,
-    needsBudget: persona.fixedCosts + Math.round((income * persona.split.needs) / 100),
+    needsBudget: income > 0 ? shares.needs : splitIncome(baseIncome, persona).needs,
+    paydaySaved: (applied.jars.savings ?? 0) + (applied.jars.goals ?? 0),
+    inFlight,
+    baseIncome,
   };
   return { income, applied };
 }
@@ -103,12 +130,22 @@ function payday(d: GameState, content: ContentBundle): NonNullable<Consequence['
 /** Start of a week: due delayed effects land, then the week's surprise-event roll sets the stage. */
 function startWeek(d: GameState, content: ContentBundle, landed: Landed): void {
   const now = absWeek(d.month, d.week);
-  const due = d.pending.filter((p) => absWeek(p.dueMonth, p.dueWeek) <= now);
-  d.pending = d.pending.filter((p) => absWeek(p.dueMonth, p.dueWeek) > now);
+  const due = d.pending.filter((p) => dueOf(p) <= now);
+  d.pending = d.pending.filter((p) => dueOf(p) > now);
   for (const p of due) landed.push({ note: p.note, applied: applyEffects(d, p.effects) });
 
   const roll = unit(d.seed, 'event', d.month, d.week) < EVENT_CHANCE[d.level];
   d.stage = roll && eligibleEvents(d, content).length > 0 ? 'event' : 'decision';
+}
+
+/** Year end: every effect still pending lands now (oldest due first), so no queued money is lost. */
+function settleAll(d: GameState, landed: Landed): void {
+  const due = d.pending
+    .map((p, i) => ({ p, i }))
+    .sort((a, b) => dueOf(a.p) - dueOf(b.p) || a.i - b.i)
+    .map((x) => x.p);
+  d.pending = [];
+  for (const p of due) landed.push({ note: p.note, applied: applyEffects(d, p.effects) });
 }
 
 function beginMonth(d: GameState, content: ContentBundle, landed: Landed): NonNullable<Consequence['payday']> {
@@ -123,6 +160,9 @@ export function createGame(
   seed: number,
   content: ContentBundle = bundledContent,
 ): GameState {
+  if (!Number.isInteger(seed) || seed < 0 || seed > UINT32_MAX) {
+    throw new EngineError('invalid_seed', `seed must be an integer in 0..${UINT32_MAX}: ${seed}`);
+  }
   const persona = findPersona(content, personaId);
   const d: GameState = {
     version: 1,
@@ -151,7 +191,7 @@ export function createGame(
 export function nextCard(state: GameState, content: ContentBundle): Card {
   switch (stageOf(state)) {
     case 'yearEnd':
-      return { kind: 'yearEnd', scores: [...(state.scores ?? [])], goalReached: state.jars.goals >= state.goal.amount };
+      return { kind: 'yearEnd', scores: [...(state.scores ?? [])], goalReached: state.goal.progress >= state.goal.amount };
     case 'monthEnd':
       return { kind: 'monthEnd', month: state.month, report: monthReport(state) };
     case 'event': {
@@ -161,7 +201,12 @@ export function nextCard(state: GameState, content: ContentBundle): Card {
     }
     case 'decision': {
       const scenario = pickDecision(state, content);
-      if (!scenario) throw new EngineError('no_cards', 'no eligible scenario');
+      if (!scenario) {
+        throw new EngineError(
+          'no_cards',
+          `no scenario passes the persona, flag, difficulty and investing gates (${state.personaId}, ${state.level})`,
+        );
+      }
       return { kind: 'decision', month: state.month, week: state.week, scenario };
     }
   }
@@ -187,6 +232,7 @@ export function choose(
     let paydayInfo: Consequence['payday'];
     if (d.month >= GAME_MONTHS) {
       d.stage = 'yearEnd';
+      settleAll(d, landed);
     } else {
       d.month += 1;
       d.week = 1;
@@ -214,17 +260,33 @@ export function choose(
   d.history.push(snapshotOf(state));
   const applied = applyEffects(d, choice.effects);
 
+  // Principal this choice took from savings/goals. Delayed inflows to the same jar pay it
+  // back, so that part counts as still saved for the score while it is in flight.
+  const owed = {
+    savings: Math.max(0, -(applied.jars.savings ?? 0)),
+    goals: Math.max(0, -(applied.jars.goals ?? 0)),
+  };
   const now = absWeek(d.month, d.week);
   let delayedQueued = 0;
   for (const delayed of choice.delayed ?? []) {
+    // An effect due after the last week stays queued and settles when the year ends.
     const due = now + delayed.afterWeeks;
-    if (due > lastWeek) continue; // would land after the game ends
-    d.pending.push({
+    const pending: PendingEffect = {
       dueMonth: Math.floor((due - 1) / WEEKS_PER_MONTH) + 1,
       dueWeek: ((due - 1) % WEEKS_PER_MONTH) + 1,
       effects: cloneEffects(delayed.effects),
       note: delayed.note,
-    });
+    };
+    const principal: NonNullable<PendingEffect['principal']> = {};
+    for (const jar of ['savings', 'goals'] as const) {
+      const back = Math.min(owed[jar], Math.max(0, delayed.effects.jars?.[jar] ?? 0));
+      if (back > 0) {
+        principal[jar] = back;
+        owed[jar] -= back;
+      }
+    }
+    if (Object.keys(principal).length > 0) pending.principal = principal;
+    d.pending.push(pending);
     delayedQueued++;
   }
   d.seen.push(card.scenario.id);
@@ -255,8 +317,9 @@ export function choose(
   return { state: d, consequence };
 }
 
-/** Undo the last choice of this month. Null with no tokens or no snapshot. */
+/** Undo the last choice of this month. Null with no tokens, no snapshot, or once the year is over. */
 export function rewind(state: GameState): GameState | null {
+  if (stageOf(state) === 'yearEnd') return null;
   if (state.rewindTokens <= 0 || state.history.length === 0) return null;
   const history = state.history.slice(0, -1);
   const snapshot = state.history[state.history.length - 1] as Omit<GameState, 'history'>;

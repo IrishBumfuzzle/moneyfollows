@@ -5,7 +5,7 @@
     "bio": "t:persona.sana.bio",
     "goal": {
       "label": "t:persona.sana.goal",
-      "amount": 3800
+      "amount": 3400
     },
     "income": {
       "pattern": "steady",
@@ -35,7 +35,7 @@
     "bio": "t:persona.ravi.bio",
     "goal": {
       "label": "t:persona.ravi.goal",
-      "amount": 4200
+      "amount": 3450
     },
     "income": {
       "pattern": "seasonal",

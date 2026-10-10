@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { GAME_MONTHS, REWIND_TOKENS_PER_MONTH } from '@paisa/shared';
+import { GAME_MONTHS, GameStateSchema, REWIND_TOKENS_PER_MONTH } from '@paisa/shared';
 import type { GameState } from '@paisa/shared';
 import { EngineError, choose, createGame, monthReport, nextCard, rewind } from '../src';
 import { applyToWallet } from '../src/wallet';
@@ -60,11 +60,27 @@ describe('rule 3: jars never negative', () => {
     expect(r.applied).toEqual({ jars: { needs: -20, wants: -50 }, debt: 30, borrowed: 30 });
   });
 
-  it('caps a repayment at the debt owed while the jar spend still happens', () => {
-    const r = applyToWallet({ needs: 100, wants: 50, goals: 0, savings: 0 }, 20, { jars: { wants: -50 }, debt: -500 });
+  it('caps a repayment, and the jar charge that pays for it, at the debt owed', () => {
+    // debt 100, "pay back 500 from Needs": only 100 is owed, so only 100 leaves the jar
+    const r = applyToWallet({ needs: 1000, wants: 0, goals: 0, savings: 0 }, 100, { jars: { needs: -500 }, debt: -500 });
     expect(r.debt).toBe(0);
-    expect(r.jars.wants).toBe(0);
-    expect(r.applied.debt).toBe(-20);
+    expect(r.jars.needs).toBe(900);
+    expect(r.applied).toEqual({ jars: { needs: -100 }, debt: -100, borrowed: 0 });
+
+    // the jar spend is cut by the unpaid excess but never below what was actually repaid
+    const small = applyToWallet({ needs: 100, wants: 50, goals: 0, savings: 0 }, 20, { jars: { wants: -50 }, debt: -500 });
+    expect(small.debt).toBe(0);
+    expect(small.jars.wants).toBe(30);
+    expect(small.applied).toEqual({ jars: { wants: -20 }, debt: -20, borrowed: 0 });
+
+    // nothing owed: nothing repaid and nothing charged
+    const none = applyToWallet({ needs: 1000, wants: 0, goals: 0, savings: 0 }, 0, { jars: { needs: -500 }, debt: -500 });
+    expect(none.jars.needs).toBe(1000);
+    expect(none.applied).toEqual({ jars: {}, debt: 0, borrowed: 0 });
+
+    // a repayment within the debt is untouched
+    const ok = applyToWallet({ needs: 1000, wants: 0, goals: 0, savings: 0 }, 800, { jars: { needs: -500 }, debt: -500 });
+    expect(ok.applied).toEqual({ jars: { needs: -500 }, debt: -500, borrowed: 0 });
   });
 
   it('a choice that overspends borrows, and debt and jars stay in range for a whole game', () => {
@@ -73,11 +89,13 @@ describe('rule 3: jars never negative', () => {
       scenarios: [scenario('big', { choices: [choice('a', { jars: { wants: -99999 }, debt: -500 })] })],
     });
     const s0 = createGame('sana', 'starter', 1, big);
+    expect(s0.debt).toBe(0);
     const { state, consequence } = choose(s0, big, 'a');
+    // no debt is owed, so the "repay 500" part is neither repaid nor charged
     expect(state.jars.wants).toBe(0);
-    expect(consequence.applied.borrowed).toBe(99999 - s0.jars.wants);
+    expect(consequence.applied.borrowed).toBe(99999 - 500 - s0.jars.wants);
     expect(consequence.applied.jars.wants).toBe(-s0.jars.wants);
-    expect(state.debt).toBe(consequence.applied.borrowed - 500);
+    expect(state.debt).toBe(consequence.applied.borrowed);
     const end = play(s0, big).state;
     for (const v of Object.values(end.jars)) expect(v).toBeGreaterThanOrEqual(0);
     expect(end.debt).toBeGreaterThanOrEqual(0);
@@ -126,7 +144,7 @@ describe('rule 4: rewind', () => {
     expect({ ...again, rewindTokens: 0, history: [] }).toEqual({ ...s2, rewindTokens: 0, history: [] });
   });
 
-  it('stops at zero tokens, with no history, and at month end', () => {
+  it('stops at zero tokens and with no history', () => {
     expect(rewind(createGame('sana', 'starter', 1, noEvents))).toBeNull();
     let s = play(createGame('sana', 'starter', 1, noEvents), noEvents, first, (st) => st.week === 4).state;
     expect(s.history.length).toBe(3);
@@ -136,6 +154,31 @@ describe('rule 4: rewind', () => {
     expect(rewind(s)).toBeNull();
     const withTokensNoHistory = { ...s, rewindTokens: 2 };
     expect(rewind(withTokensNoHistory)).toBeNull();
+  });
+
+  it('cannot cross back over a month boundary', () => {
+    // month 1 week 4 decided (history 4 deep), at month end: a rewind is still allowed here
+    const atEnd = play(createGame('sana', 'starter', 1, noEvents), noEvents, first, (st) => st.stage === 'monthEnd').state;
+    expect(atEnd.history).toHaveLength(4);
+    expect(rewind(atEnd)?.stage).toBe('decision');
+    // after continue the new month has tokens but no way back into month 1
+    const m2 = choose(atEnd, noEvents, 'continue').state;
+    expect(m2.month).toBe(2);
+    expect(m2.rewindTokens).toBe(REWIND_TOKENS_PER_MONTH);
+    expect(rewind(m2)).toBeNull();
+    // one choice into month 2: rewinding lands at month 2 week 1, not in month 1
+    const m2w2 = choose(m2, noEvents, 'a').state;
+    const back = rewind(m2w2)!;
+    expect([back.month, back.week]).toEqual([2, 1]);
+    expect(rewind(back)).toBeNull();
+  });
+
+  it('is blocked once the year is over, even with tokens and history left', () => {
+    const end = play(createGame('sana', 'starter', 1, noEvents), noEvents).state;
+    expect(end.stage).toBe('yearEnd');
+    expect(end.rewindTokens).toBeGreaterThan(0);
+    expect(end.history.length).toBeGreaterThan(0);
+    expect(rewind(end)).toBeNull();
   });
 
   it('refills tokens and clears history at a new month', () => {
@@ -210,12 +253,36 @@ describe('rule 5: delayed effects', () => {
     expect(q.pending[0]).toMatchObject({ dueMonth: 3, dueWeek: 1 });
   });
 
-  it('drops effects due after the last week of the game', () => {
-    const c = delayedScenario(1);
+  it('keeps effects due after the last week queued and settles them at year end', () => {
+    const c = delayedScenario(3);
     const s = play(createGame('sana', 'starter', 1, c), c, always('b'), at(GAME_MONTHS, 4)).state;
     const r = choose(s, c, 'a');
-    expect(r.consequence.delayedQueued).toBe(0);
-    expect(r.state.pending).toEqual([]);
+    expect(r.consequence.delayedQueued).toBe(1);
+    expect(r.state.pending).toEqual([
+      { dueMonth: GAME_MONTHS + 1, dueWeek: 3, effects: { jars: { savings: 500 }, flags: ['paid'] }, note: 't:note.later' },
+    ]);
+    expect(r.state.stage).toBe('monthEnd');
+    const end = choose(r.state, c, 'continue');
+    expect(end.state.stage).toBe('yearEnd');
+    expect(end.state.pending).toEqual([]);
+    expect(end.consequence.landed).toEqual([
+      { note: 't:note.later', applied: { jars: { savings: 500 }, debt: 0, borrowed: 0 } },
+    ]);
+    expect(end.state.jars.savings).toBe(r.state.jars.savings + 500);
+    expect(end.state.flags).toContain('paid');
+  });
+
+  it('settles every pending effect at year end, oldest due first', () => {
+    const c = delayedScenario(6);
+    const s = play(createGame('sana', 'starter', 1, c), c, always('b'), at(GAME_MONTHS, 2)).state;
+    const q1 = choose(s, c, 'a').state; // due 3w2 + 6 = abs week 16
+    const q2 = choose(q1, c, 'a').state; // due 3w3 + 6 = abs week 17
+    const atEnd = choose(q2, c, 'b').state;
+    expect(atEnd.pending).toHaveLength(2);
+    const end = choose(atEnd, c, 'continue');
+    expect(end.consequence.landed).toHaveLength(2);
+    expect(end.state.jars.savings).toBe(atEnd.jars.savings + 1000);
+    expect(end.state.pending).toEqual([]);
   });
 });
 
@@ -229,6 +296,19 @@ describe('rule 6: serializable', () => {
       expect(Object.values(s).includes(undefined)).toBe(false);
     }
   });
+
+  it('every state of a game passes GameStateSchema', () => {
+    let s = createGame('sana', 'planner', 5, fixture);
+    expect(GameStateSchema.safeParse(s).success).toBe(true);
+    for (let i = 0; i < 60 && s.stage !== 'yearEnd'; i++) {
+      s = choose(s, fixture, first(nextCard(s, fixture))).state;
+      const r = GameStateSchema.safeParse(JSON.parse(JSON.stringify(s)));
+      expect(r.error).toBeUndefined();
+    }
+    expect(GameStateSchema.safeParse({ ...s, jars: { ...s.jars, needs: -1 } }).success).toBe(false);
+    expect(GameStateSchema.safeParse({ ...s, seed: -1 }).success).toBe(false);
+    expect(GameStateSchema.safeParse({ ...s, week: 5 }).success).toBe(false);
+  });
 });
 
 describe('payday', () => {
@@ -236,7 +316,16 @@ describe('payday', () => {
     const s = createGame('sana', 'starter', 1, noEvents);
     expect(s.jars).toEqual({ needs: 500 + 4000 - 1000, wants: 200 + 1600, goals: 800, savings: 300 + 1600 });
     expect(s.goal.progress).toBe(800);
-    expect(s.monthStart).toEqual({ jars: s.jars, debt: 0, income: 8000, needsBudget: 5000 });
+    // needsBudget is one month of Needs: the 50% share (4000), which already pays the 1000 fixed costs
+    expect(s.monthStart).toEqual({
+      jars: s.jars,
+      debt: 0,
+      income: 8000,
+      needsBudget: 4000,
+      paydaySaved: 1600 + 800,
+      inFlight: 0,
+      baseIncome: 8000,
+    });
     expect(s.rewindTokens).toBe(3);
     expect(s.stage).toBe('decision');
   });
@@ -287,6 +376,28 @@ describe('payday', () => {
     const r = choose(atEnd, c, 'continue');
     expect(r.consequence.payday?.income).toBe(1500);
     expect(r.state.monthStart?.income).toBe(1500);
+  });
+
+  it('uses the base income for needsBudget in a zero-income month', () => {
+    const seasonal = {
+      ...sana,
+      income: { pattern: 'seasonal' as const, amount: 8000, multipliers: [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] },
+    };
+    const s = createGame('sana', 'starter', 1, bundle({ events: [], personas: [seasonal] }));
+    expect(s.monthStart).toMatchObject({ income: 0, needsBudget: 4000, baseIncome: 8000, paydaySaved: 0 });
+  });
+
+  it('validates the seed as a uint32 integer', () => {
+    for (const bad of [-1, 1.5, 2 ** 32, Number.NaN, Number.POSITIVE_INFINITY]) {
+      try {
+        createGame('sana', 'starter', bad, noEvents);
+        expect.unreachable();
+      } catch (e) {
+        expect((e as EngineError).code).toBe('invalid_seed');
+      }
+    }
+    expect(createGame('sana', 'starter', 0, noEvents).seed).toBe(0);
+    expect(createGame('sana', 'starter', 2 ** 32 - 1, noEvents).seed).toBe(2 ** 32 - 1);
   });
 
   it('unknown persona throws', () => {
@@ -407,7 +518,15 @@ describe('game flow', () => {
     expect(end.month).toBe(GAME_MONTHS);
     expect(end.scores).toHaveLength(GAME_MONTHS);
     const card = nextCard(end, noEvents);
-    expect(card).toEqual({ kind: 'yearEnd', scores: end.scores, goalReached: end.jars.goals >= end.goal.amount });
+    expect(card).toEqual({ kind: 'yearEnd', scores: end.scores, goalReached: end.goal.progress >= end.goal.amount });
+  });
+
+  it('yearEnd goalReached reads goal.progress, like everywhere else', () => {
+    const end = play(s0, noEvents).state;
+    const reached = { ...end, goal: { amount: 100, progress: 100 }, jars: { ...end.jars, goals: 0 } };
+    expect(nextCard(reached, noEvents)).toMatchObject({ kind: 'yearEnd', goalReached: true });
+    const short = { ...end, goal: { amount: 100, progress: 99 }, jars: { ...end.jars, goals: 1000 } };
+    expect(nextCard(short, noEvents)).toMatchObject({ kind: 'yearEnd', goalReached: false });
   });
 
   it('records seen ids and deduped lessons, and reports the choice consequence', () => {

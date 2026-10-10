@@ -15,6 +15,28 @@ export const DEMO = {
   className: 'Class 11 A (demo data)',
 };
 
+/** Hosts `pnpm seed` may load the demo data into without `--allow-remote-demo`. */
+export const LOCAL_DB_HOSTS = ['localhost', '127.0.0.1', '::1', '[::1]', 'postgres', 'db'];
+
+/**
+ * The demo data has a known password and class code, so it is only loaded into a
+ * local or CI database unless the caller passes --allow-remote-demo.
+ * Returns null if loading is allowed, else the reason it is refused.
+ */
+export function seedTargetProblem(url: string, argv: readonly string[]): string | null {
+  let host: string;
+  try {
+    host = new URL(url).hostname.toLowerCase();
+  } catch {
+    return 'SUPABASE_DB_URL is not a valid URL.';
+  }
+  if (LOCAL_DB_HOSTS.includes(host) || argv.includes('--allow-remote-demo')) return null;
+  return (
+    `Refusing to load demo data (known password and class code) into ${host}. ` +
+    'Use a local database, or pass --allow-remote-demo if you really mean it.'
+  );
+}
+
 const NICKNAMES = [
   'Chai Champ',
   'Star Saver',
@@ -162,8 +184,10 @@ export function buildSeedSql(content: ContentBundle = bundled): string {
 -- DEMO DATA: a demo facilitator, class ${DEMO.classCode} and ${NICKNAMES.length} demo students.
 begin;
 
-delete from public.classes where id = ${q(DEMO.classId)};
+-- classes.facilitator_id is on delete restrict, so remove the demo user's classes first.
+delete from public.classes where id = ${q(DEMO.classId)} or facilitator_id = ${q(DEMO.userId)};
 delete from auth.users where id = ${q(DEMO.userId)};
+delete from public.staff where email = ${q(DEMO.email)};
 
 -- Demo facilitator. On Supabase it can sign in with the password below (local only);
 -- on a plain test database only the id and email exist.
@@ -186,6 +210,9 @@ begin
   end if;
 end
 $$;
+
+-- The demo facilitator is on the staff allowlist, so RLS lets them see the class.
+insert into public.staff (email) values (${q(DEMO.email)});
 
 insert into public.classes (id, class_code, default_lang, facilitator_id, name)
 values (${q(DEMO.classId)}, ${q(DEMO.classCode)}, 'hi', ${q(DEMO.userId)}, ${q(DEMO.className)});

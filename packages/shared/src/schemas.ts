@@ -1,6 +1,7 @@
 // zod schemas for the content files and the sync API. Each matches its type in
 // types.ts; test/schemas.test.ts checks that they stay in step.
 import { z } from 'zod';
+import { MAX_DELAY_WEEKS, REWIND_TOKENS_PER_MONTH, WEEKS_PER_MONTH } from './constants';
 
 export const LangSchema = z.enum(['en', 'hi', 'te', 'ur']);
 export const PersonaIdSchema = z.enum(['ravi', 'sana', 'kiran', 'lakshmi']);
@@ -16,16 +17,21 @@ export const TKeySchema = z
 
 export const ContentIdSchema = z.string().regex(/^[a-z0-9_]+(\.[a-z0-9_]+)*$/);
 const Rupees = z.int();
+/** Story flag names: set by Effects.flags and tested by requiresFlag. */
+export const FlagSchema = z.string().regex(/^[a-z0-9_]+$/);
+/** A game seed: an integer in the uint32 range (the hash works on 32 bits). */
+export const SeedSchema = z.int().min(0).max(0xffffffff);
 const MetaSchema = z.strictObject({ status: z.enum(['draft', 'reviewed']), author: z.string().min(1) });
 
 export const EffectsSchema = z.strictObject({
   jars: z.partialRecord(JarIdSchema, Rupees).optional(),
   debt: Rupees.optional(),
-  flags: z.array(z.string().regex(/^[a-z0-9_]+$/)).optional(),
+  flags: z.array(FlagSchema).optional(),
 });
 
 export const DelayedEffectSchema = z.strictObject({
-  afterWeeks: z.int().min(1).max(52),
+  // At most MAX_DELAY_WEEKS (11), so an effect queued in week 1 still lands inside the game.
+  afterWeeks: z.int().min(1).max(MAX_DELAY_WEEKS),
   effects: EffectsSchema,
   note: TKeySchema,
 });
@@ -53,7 +59,7 @@ const cardFields = {
   personas: z.array(PersonaIdSchema).min(1),
   text: TKeySchema,
   illustration: z.string().optional(),
-  requiresFlag: z.string().optional(),
+  requiresFlag: FlagSchema.optional(),
   assumption: z.boolean().optional(),
   meta: MetaSchema,
 };
@@ -94,12 +100,14 @@ export const PersonaSchema = z.strictObject({
       amount: Rupees.positive(),
       multipliers: z.array(z.number().min(0).max(5)).length(12),
     }),
-    z.strictObject({
-      pattern: z.literal('irregular'),
-      min: Rupees.positive(),
-      max: Rupees.positive(),
-      step: Rupees.positive(),
-    }),
+    z
+      .strictObject({
+        pattern: z.literal('irregular'),
+        min: Rupees.positive(),
+        max: Rupees.positive(),
+        step: Rupees.positive(),
+      })
+      .refine((i) => i.min <= i.max, { message: 'irregular income needs min <= max', path: ['max'] }),
   ]),
   fixedCosts: Rupees.min(0),
   startingJars: JarRecord,
@@ -166,3 +174,50 @@ export const SyncEventSchema = z.strictObject({
 
 /** i18n file: flat map of key (without "t:") to text. An optional "_meta" marks drafts (7.4). */
 export const I18nFileSchema = z.record(z.string(), z.union([z.string(), z.object({ status: z.string() })]));
+
+// ---------------------------------------------------------------------------
+// Saved games: GameState (types.ts), so a save or the demo save can be checked on load.
+// ---------------------------------------------------------------------------
+
+const Count = z.int().min(0);
+const JarAmounts = z.strictObject({ needs: Count, wants: Count, goals: Count, savings: Count });
+
+export const PendingEffectSchema = z.strictObject({
+  dueMonth: z.int().min(1),
+  dueWeek: z.int().min(1).max(WEEKS_PER_MONTH),
+  effects: EffectsSchema,
+  note: TKeySchema,
+  principal: z.partialRecord(JarIdSchema, Count).optional(),
+});
+
+export const GameStateSchema = z.strictObject({
+  version: z.literal(1),
+  personaId: PersonaIdSchema,
+  level: LevelSchema,
+  seed: SeedSchema,
+  month: z.int().min(1),
+  week: z.int().min(1).max(WEEKS_PER_MONTH),
+  jars: JarAmounts,
+  debt: Count,
+  goal: z.strictObject({ amount: Count, progress: Count }),
+  flags: z.array(FlagSchema),
+  seen: z.array(z.string()),
+  pending: z.array(PendingEffectSchema),
+  rewindTokens: z.int().min(0).max(REWIND_TOKENS_PER_MONTH),
+  history: z.array(z.unknown()),
+  score: z.number().min(0).max(100).optional(),
+  stage: z.enum(['event', 'decision', 'monthEnd', 'yearEnd']).optional(),
+  monthStart: z
+    .strictObject({
+      jars: JarAmounts,
+      debt: Count,
+      income: Count,
+      needsBudget: Count,
+      paydaySaved: Count.optional(),
+      inFlight: Count.optional(),
+      baseIncome: Count.optional(),
+    })
+    .optional(),
+  scores: z.array(z.number().min(0).max(100)).optional(),
+  lessons: z.array(TKeySchema).optional(),
+});

@@ -19,13 +19,40 @@ pnpm dev:dashboard          # staff dashboard (UI-2)
 
 Put the `API URL` and `anon key` that `supabase start` prints into `.env` as `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
 
-**Demo:** class code `HYD234`. Facilitator sign-in is `demo.facilitator@example.org`, password `paisa-demo-2026` (local only), or use an email code. Inbucket at http://127.0.0.1:54324 shows the emails. The seeded students and quiz results are labelled demo data.
+**Demo:** class code `HYD234`. Facilitator sign-in is `demo.facilitator@example.org`, password `paisa-demo-2026` (local only), or use an email code. Inbucket at http://127.0.0.1:54324 shows the emails. The seeded students and quiz results are labelled demo data. `pnpm seed` loads only into a local or CI database unless you pass `--allow-remote-demo`.
+
+### Hosted project
+
+1. Create the Supabase project in region **ap-south-1 (South Asia, Mumbai)**. The region is fixed at creation and cannot be set in `config.toml`. Verify it under Project Settings → General ("Region: South Asia (Mumbai)"), or with `npx supabase projects list`.
+2. `npx supabase link --project-ref <ref>`, then `npx supabase db push` (migrations only; do not load `seed.sql` there).
+3. Email: fill the `SUPABASE_SMTP_*` variables from `.env.example` in your shell, set `[auth.email.smtp] enabled = true` and run `npx supabase config push`. Sign-up is off, email confirmation is on and sign-in codes expire after 10 minutes.
+
+### Staff accounts
+
+Sign-up is disabled, and signing in alone does not make someone a facilitator. To add one, as the project owner:
+
+1. Invite the email (Studio → Authentication → Invite user).
+2. Add it to the allowlist in the SQL editor: `insert into public.staff (email) values ('name@ngo.org');` (lowercase).
+
+Removing the row from `public.staff` revokes access to all their classes immediately.
+
+### Transferring a class
+
+A facilitator account that still owns classes cannot be deleted (`on delete restrict`), so student data is never wiped by accident. Move the classes first, in the SQL editor:
+
+```sql
+update public.classes
+set facilitator_id = (select id from auth.users where email = 'new.person@ngo.org')
+where facilitator_id = (select id from auth.users where email = 'old.person@ngo.org');
+```
+
+The new owner must also be in `public.staff`.
 
 ## Commands
 
 | Command | What it does |
 | --- | --- |
-| `pnpm check` | Typecheck, lint, all tests, content lint. Must pass before every commit. Needs the test Postgres (below). |
+| `pnpm check` | Typecheck, lint, all tests, content lint. Must pass before every commit. Without the test Postgres (below) the SQL tests skip locally; in CI (`CI` set) they always run. |
 | `pnpm test` | Vitest across packages, scripts and the SQL tests |
 | `pnpm db:test:up` | Starts the plain Postgres the SQL tests use (port 54330) |
 | `pnpm lint:content` | Guardrail linter over `packages/content` (`-- --strict` also fails on drafts; use it for release builds) |

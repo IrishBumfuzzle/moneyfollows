@@ -1,7 +1,15 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { SyncEvent } from '@paisa/shared';
-import { ApiError, createApiClient, createSyncQueue, makeEvent, type QueueStorage } from '../src';
+import {
+  ApiError,
+  createApiClient,
+  createSyncQueue,
+  isRetryableError,
+  makeEvent,
+  toApiError,
+  type QueueStorage,
+} from '../src';
 
 const ctx = {
   anon_id: '0b1d7c8e-1e7b-4d55-8f62-7d0c4a9f3e21',
@@ -80,7 +88,7 @@ describe('createSyncQueue', () => {
       if (!online) throw new ApiError('network');
       return { accepted: events.length };
     });
-    const queue = createSyncQueue({ storage, push, batchSize: 2 });
+    const queue = createSyncQueue({ storage, push, batchSize: 2, maxRetries: 0 });
     await Promise.all([queue.enqueue(event()), queue.enqueue(event()), queue.enqueue(event())]);
     expect(await queue.size()).toBe(3);
 
@@ -124,5 +132,115 @@ describe('createSyncQueue', () => {
     await vi.waitFor(() => expect(push).toHaveBeenCalledTimes(2));
     release();
     expect(await flushing).toEqual({ sent: 2, remaining: 0 });
+  });
+
+  it('times out a hung push so flushing never gets stuck', async () => {
+    const storage = memory();
+    let signal: AbortSignal | undefined;
+    let hang = true;
+    const push = vi.fn((events: SyncEvent[], s?: AbortSignal) => {
+      signal = s;
+      return hang ? new Promise<{ accepted: number }>(() => {}) : Promise.resolve({ accepted: events.length });
+    });
+    const queue = createSyncQueue({ storage, push, timeoutMs: 20, maxRetries: 0 });
+    await queue.enqueue(event());
+    const stuck = await queue.flush();
+    expect(stuck).toMatchObject({ sent: 0, remaining: 1 });
+    expect(stuck.error).toMatchObject({ code: 'timeout' });
+    expect(signal?.aborted).toBe(true);
+    // The next flush runs (it is not wedged on the hung one).
+    hang = false;
+    expect(await queue.flush()).toEqual({ sent: 1, remaining: 0 });
+  });
+
+  it('retries network, 5xx and 429 errors with exponential backoff and jitter', async () => {
+    const storage = memory();
+    const failures = [
+      new ApiError('network'),
+      new ApiError('unknown', 'bad gateway', 502),
+      new ApiError('unknown', 'slow down', 429),
+    ];
+    const push = vi.fn(async (events: SyncEvent[]) => {
+      const f = failures.shift();
+      if (f) throw f;
+      return { accepted: events.length };
+    });
+    const delays: number[] = [];
+    const queue = createSyncQueue({
+      storage,
+      push,
+      backoffMs: 100,
+      sleep: async (ms) => void delays.push(ms),
+      random: () => 0.5,
+    });
+    await queue.enqueue(event());
+    expect(await queue.flush()).toEqual({ sent: 1, remaining: 0 });
+    expect(push).toHaveBeenCalledTimes(4);
+    expect(delays).toEqual([50, 100, 200]); // 100·2^n, times the jitter factor
+
+    // After maxRetries the flush stops and keeps the events for later.
+    const down = createSyncQueue({
+      storage,
+      push: async () => {
+        throw new ApiError('network');
+      },
+      maxRetries: 2,
+      sleep: async () => {},
+    });
+    await down.enqueue(event());
+    const r = await down.flush();
+    expect(r).toMatchObject({ sent: 0, remaining: 1 });
+    expect(r.error).toMatchObject({ code: 'network' });
+  });
+
+  it('dead-letters a batch the server rejects and carries on with the next', async () => {
+    const storage = memory();
+    const onDeadLetter = vi.fn();
+    let calls = 0;
+    const push = vi.fn(async (events: SyncEvent[]) => {
+      if (++calls === 1) throw toApiError({ message: 'events_must_be_an_array', code: 'PT400' });
+      return { accepted: events.length };
+    });
+    const queue = createSyncQueue({ storage, push, batchSize: 2, onDeadLetter, sleep: async () => {} });
+    const first = [event(), event()];
+    for (const e of [...first, event()]) await queue.enqueue(e);
+    expect(await queue.flush()).toEqual({ sent: 1, remaining: 0, deadLettered: 2 });
+    expect(push).toHaveBeenCalledTimes(2); // no retries for a permanent error
+    const dead = await queue.deadLetters();
+    expect(dead).toEqual([
+      expect.objectContaining({ reason: 'rejected', events: first, status: 400, error: 'events_must_be_an_array' }),
+    ]);
+    expect(onDeadLetter).toHaveBeenCalledTimes(1);
+    // The app can put them back (push_events ignores ids it already holds).
+    expect(await queue.requeueDeadLetters()).toBe(2);
+    expect(await queue.deadLetters()).toEqual([]);
+    expect(await queue.flush()).toEqual({ sent: 2, remaining: 0 });
+  });
+
+  it('surfaces a partial accepted count instead of hiding the drop', async () => {
+    const storage = memory();
+    const onPartial = vi.fn();
+    const push = vi.fn(async (events: SyncEvent[]) => ({ accepted: events.length - 1 }));
+    const queue = createSyncQueue({ storage, push, onPartial });
+    const batch = [event(), event(), event()];
+    for (const e of batch) await queue.enqueue(e);
+    expect(await queue.flush()).toEqual({ sent: 3, remaining: 0, dropped: 1, deadLettered: 3 });
+    expect(onPartial).toHaveBeenCalledWith({ batch, accepted: 2 });
+    expect(await queue.deadLetters()).toEqual([
+      expect.objectContaining({ reason: 'partial', accepted: 2, events: batch }),
+    ]);
+  });
+});
+
+describe('isRetryableError', () => {
+  it('retries network trouble, 5xx, 408 and 429, and nothing else from the server', () => {
+    expect(isRetryableError(new TypeError('Failed to fetch'))).toBe(true);
+    expect(isRetryableError(new ApiError('network'))).toBe(true);
+    expect(isRetryableError(new ApiError('timeout'))).toBe(true);
+    expect(isRetryableError(new ApiError('unknown', 'x', 503))).toBe(true);
+    expect(isRetryableError(toApiError({ message: 'slow down', code: 'PT429' }))).toBe(true);
+    expect(isRetryableError(new ApiError('unknown', 'x', 400))).toBe(false);
+    expect(isRetryableError(toApiError({ message: 'too_many_events', code: 'PT413' }))).toBe(false);
+    expect(isRetryableError(new ApiError('too_many_events'))).toBe(false);
   });
 });

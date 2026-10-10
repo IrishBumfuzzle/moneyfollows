@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { content } from '@paisa/content';
+import { GameStateSchema } from '@paisa/shared';
 import { createDemoGame, nextCard } from '../src';
 
 describe('createDemoGame', () => {
@@ -10,5 +11,12 @@ describe('createDemoGame', () => {
     expect(a.personaId).toBe('sana');
     expect(a.scores?.length).toBe(1);
     expect(['decision', 'event']).toContain(nextCard(a, content).kind);
+  });
+
+  it('parses with GameStateSchema, as a saved game would be checked on load', () => {
+    const save = JSON.parse(JSON.stringify(createDemoGame(content)));
+    const r = GameStateSchema.safeParse(save);
+    expect(r.error).toBeUndefined();
+    expect(r.data).toEqual(save);
   });
 });

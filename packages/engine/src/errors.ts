@@ -1,4 +1,4 @@
-export type EngineErrorCode = 'unknown_choice' | 'game_over' | 'unknown_persona' | 'no_cards';
+export type EngineErrorCode = 'unknown_choice' | 'game_over' | 'unknown_persona' | 'no_cards' | 'invalid_seed';
 
 export class EngineError extends Error {
   readonly code: EngineErrorCode;

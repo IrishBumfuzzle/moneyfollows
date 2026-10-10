@@ -38,7 +38,13 @@ const i18n: Record<string, Record<string, unknown>> = {};
 for (const path of jsonIn('i18n')) i18n[basename(path, '.json')] = readJson(path) as Record<string, unknown>;
 
 const guardrails = readJson('guardrails.json') as Guardrails;
-const issues: Issue[] = validateContent({ files, i18n, guardrails }, { strict });
+// manifest.json holds CONTENT_VERSION and the required languages; any i18n/<code>.json is a language.
+const manifest = readJson('manifest.json') as { version?: unknown; required?: unknown };
+const requiredLanguages = Array.isArray(manifest.required)
+  ? manifest.required.filter((l): l is string => typeof l === 'string')
+  : undefined;
+const contentVersion = typeof manifest.version === 'string' ? manifest.version : String(manifest.version);
+const issues: Issue[] = validateContent({ files, i18n, guardrails, requiredLanguages, contentVersion }, { strict });
 
 const errors = issues.filter((i) => i.severity === 'error');
 const warnings = issues.filter((i) => i.severity === 'warning');

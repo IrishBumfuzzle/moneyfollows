@@ -2,7 +2,7 @@
 export { createGame, nextCard, choose, rewind } from './game';
 export { monthReport } from './score';
 export { projectGrowth } from './projection';
-export { scoreQuiz, quizFor } from './quiz';
+export { scoreQuiz, quizFor, shuffleOptions } from './quiz';
 export { createDemoGame, DEMO_SEED } from './demo';
 export { EngineError } from './errors';
 export type { EngineErrorCode } from './errors';

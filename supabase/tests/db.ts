@@ -1,5 +1,6 @@
 import { randomBytes, randomUUID } from 'node:crypto';
 import { readdirSync, readFileSync } from 'node:fs';
+import { connect } from 'node:net';
 import { fileURLToPath } from 'node:url';
 import postgres, { type Sql } from 'postgres';
 
@@ -7,13 +8,37 @@ const here = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 
 export const ADMIN_URL = process.env.SUPABASE_TEST_DB_URL ?? 'postgres://postgres:postgres@localhost:54330/postgres';
 
+/**
+ * True if something listens on the test database's host and port. Without a
+ * database the SQL tests skip locally, but in CI (process.env.CI) they always run,
+ * so a missing database fails the build.
+ */
+export function testDbReachable(timeoutMs = 1500): Promise<boolean> {
+  const url = new URL(ADMIN_URL);
+  return new Promise((resolve) => {
+    const socket = connect({ host: url.hostname, port: Number(url.port || 5432) });
+    const done = (ok: boolean) => {
+      socket.destroy();
+      resolve(ok);
+    };
+    socket.setTimeout(timeoutMs, () => done(false));
+    socket.once('connect', () => done(true));
+    socket.once('error', () => done(false));
+  });
+}
+
+/** Skip the SQL tests: no database locally, and not in CI. */
+export const skipDbTests = !process.env.CI && !(await testDbReachable());
+if (skipDbTests) console.warn(`SQL tests skipped: no test database at ${new URL(ADMIN_URL).host} (pnpm db:test:up).`);
+
 export interface TestDb {
   sql: Sql;
   /** Runs `fn` as an anonymous student (the anon role). */
   asAnon<T>(fn: (tx: Sql) => Promise<T>): Promise<T>;
   /** Runs `fn` as a signed-in facilitator (the authenticated role with that user id). */
   asUser<T>(userId: string, fn: (tx: Sql) => Promise<T>): Promise<T>;
-  createFacilitator(email?: string): Promise<string>;
+  /** An auth user; on the staff allowlist unless `staff` is false. */
+  createFacilitator(email?: string, staff?: boolean): Promise<string>;
   drop(): Promise<void>;
 }
 
@@ -47,9 +72,10 @@ export async function createTestDb(): Promise<TestDb> {
     sql,
     asAnon: as('anon'),
     asUser: (userId, fn) => as('authenticated', userId)(fn),
-    async createFacilitator(email = `${randomUUID()}@example.org`) {
+    async createFacilitator(email = `${randomUUID()}@example.org`, staff = true) {
       const id = randomUUID();
       await sql`insert into auth.users (id, email) values (${id}, ${email})`;
+      if (staff) await sql`insert into staff (email) values (${email.toLowerCase()})`;
       return id;
     },
     async drop() {

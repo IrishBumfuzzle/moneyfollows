@@ -1,13 +1,15 @@
 import { PILLARS, REFLECTION_KEYS } from '@paisa/shared';
 import { describe, expect, it } from 'vitest';
-import { collectKeys, content, i18n } from '../src';
+import { buildI18n, buildLanguages, collectKeys, content, i18n, isValidContentVersion, languages } from '../src';
+import manifest from '../manifest.json';
 
 const bundleKeys = () =>
   collectKeys([content.personas, content.scenarios, content.events, content.quizzes, content.scamMessages]);
 
 describe('content bundle', () => {
-  it('parses and has a version', () => {
-    expect(content.version).toMatch(/^\d{4}\.\d{2}\.\d{2}$/);
+  it('parses and has a valid version from manifest.json', () => {
+    expect(content.version).toBe(manifest.version);
+    expect(isValidContentVersion(content.version)).toBe(true);
   });
   it('has 24 scenarios, 6 per pillar, with unique ids', () => {
     expect(content.scenarios).toHaveLength(24);
@@ -38,15 +40,49 @@ describe('content bundle', () => {
     for (const s of content.scenarios.filter((s) => s.pillar === 'understand_investing'))
       expect(s.assumption).toBe(true);
   });
-  it('gives personas reachable goals for a 3-month game', () => {
+  it('sizes persona goals so steady saving reaches them, but one raid on the goal jar misses', () => {
+    // Every goal-jar spend in the content, immediate or delayed. The smallest one is the margin.
+    const raids = [...content.scenarios, ...content.events]
+      .flatMap((card) => card.choices)
+      .flatMap((c) => [c.effects, ...(c.delayed ?? []).map((d) => d.effects)])
+      .map((e) => e.jars?.goals ?? 0)
+      .filter((g) => g < 0)
+      .map((g) => -g);
+    expect(raids.length).toBeGreaterThan(0);
+    const smallestRaid = Math.min(...raids);
     for (const p of content.personas) {
       const inc = p.income;
       if (inc.pattern === 'irregular') throw new Error('unexpected irregular income');
       const months = inc.pattern === 'steady' ? [1, 1, 1] : inc.multipliers.slice(0, 3);
-      const saved = months.reduce((sum, m) => sum + (m * inc.amount * p.split.goals) / 100, p.startingJars.goals);
-      expect(saved / p.goal.amount).toBeGreaterThanOrEqual(0.7);
-      expect(saved / p.goal.amount).toBeLessThanOrEqual(1);
+      // The engine's payday: whole-rupee income, floored per jar.
+      const saved = months.reduce(
+        (sum, m) => sum + Math.floor((Math.round(m * inc.amount) * p.split.goals) / 100),
+        p.startingJars.goals,
+      );
+      expect(saved, `${p.id} reaches the goal by saving the payday split`).toBeGreaterThanOrEqual(p.goal.amount);
+      expect(saved - smallestRaid, `${p.id} misses after one ₹${smallestRaid} raid`).toBeLessThan(p.goal.amount);
     }
+  });
+});
+
+describe('languages', () => {
+  it('lists every i18n file, with en and hi required and shipped', () => {
+    const codes = languages.map((l) => l.code);
+    expect(codes.slice(0, 2).sort()).toEqual(['en', 'hi']);
+    for (const l of languages.filter((l) => l.required)) expect(l.status).toBe('shipped');
+    expect(Object.keys(i18n).sort()).toEqual([...codes].sort());
+  });
+  it('adds a language from its file alone, with no code change', () => {
+    const files = { en: { a: 'A' }, hi: { a: 'अ' }, te: { _meta: { status: 'machine_draft' }, a: 'అ' } };
+    expect(buildI18n(files, manifest).te).toEqual({ a: 'అ' });
+    const te = buildLanguages(files, manifest).find((l) => l.code === 'te');
+    expect(te).toMatchObject({ name: 'తెలుగు', status: 'machine_draft', required: false, dir: 'ltr' });
+    const xx = buildLanguages({ ...files, xx: { a: 'x' } }, manifest).find((l) => l.code === 'xx');
+    expect(xx).toMatchObject({ name: 'xx', status: 'shipped', dir: 'ltr' });
+    expect(buildLanguages({ ...files, ur: { a: 'ا' } }, manifest).find((l) => l.code === 'ur')?.dir).toBe('rtl');
+  });
+  it('fails loudly when a required language file is missing', () => {
+    expect(() => buildI18n({ en: { a: 'A' } }, manifest)).toThrow(/hi\.json/);
   });
 });
 

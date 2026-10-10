@@ -433,7 +433,18 @@
           }
         },
         "lesson": "t:event.rain_stock.01.a.lesson",
-        "rating": "ok"
+        "rating": "ok",
+        "delayed": [
+          {
+            "afterWeeks": 4,
+            "effects": {
+              "jars": {
+                "savings": -300
+              }
+            },
+            "note": "t:event.rain_stock.01.a.later"
+          }
+        ]
       },
       {
         "id": "b",
@@ -445,7 +456,18 @@
           }
         },
         "lesson": "t:event.rain_stock.01.b.lesson",
-        "rating": "ok"
+        "rating": "ok",
+        "delayed": [
+          {
+            "afterWeeks": 4,
+            "effects": {
+              "jars": {
+                "goals": -300
+              }
+            },
+            "note": "t:event.rain_stock.01.b.later"
+          }
+        ]
       },
       {
         "id": "c",
@@ -453,17 +475,14 @@
         "icon": "shield",
         "effects": {
           "jars": {
+            "savings": -300,
             "needs": -150
           }
         },
         "delayed": [
           {
-            "afterWeeks": 6,
-            "effects": {
-              "jars": {
-                "savings": 300
-              }
-            },
+            "afterWeeks": 4,
+            "effects": {},
             "note": "t:event.rain_stock.01.c.later"
           }
         ],
@@ -503,7 +522,7 @@
           }
         },
         "lesson": "t:event.screen_crack.01.a.lesson",
-        "rating": "best"
+        "rating": "ok"
       },
       {
         "id": "b",
@@ -551,7 +570,8 @@
     "pillar": "save_manage",
     "concept": "surprise",
     "personas": [
-      "kiran"
+      "sana",
+      "ravi"
     ],
     "levels": [
       "explorer",
@@ -578,7 +598,7 @@
         "icon": "wait",
         "effects": {
           "jars": {
-            "wants": -200
+            "wants": -300
           }
         },
         "lesson": "t:event.slow_week.01.b.lesson",

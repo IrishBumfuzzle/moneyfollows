@@ -11,11 +11,22 @@ export const LEVELS: readonly Level[] = ['starter', 'explorer', 'planner'];
 export const GAME_MONTHS = 3;
 export const WEEKS_PER_MONTH = 4;
 export const REWIND_TOKENS_PER_MONTH = 3;
+/** Longest delay a delayed effect may have: from week 1 it still lands by the last week. */
+export const MAX_DELAY_WEEKS = GAME_MONTHS * WEEKS_PER_MONTH - 1;
 
 /** Highest scenario difficulty each level sees. */
 export const LEVEL_MAX_DIFFICULTY: Record<Level, 1 | 2 | 3> = { starter: 1, explorer: 2, planner: 3 };
 /** Chance of a surprise event in a week. */
 export const EVENT_CHANCE: Record<Level, number> = { starter: 0.2, explorer: 0.3, planner: 0.4 };
+
+/** Selector: an event is not drawn again while it is among the last this-many events seen. */
+export const RECENT_EVENTS = 6;
+/** Selector: a scenario is not drawn again while it is among the last this-many decisions seen. */
+export const RECENT_DECISIONS = 3;
+/** Selector: draw weight of a never-seen scenario (a seen one weighs 1). */
+export const UNSEEN_WEIGHT = 5;
+/** Selector: plan_budget/save_manage decisions a starter makes before investing cards appear. */
+export const BASICS_BEFORE_INVESTING = 2;
 
 /** Money Health Score v0 (5.3). */
 export const SAVINGS_TARGET = 0.2;

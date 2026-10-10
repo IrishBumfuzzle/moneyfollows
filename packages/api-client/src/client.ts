@@ -19,6 +19,9 @@ export interface ClassRow {
   created_at: string;
 }
 
+/** learning_gain row plus the additive `n`: matched students for that pillar (= baseline_n = endline_n). */
+export type MatchedLearningGainRow = LearningGainRow & { n: number };
+
 export interface ApiClientOptions {
   url: string;
   anonKey: string;
@@ -33,14 +36,16 @@ export interface ApiClientOptions {
 export function createApiClient(options: ApiClientOptions) {
   const sb = options.supabase ?? createClient(options.url, options.anonKey);
 
-  async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
+  async function rpc<T>(fn: string, args: Record<string, unknown>, signal?: AbortSignal): Promise<T> {
     let res;
     try {
-      res = await sb.rpc(fn, args);
+      const query = sb.rpc(fn, args);
+      res = await (signal ? query.abortSignal(signal) : query);
     } catch (err) {
-      throw new ApiError('network', (err as Error).message);
+      const message = (err as Error).message;
+      throw new ApiError(signal?.aborted ? 'timeout' : 'network', message);
     }
-    if (res.error) throw toApiError(res.error);
+    if (res.error) throw toApiError(res.error, res.status);
     return res.data as T;
   }
 
@@ -52,14 +57,19 @@ export function createApiClient(options: ApiClientOptions) {
       return rpc<JoinClassResult>('join_class', { class_code: classCode, nickname });
     },
 
-    pushEvents(events: SyncEvent[]): Promise<PushEventsResult> {
+    /** `signal` aborts the request (the sync queue uses it for its timeout). */
+    pushEvents(events: SyncEvent[], signal?: AbortSignal): Promise<PushEventsResult> {
       if (events.length > SYNC_BATCH_MAX) throw new ApiError('too_many_events');
-      return rpc<PushEventsResult>('push_events', { events });
+      return rpc<PushEventsResult>('push_events', { events }, signal);
     },
 
     // ---- Staff (dashboard) ----
+    /**
+     * Sends a sign-in code. Staff accounts are invited by an admin (sign-up is off in
+     * supabase/config.toml) and must be on the staff allowlist to see any class.
+     */
     async signInWithEmail(email: string): Promise<void> {
-      const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
+      const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
       if (error) throw toApiError(error);
     },
 
@@ -94,8 +104,9 @@ export function createApiClient(options: ApiClientOptions) {
       return rpc<ClassProgressRow[]>('class_progress', { class_id: classId });
     },
 
-    async learningGain(classId: string): Promise<LearningGainRow[]> {
-      const rows = await rpc<LearningGainRow[]>('learning_gain', { class_id: classId });
+    /** Matched students only (both quizzes); `n` is how many, per pillar. */
+    async learningGain(classId: string): Promise<MatchedLearningGainRow[]> {
+      const rows = await rpc<MatchedLearningGainRow[]>('learning_gain', { class_id: classId });
       // numeric columns arrive as strings from PostgREST.
       return rows.map((r) => ({
         ...r,

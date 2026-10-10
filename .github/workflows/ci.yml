@@ -19,6 +19,9 @@ jobs:
           --health-cmd "pg_isready -U postgres"
           --health-interval 3s --health-timeout 3s --health-retries 20
     env:
+      # With CI set, the SQL tests never skip: a missing database fails the build.
+      # (Locally, without CI, they skip when nothing listens on 54330.)
+      CI: 'true'
       SUPABASE_TEST_DB_URL: postgres://postgres:postgres@localhost:54330/postgres
     steps:
       - uses: actions/checkout@v4
