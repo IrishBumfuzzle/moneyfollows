@@ -432,5 +432,21 @@
   "jar.check.save.ok": "Goals and Savings get {{percent}}% or more of the money. Your future self says thanks.",
   "jar.check.save.fix": "Goals and Savings get less than {{percent}}%. That share is ₹{{amount}}.",
   "jar.check.wants.ok": "Wants stays within {{percent}}% (₹{{amount}}). Fun, with a limit.",
-  "jar.check.wants.fix": "Wants is over {{percent}}%. The limit this month is ₹{{amount}}."
+  "jar.check.wants.fix": "Wants is over {{percent}}%. The limit this month is ₹{{amount}}.",
+  "speaker.you": "You",
+  "speaker.shopkeeper": "Shopkeeper",
+  "speaker.friend": "Friend",
+  "speaker.cousin": "Cousin",
+  "speaker.parent": "Parent",
+  "speaker.teacher": "Teacher",
+  "speaker.doctor": "Doctor",
+  "speaker.classmate": "Classmate",
+  "speaker.phone_ad": "Phone ad",
+  "speaker.unknown_number": "Unknown number",
+  "speaker.buyer": "Buyer",
+  "speaker.bank_guide": "Bank guide",
+  "speaker.customer": "Customer",
+  "speaker.college_office": "College office",
+  "speaker.relatives": "Relatives",
+  "speaker.father": "Father"
 }
