@@ -21,10 +21,13 @@ Full product spec: `docs/spec.md` (paste the team's spec there). This file summa
 
 ### 1.1 App and game structure
 
-- The app has several **sections**; the **game** is one of them. The other sections are not decided yet.
+- The app has several **sections**; the **game** is one of them. Other sections may be added beyond those listed here.
 - Entering the game takes the player to a **map** with places: **Home, Shop, School, Hospital** (more may be added).
 - A place can open a **sub-map** with its own locations, and the player plays inside those locations.
-- Still to decide: what the other app sections are, and how the map's places connect to the weekly decision loop and the mini-games (section 2).
+- **Newspaper section (idea):** the student reads the 4–5 most important financial news articles, each kept very brief.
+  - Complicated words are highlighted. Tapping one opens a simple pop-up, styled like a thought cloud coming from the word, with its meaning.
+  - Each article has 1 question. Reading all 5 articles and answering every question earns points/money the student can spend in the game.
+- Still to decide: the other app sections, and how the map's places connect to the weekly decision loop and the mini-games (section 2).
 
 ## 2. Scope for the hackathon (MoSCoW)
 
@@ -380,6 +383,7 @@ Append decisions here as `YYYY-MM-DD HH:MM — decision — who`.
 Open questions:
 - Which license does Section 11 of the brief require for the `LICENSE` file?
 - What are the app's other sections, and how do the game map's places (Home, Shop, School, Hospital) and sub-maps connect to the weekly decision loop and mini-games?
+- Newspaper: are the articles real news or written by us? Who updates them, and how often? How do they reach the app when it's offline? How do the newspaper's points/money enter the game?
 - Which success measures are scored: six or seven?
 - Compliance-approved assumed growth rates for Time Machine (placeholders: 4/8/12%).
 - Who is the native Telugu reviewer, if any, via the NGO partner?
