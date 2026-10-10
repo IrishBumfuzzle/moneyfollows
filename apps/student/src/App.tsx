@@ -6,6 +6,8 @@ import { MetersBar } from './features/life/MetersBar';
 import type { MeterPop } from './features/life/MetersBar';
 import { StoreSheet } from './features/life/StoreSheet';
 import type { LifeState } from './features/life/types';
+import { Onboarding, loadProfile } from './features/onboarding';
+import type { Profile } from './features/onboarding';
 import { LocationScreen } from './screens/LocationScreen';
 
 type Screen = 'map' | 'classroom' | 'store';
@@ -43,10 +45,17 @@ export function App() {
     else setScreen('map');
   }, []);
 
+  // First launch shows onboarding; afterwards the saved profile skips it. undefined = still reading IndexedDB.
+  const [profile, setProfile] = useState<Profile | null>();
+  useEffect(() => void loadProfile().then((p) => setProfile(p ?? null)), []);
+  if (profile === undefined) return null;
+  if (profile === null) return <Onboarding initialLang={LANG} onDone={setProfile} />;
+  const lang = params.has('lang') ? LANG : profile.lang; // ?lang= still overrides for demos and tests
+
   if (screen === 'classroom') {
     return (
       <ClassroomScreen
-        lang={LANG}
+        lang={lang}
         seed={SEED}
         onExit={back}
         // TODO: queue toSubmittedEvent(result, …) once api-client's sync queue is on main (API.md).
@@ -59,10 +68,10 @@ export function App() {
       <LocationScreen
         onSelect={(id) => (id === 'school' ? open('classroom') : id === 'convenience' ? open('store') : console.log('go to', id))}
       />
-      <MetersBar lang={LANG} state={life} pop={pop} />
+      <MetersBar lang={lang} state={life} pop={pop} />
       {screen === 'store' && (
         <StoreSheet
-          lang={LANG}
+          lang={lang}
           state={life}
           onBuy={(_, out) => {
             setLife(out.state);

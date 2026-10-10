@@ -4,17 +4,18 @@ Oct 10, 2026 · @Abhiraj Ratna
 
 ## 1. Orientation
 
-You own three pieces: **onboarding**, the **Paisa Times** newspaper and the **staff dashboard**. By **M2 (Sun 04:00)** a new player must get through onboarding, open the paper, tap a word, answer a question and see the paper-route wage land in their wallet. By **feature freeze (Sun 08:30)** the dashboard must show a class code and QR, a progress table and the learning-gains chart.
+You own four pieces: **onboarding**, the **main screen**, the **Paisa Times** newspaper and the **staff dashboard**. By **M2 (Sun 04:00)** a new player must get through onboarding onto the main screen (their character on a couch, a Play button, a news rack), tap Play to reach the map, and tap the news rack to read the paper, tap a word, answer a question and see the paper-route wage land. By **feature freeze (Sun 08:30)** the dashboard must show a class code and QR, a progress table and the learning-gains chart.
 
 ### What the game is, in UI terms
 
-Paisa Path is a web app that looks and plays like a small pixel-art game on a phone. The player runs Sana's or Ravi's money week by week. The **engine** (BE-1's lane) decides what happens; the UI shows the state and passes taps to it. Your pieces sit at the edges of that loop: onboarding is the way in, Paisa Times is a side activity that pays a wage, and the dashboard is a separate website for teachers (called facilitators).
+Paisa Path is a web app that looks and plays like a small pixel-art game on a phone. The player runs Sana's or Ravi's money week by week. The **engine** (BE-1's lane) decides what happens; the UI shows the state and passes taps to it. Your pieces frame that loop: onboarding is the way in, the main screen is where every session starts, Paisa Times is a side activity that pays a wage, and the dashboard is a separate website for teachers (called facilitators). The map, places and decisions behind the Play button belong to the other UI dev.
 
-### Your three pieces
+### Your four pieces
 
 | Piece | Who uses it, where | What it does | Lives in |
 | --- | --- | --- | --- |
 | Onboarding | Student, once, on a phone | Language, class code, nickname and avatar, persona, 3 how-to-play cards, in under a minute | `apps/student/src/features/onboarding` |
+| Main screen | Student, every session, on a phone | The player's character sits on a couch near the top; a big **Play** button opens the map; a **news rack** opens Paisa Times | `apps/student/src/features/main` |
 | Paisa Times | Student, on a phone | A weekly paper of 5 short articles. Highlighted words open a thought-cloud meaning; one question per article pays the paper-route wage | `apps/student/src/features/news` |
 | Staff dashboard | NGO facilitator, on a laptop | Sign in, create a class and get its code and QR, see each student's progress, compare baseline and end-line quiz scores | `apps/dashboard` |
 
@@ -22,32 +23,34 @@ Paisa Path is a web app that looks and plays like a small pixel-art game on a ph
 
 | Person | Builds | Note |
 | --- | --- | --- |
-| You | Onboarding; Paisa Times (reader, thought cloud, questions and wage, Word Wallet); staff dashboard | — |
-| Other UI dev | Room, Map, places, decisions, phone and scams, Home, Month Recap, the School section with its quizzes | Probably also the design system and app shell (CLAUDE.md's UI-1); confirm in Phase 0 |
+| You | Onboarding; main screen; Paisa Times (reader, thought cloud, questions and wage, Word Wallet); staff dashboard | — |
+| Other UI dev | Map, places, decisions, phone and scams, Home (sleep, Month Recap), the School classroom quiz (built) | Also owns the Kenney UI kit (`design/kenney.css`) and `App.tsx` navigation so far |
 | BE-1 | Engine (including `earn()`), content (editions, glossary, personas, quizzes) | — |
 | BE-2 | Supabase, api-client (`join_class`, `push_events`, `class_progress`, `learning_gain`), deploy, merges | — |
-| Nobody yet | MessageInspector, Scam or Safe?, Time Machine | CLAUDE.md gave these to UI-2; raise it with the team tonight |
+| Nobody yet | MessageInspector, Scam or Safe?, Time Machine; Me and Notes screens | Raise it with the team tonight |
 
-This split differs from CLAUDE.md §3, which puts onboarding with UI-1. Phase 0 updates §3 first, because Claude reads it to decide which files you may edit.
+This split differs from CLAUDE.md, which gives onboarding and the Room hub to UI-1 and describes a Room with a door, newspaper, trophy and notebook. Phase 0 records the new lanes and the simpler main screen in CLAUDE.md, because Claude reads it to decide which files you may edit.
 
-### What exists today (checked Sat 22:26)
+### What exists today (checked Sat 23:00)
 
 | Thing | State |
 | --- | --- |
-| Student app: Vite + React, one map screen (`LocationScreen`), the `PixelText` component | Works |
-| Classroom quiz at School (`features/classroom`, see `API.md`) | Works |
-| Life meters API: money, health, sanity; the store's necessity/want options, work, school (`features/life`, see `docs/life-meters-api.md`) | Frontend API, meters bar and store sheet built; work/school buttons, engine and backend not yet |
-| Onboarding, Paisa Times, dashboard | Nothing yet |
-| `apps/dashboard` | Folder does not exist; `pnpm dev:dashboard` is in CLAUDE.md but not in `package.json` |
-| `packages/shared` (types), engine (`earn()`), content (editions, glossary, personas), api-client | Not created yet (backend lanes) |
-| Shared foundations: design tokens, translations (i18n), stores, app shell | Not built; Phase 0 settles who builds them |
-| Libraries: react-i18next, zustand, motion, @floating-ui/react, idb-keyval; Recharts for the dashboard | Not installed |
-| `pnpm` on your laptop | Broken (Corepack download error); fixed in Setup |
+| Map screen (`src/screens/LocationScreen.tsx`); tapping School opens the classroom | Works |
+| School classroom quiz (`src/features/classroom`): 5 practice questions, en + hi, tests | Works (other UI dev) |
+| Kenney pixel UI kit (`src/design/kenney.css`): `k-btn`, `k-btn is-primary`, `k-panel`, `k-banner`, `k-round` | Works; reuse it for your buttons and panels |
+| `App.tsx`: switches between map and classroom with `history.pushState`, so Android back works; `?lang=hi` switches language | Works; no main screen, onboarding or news yet |
+| Translations: each feature keeps `content/en.json` + `hi.json` and a small `t()` (see `features/classroom/content/index.ts`); react-i18next not installed | Pattern to copy |
+| `pnpm check` (typecheck + tests) and Vitest | Works |
+| `pnpm` on your laptop | Fixed; your `package.json` has a new `packageManager` line that is not committed yet |
+| Onboarding, main screen, Paisa Times, `apps/dashboard` | Nothing yet |
+| `packages/shared`, engine (`earn()`), content, api-client | Not on `main` yet (an `origin/Backend` branch exists) |
+| Life meters API (`src/features/life`, see `docs/life-meters-api.md`): one common money wallet, health, sanity; the store's necessity/want options, work, school | Frontend API, meters bar and store sheet built; work/school buttons, engine and backend not yet |
 
 ### Which document wins
 
 - **CLAUDE.md** is the source of truth for this weekend. **docs/Paisa Path — Product & Component Design.md** describes the long-term product; use it for ideas, not scope.
-- **Onboarding:** CLAUDE.md's list (language, class code, nickname and avatar, persona, 3 cards). The baseline quiz lives in the School section, not onboarding. No picture-PIN.
+- **Main screen:** the team replaced CLAUDE.md's Room hub (door, newspaper, trophy, notebook) with a character on a couch, a Play button and a news rack. Until Phase 0 updates CLAUDE.md, tell Claude this in your prompt.
+- **Onboarding:** CLAUDE.md's list (language, class code, nickname and avatar, persona, 3 cards). No baseline quiz and no picture-PIN in onboarding. Where the baseline and end-line quizzes live is still open: the School classroom quiz is practice only, kept separate so it cannot inflate learning gains.
 - **Dashboard:** the design doc lists 9 staff screens; CLAUDE.md asks for 4: Sign in → Class setup (code and QR) → Class progress table → Learning gains chart. Build only those.
 - **Paisa Times:** the rules in CLAUDE.md §5.8 (original explainers, `[[termId]]` words, one question per article, wage paid once per edition, half wage on retry, framed as a paper-route shift).
 - Everywhere: **no hard-coded words in components.** Every visible word goes through a translation key, in English and Hindi.
@@ -56,8 +59,8 @@ This split differs from CLAUDE.md §3, which puts onboarding with UI-1. Phase 0 
 
 | Deadline (IST) | Hard limit | Aim for | You must have |
 | --- | --- | --- | --- |
-| M2 | Sun 04:00 | 03:30 | Onboarding and Paisa Times (words, questions, wage) working in Hindi, merged |
-| Feature freeze | Sun 08:30 | 08:30 | Dashboard's 4 screens with demo data; a "new edition" hook for the demo panel |
+| M2 | Sun 04:00 | 03:30 | Onboarding, main screen and Paisa Times (words, questions, wage) working in Hindi, merged |
+| Feature freeze | Sun 08:30 | 08:30 | Word Wallet; the dashboard's 4 screens with demo data; a "new edition" hook for the demo panel |
 | Final | Sun 11:00 | 10:30 | Nothing new; bugs, copy and polish only |
 
 Merge checkpoints are 23:30, 01:30, 03:15 and 07:30. `main` must run after each one.
@@ -67,10 +70,10 @@ Merge checkpoints are 23:30, 01:30, 03:15 and 07:30. `main` must run after each 
 ```mermaid
 flowchart TB
   subgraph STU["Student app · phone"]
-    ON["Onboarding (yours)<br/>language, class code, nickname, persona"] -->|once| ROOM["Room, the hub (other UI dev)<br/>its newspaper opens the news"]
-    ROOM -->|newspaper| PT["Paisa Times (yours)<br/>5 articles, word pop-ups, a question each"]
-    PT -->|tap a word| WW["Word Wallet (yours)<br/>every word tapped; also shown in Notes"]
-    SQ["School quizzes (other UI dev)<br/>feeds learning gains"]
+    ON["Onboarding (yours)<br/>language, class code, nickname, persona"] -->|first launch only| MS["Main screen (yours)<br/>persona on the couch, Play button, news rack"]
+    MS -->|news rack| PT["Paisa Times (yours)<br/>5 articles, word pop-ups, wage"]
+    MS -->|Play| MAP["Map (other UI dev)<br/>places, classroom"]
+    PT -->|tap a word| WW["Word Wallet (yours)<br/>every word tapped, shown in Notes"]
   end
   subgraph DASH["Staff dashboard · laptop (all yours)"]
     SI["Sign in<br/>facilitator email + one-time code"] --> CS["Class setup<br/>code + QR students scan to join"]
@@ -82,7 +85,7 @@ flowchart TB
   BE -->|progress and gains| DASH
 ```
 
-The class code and QR from your dashboard are what students type or scan in your onboarding. Article text and the glossary come from BE-1's content pack, and the wage is paid through the engine's `earn()`.
+Every session starts on your main screen: Play leads into the other UI dev's map, the news rack into your Paisa Times. The class code and QR from your dashboard are what students type or scan in your onboarding. Article text and the glossary come from BE-1's content pack, and the wage is paid through the engine's `earn()`.
 
 ## 2. Concepts you need first
 
@@ -115,6 +118,9 @@ There is no game loop running 60 times a second and no physics. Paisa Path is **
 
 | Pattern | What it is | Where you use it |
 | --- | --- | --- |
+| Hub | One home screen that every session starts from | Main screen: Play → map, news rack → Paisa Times |
+| Hotspot | A tappable object inside a picture | The news rack |
+| Idle animation | A small looping movement (blink, breathe) that makes a still scene feel alive | The character on the couch |
 | Stepper | One question per screen, progress dots, a big Next button | Onboarding |
 | Card picker | Large tappable cards; the chosen one is clearly highlighted | Persona choice, avatar grid |
 | Carousel | Cards the player swipes or steps through | The 3 how-to-play cards |
@@ -168,8 +174,9 @@ Two habits make layouts look professional with no design training:
 The game's map is pixel art; your phone screens should feel like part of the same game.
 
 - **Scale pixel images by whole numbers only** (2×, 3×) and give them `image-rendering: pixelated`, or they blur.
+- **Reuse what is already in the repo.** The classroom draws a 360×640 backdrop and scales the whole stage as one (`features/classroom/ClassroomScreen.tsx`), and `design/kenney.css` gives pixel buttons and panels (`k-btn is-primary` suits Play). Copy both so your screens match the rest of the game.
 - **Pixel font for short titles; Noto Sans for reading.** The Paisa Times masthead and onboarding titles can use the pixel font through `PixelText`. Article text, meanings and questions must be plain 16 px text, especially in Hindi. `PixelText` is invisible to screen readers, so the same words also go in an `aria-label`.
-- **Placeholders first.** An emoji avatar or a coloured box is fine until the flow works. Art comes last.
+- **Placeholders first.** An emoji character on a grey couch is fine until the flow works. Art comes last.
 
 ### 2.7 Animation basics
 
@@ -209,6 +216,8 @@ corepack use pnpm@9
 ```
 
 Or just tell Claude: *"`pnpm -v` fails with a Corepack MODULE\_NOT\_FOUND error. Fix it without touching anything outside this repo except the Corepack cache."*
+
+**Status (23:00):** done. Your root `package.json` now has a `packageManager` line pinning pnpm 9.15.9. Commit it on its own and tell BE-2, so the whole team uses the same pnpm.
 
 ### Step 2 — Install and run
 
@@ -265,13 +274,16 @@ Your screens need things other people are building. Until each one lands, use a 
 
 | You need | From | Stand-in until it lands |
 | --- | --- | --- |
+| The map behind the Play button | Other UI dev: `src/screens/LocationScreen.tsx`, opened from `App.tsx` | Already on `main` |
+| Screen switching and Android back | Other UI dev: `App.tsx` (`history.pushState`) | Add your screens to it the same way; tell them what you changed |
+| Translations | Each feature's `content/en.json` + `hi.json` and `t()` (classroom pattern) | Copy the pattern into each of your feature folders |
 | `Article`, `GlossaryTerm`, `GameState` types | `packages/shared` (frozen contract) | A temporary copy in your feature folder, marked "replace when shared lands" |
 | One Paisa Times edition (5 articles) and the glossary | BE-1: `packages/content/news/<edition>.json`, `glossary.json` | `src/features/news/sample-edition.ts` with 5 short placeholder articles |
-| Sana's and Ravi's details | BE-1: `packages/content/personas.json` | The personas table in the design doc |
-| The wallet and `earn()` | The engine, through the other UI dev's `useGame` store | Ask them for `useGame.earn(amount, sourceId)`; until then a local function that logs the payment |
+| Sana's and Ravi's details and art | BE-1: `packages/content/personas.json`; art from you or the other UI dev | The personas table in the design doc; emoji until art exists |
+| The wallet and `earn()` | The engine, through the other UI dev's game store | Ask them for an `earn(amount, sourceId)` function; until then a local function that logs the payment |
 | `join_class` | BE-2: `packages/api-client` | `src/api/joinClass.ts` that accepts any code |
 | Staff sign-in, `class_progress`, `learning_gain` | BE-2 | `apps/dashboard/src/api.ts` returning seed data |
-| Baseline and end-line quiz scores | The other UI dev's School quizzes, stored by BE-2 | Seed data, labelled "Demo data" on screen |
+| Baseline and end-line quiz scores | Not decided (the classroom quiz is practice only) | Seed data, labelled "Demo data" on screen |
 | Health and sanity meters; store, work and school actions | BE-1: `buy`, `work`, `attendSchool`, `GameState.money` (one common wallet) and `GameState.vitals`; BE-2: three new event types (`docs/life-meters-api.md` §4–5) | `lifeApi` in `src/features/life/life.ts`, a local stand-in with the same rules |
 
 ### Setup is done when
@@ -284,22 +296,23 @@ Your screens need things other people are building. Until each one lands, use a 
 
 ## 4. Step-by-step build plan
 
-Build in **10 phases**. Phases 0–5 make your part of the M2 demo (onboarding and Paisa Times); Phases 6–9 build the dashboard before freeze; Phase 10 is polish. Every phase ends with something you can tap. If a phase runs 30 minutes past its time box, use the cut list at the end of this section rather than skipping a later phase.
+Build in **12 phases** (0–11). Phases 0–5 make your part of the M2 demo (onboarding, main screen, Paisa Times); Phase 6 adds the Word Wallet; Phases 7–10 build the dashboard before freeze; Phase 11 is polish. Every phase ends with something you can tap. If a phase runs 30 minutes past its time box, use the cut list at the end of this section rather than skipping a later phase.
 
 | Phase | Time (IST) |
 | --- | --- |
-| 0 · Agree split, setup | 22:30–23:00 |
-| 1 · Onboarding | 23:00–00:00 |
-| 2 · Paisa Times reader | 00:00–00:45 |
-| 3 · Thought-cloud words | 00:45–01:30 |
-| 4 · Questions and wage | 01:30–02:15 |
-| 5 · Word Wallet | 02:15–02:45 |
-| Hook-up with the other UI dev | 02:45–03:15 |
+| 0 · Agree split, learn patterns | 23:00–23:20 |
+| 1 · Onboarding | 23:20–00:15 |
+| 2 · Main screen | 00:15–01:00 |
+| 3 · Paisa Times reader | 01:00–01:40 |
+| 4 · Thought-cloud words | 01:40–02:20 |
+| 5 · Questions and wage | 02:20–03:00 |
+| Hook-up with the other UI dev | 03:00–03:15 |
 | **M2 gate** | 03:15–03:30 (M2 due 04:00) |
-| 6–9 · Dashboard, plus your sleep shift | 03:30–08:30 (freeze 08:30) |
-| 10 · Polish and video | 08:30–10:30 (final due 11:00) |
+| 6 · Word Wallet | 03:30–04:00 |
+| 7–10 · Dashboard, plus your sleep shift | 04:00–08:30 (freeze 08:30) |
+| 11 · Polish and video | 08:30–10:30 (final due 11:00) |
 
-Onboarding gets the longest slot because everything else starts after it. The dashboard shares its window with your sleep shift, so it is built against seed data and kept plain.
+The main screen took 45 minutes from the schedule, so the Word Wallet moved to just after M2, which does not need it. The dashboard shares its window with your sleep shift, so it is built against seed data and kept plain.
 
 ### How to run every phase
 
@@ -312,77 +325,76 @@ Onboarding gets the longest slot because everything else starts after it. The da
 
 Placeholders are fine in every phase: an emoji avatar or a grey box for an article picture is fine until Phase 10. **Flow first, art last.**
 
-### Phase 0 — Agree the split and the foundations (22:30–23:00)
+### Phase 0 — Agree the split and learn the patterns (23:00–23:20)
 
 **Goal:** 30 minutes of talking and small setup that saves hours of merge conflicts later. Your screens plug into the other UI dev's app, so agree where the plugs are before either of you writes them.
 
 - [ ] **With the other UI dev, agree who owns the shared foundations:** design tokens (`src/design`), translation setup (`src/i18n`), stores (`src/game`, `src/app`) and the app shell with navigation. Recommended: they own all four (CLAUDE.md's UI-1 role), and you build only inside your feature folders.
 - [ ] **Agree the hand-off points** in the table below, and post them in the team chat.
-- [ ] **Update CLAUDE.md §3** with the new lanes (Prompt 0a). Claude uses it to keep you in your own folders.
+- [ ] **Update CLAUDE.md §3** with the new lanes and the main screen (Prompt 0a). Claude uses it to keep you in your own folders.
 - [ ] **Message BE-1:** when do a sample edition, `glossary.json` and `personas.json` land?
 - [ ] **Message BE-2:** api-client `join_class`; staff sign-in; `class_progress` and `learning_gain`; seed data for the dashboard.
 - [ ] **Message the team:** MessageInspector, Scam or Safe? and Time Machine have no owner.
-- [ ] **If translations and tokens will not exist by 23:00,** add a minimal version yourself in one small pull request (Prompt 0b). Tell the other UI dev first, so you do not both build it.
+- [ ] **Do not build shared foundations yourself;** copy the repo's existing patterns instead (Prompt 0b): per-feature translations and the Kenney UI kit.
 
 | Hand-off | Direction | What it looks like in code |
 | --- | --- | --- |
-| Onboarding finishes | You → other UI dev | `<Onboarding onDone={(profile) => …} />`: you save the profile; they start the game and open the Room |
-| Newspaper object and News tab | Other UI dev → you | They render your `<PaisaTimes />` as the News screen |
-| Paper-route wage | You → engine | You call `useGame.earn(amount, sourceId)`; they expose it from their store |
-| Notes shows the Word Wallet | Other UI dev → you | They render your `<WordWallet />` inside Notes |
-| Demo panel "mark a new edition" | Other UI dev → you | Their panel calls your `markNewEdition()` |
-| Quiz scores for the dashboard | Other UI dev → BE-2 → you | Their `quiz_submitted` events; your dashboard reads `learning_gain` |
+| Onboarding finishes | You → you | `<Onboarding onDone={(profile) => …} />` opens your `<MainScreen />` |
+| Play | You → other UI dev | `<MainScreen onPlay={…} />`: `App.tsx` opens their map; Android back returns to the main screen |
+| News rack | You → you | `<MainScreen onOpenNews={…} />` opens your `<PaisaTimes />` |
+| Paper-route wage | You → engine | You call `earn(amount, sourceId)` from the other UI dev's game store |
+| Word Wallet | You → owner of Notes | They render your `<WordWallet />` (Notes has no owner yet) |
+| Demo panel "mark a new edition" | Demo panel owner → you | Their panel calls your `markNewEdition()` |
+| `App.tsx` | Shared | You add `onboarding`, `main` and `news` screens the way `classroom` is added, and tell the other UI dev each time |
+| Quiz scores for the dashboard | Baseline/end-line owner → BE-2 → you | `quiz_submitted` events; your dashboard reads `learning_gain` |
 | Meters bar, store sheet, work and school | Other UI dev | `MetersBar` and `StoreSheet` are built; work and school buttons call `lifeApi.work / attendSchool` (`docs/life-meters-api.md` §6) |
 
 **Prompt 0a — record the new lanes**
 
 ```text
-Update CLAUDE.md section 3 (lanes) to match our new split. Change nothing else.
-- UI-1 (other UI dev): Room, Map, places, decisions, phone and scams, Home, Month Recap, the School section with baseline and end-line quizzes, the design system (apps/student/src/design/**), app shell, stores, DESIGN.md.
-- UI-2 (me): onboarding (apps/student/src/features/onboarding/**), Paisa Times (apps/student/src/features/news/**), staff dashboard (apps/dashboard/**).
-- MessageInspector, Scam or Safe? and Time Machine: owner to be decided.
-Also update the two UI build orders in section 6 to match, and add a line to the section 12 decisions log: lanes reassigned — team. Show me the diff before saving.
+Update CLAUDE.md to match decisions the team made tonight. Change nothing else, and show me the diff before saving.
+1. Section 3 (lanes): UI-1 (other UI dev) = map, places, decisions, phone and scams, Home (sleep, Month Recap), the School classroom quiz, the Kenney UI kit (apps/student/src/design/**). UI-2 (me) = onboarding (apps/student/src/features/onboarding/**), the main screen (apps/student/src/features/main/**), Paisa Times (apps/student/src/features/news/**), staff dashboard (apps/dashboard/**). App.tsx is shared: both may add screens. MessageInspector, Scam or Safe?, Time Machine, Me and Notes: owner to be decided.
+2. Section 1.1 (hub): the app opens on a main screen. The player's character sits on a couch at the top, a Play button opens the map, and a news rack opens Paisa Times. This replaces the room with a door, newspaper, trophy and notebook.
+3. Section 6: update the two UI build orders to match.
+4. Section 12: add decision lines for the new lanes and the main screen, dated today, by "team".
 ```
 
-**Prompt 0b — minimal foundations (only if agreed)**
+**Prompt 0b — learn the patterns already in the repo**
 
 ```text
-Read CLAUDE.md sections 4–6. Use plan mode. Work only inside apps/student. The other UI dev owns the foundations, but they do not exist yet and we agreed I add a minimal version they can build on:
-1. Install i18next, react-i18next, zustand, motion, @floating-ui/react, idb-keyval and @fontsource/noto-sans.
-2. src/i18n: react-i18next setup with en.json and hi.json, a setLanguage() function, and formatRupees() using Intl.NumberFormat('en-IN').
-3. src/design/tokens.css: CSS variables for colours (including a marigold for glossary words and an off-white newsprint colour), spacing on an 8 px grid, card radius 12 px, type sizes 14/16/20/28, tap size 48 px. Every text/background pair passes WCAG AA. Import it in main.tsx.
-Keep it small: no screens, stores or navigation. Run pnpm typecheck and list the files you added.
+Read apps/student/src/App.tsx, src/features/classroom/ (ClassroomScreen.tsx, classroom.css, content/index.ts, quiz.test.ts) and src/design/kenney.css. Explain to me, as someone new to React, in at most 10 bullets: how screens are switched and how Android back works; how the 360x640 stage is scaled; how translations work with t(); which Kenney classes to use for buttons and panels; how tests are written. Then list what I should copy for my onboarding, main screen and Paisa Times. Don't change any files.
 ```
 
 **Done when**
 
-- [ ] You and the other UI dev have agreed, in the team chat, who owns the foundations and each hand-off
-- [ ] CLAUDE.md §3 shows the new lanes
+- [ ] You and the other UI dev have agreed the hand-offs in the team chat, including that `App.tsx` is shared
+- [ ] CLAUDE.md shows the new lanes and the main screen (Prompt 0a)
 - [ ] BE-1 and BE-2 have your requests
-- [ ] Translations and tokens exist (theirs or your minimal version), and `pnpm typecheck` passes
+- [ ] You can explain the classroom's patterns (Prompt 0b), and `pnpm check` passes
 
-### Phase 1 — Onboarding (23:00–00:00)
+### Phase 1 — Onboarding (23:20–00:15)
 
-**Goal:** a new player gets from first launch to the Room in under a minute: language, class code, nickname and avatar, persona, three how-to-play cards. CLAUDE.md wants the first decision within 3 minutes of opening the app, and onboarding is the first part of that.
+**Goal:** a new player gets from first launch to the main screen in under a minute: language, class code, nickname and avatar, persona, three how-to-play cards. CLAUDE.md wants the first decision within 3 minutes of opening the app, and onboarding is the first part of that.
 
 **Prompt 1a — the five steps**
 
 ```text
-Use plan mode. Build onboarding in apps/student/src/features/onboarding as 5 steps with progress dots and a large Next button at the bottom. Export one component: <Onboarding onDone={(profile) => void} />.
-1. Language: two large buttons, "English" and "हिन्दी". Switches the i18n language immediately and tracks language_changed.
+Use plan mode. Copy the patterns in src/features/classroom: Kenney UI kit buttons and panels (k-btn, k-btn is-primary, k-panel), and a content/ folder with en.json + hi.json and a t() helper.
+Build onboarding in apps/student/src/features/onboarding as 5 steps with progress dots and a large Next button at the bottom. Export one component: <Onboarding onDone={(profile) => void} />.
+1. Language: two large buttons, "English" and "हिन्दी". Switches the language immediately and tracks language_changed.
 2. Join class: a large uppercase class-code input and a Join button. If the page URL has ?code=XXXX, pre-fill it (the dashboard's QR will link here). Create src/api/joinClass.ts faking join_class from CLAUDE.md 5.5 (any non-empty code works; returns a fake anon_id and class_id) so BE-2's api-client can replace it later. A wrong code shows a friendly message, never a raw error.
 3. Nickname and avatar: a text input (max 16 characters, letters and numbers) and a grid of 6 preset avatars (emoji placeholders for now). The hint says "a nickname, not your real name".
 4. Persona: two cards, Sana and Ravi, each with a portrait placeholder, age, a one-line story, monthly income and goal, from the personas table in docs/Paisa Path — Product & Component Design.md (marked temporary until packages/content/personas.json exists).
-5. How to play: 3 cards (pins on the map show this week's tasks; choose and see what happens, and you can rewind; sleep at Home to end the week).
-On finish: save the profile (nickname, avatar, persona, language, class) to IndexedDB with idb-keyval, track onboarding_complete and persona_selected, then call onDone(profile). Export loadProfile() so the app can skip onboarding on reload.
+5. How to play: 3 cards (Play opens the map, where pins show this week's tasks; choose and see what happens, and you can rewind; the news rack holds Paisa Times, which pays for your paper-route shift).
+On finish: save the profile (nickname, avatar, persona, language, class) to IndexedDB (install idb-keyval), track onboarding_complete and persona_selected, then call onDone(profile). Export loadProfile() so the app can skip onboarding on reload.
 Track events with the shared track() helper if it exists; otherwise a local stub that logs to the console, in one file, so it is easy to connect later.
-Every word through i18n keys in en and hi. Every tap target at least 48 px at 360 px wide. Run pnpm typecheck.
+Every word through t() keys in content/en.json and hi.json. Every tap target at least 48 px at 360 px wide. Run pnpm check.
 ```
 
 **Prompt 1b — see it before the shell exists**
 
 ```text
-Until the other UI dev's app shell exists, show <Onboarding /> when the page has no saved profile, and the existing map after onDone. Keep the change to App.tsx under 10 lines and add a comment that the shell replaces it.
+Add an 'onboarding' screen to App.tsx the same way 'classroom' is added. Start there when no profile is saved (loadProfile()); otherwise start on the map for now (Phase 2 adds the main screen). Keep the change small and list exactly what you changed so I can tell the other UI dev.
 ```
 
 Tell the other UI dev you touched `App.tsx`, since it is theirs.
@@ -396,17 +408,81 @@ Tell the other UI dev you touched `App.tsx`, since it is theirs.
 - [ ] A stopwatch run from the first screen to the end takes under 60 seconds
 - [ ] Merged by the **01:30** checkpoint at the latest
 
-### Phase 2 — Paisa Times reader (00:00–00:45)
+### Phase 2 — Main screen (00:15–01:00)
 
-**Goal:** the newspaper opens from the Room's newspaper or the News tab: a front page with 5 headlines, each opening a short article.
+**Goal:** the screen every session starts on. The player's character sits on a couch near the top; a big **Play** button opens the map; a **news rack** opens Paisa Times. CLAUDE.md calls this the Room hub (`RoomHub`); the team simplified it to these three things.
 
-**Prompt 2a — a stand-in edition** (skip it if BE-1's edition has landed)
+A layout to start from (a suggestion, not a spec):
+
+```text
++--------------------------------+
+| ₹4,200            Month 1 · W2 |  small top bar (optional)
+|                                |
+|      [ Sana on the couch ]     |  the scene: top ~60%
+|                                |
+|                   [ news rack ]|  tappable, "Paisa Times" label
+|                   [   NEW     ]|  + badge when unread
+|                                |
+|     +--------------------+     |
+|     |      >  PLAY       |     |  biggest thing on screen,
+|     +--------------------+     |  in thumb reach
++--------------------------------+
+```
+
+**Rules for this screen**
+
+- The character is the persona chosen in onboarding (Sana or Ravi), read from the saved profile.
+- **Play is the one main action:** at least 56 px tall, near the bottom, a Kenney primary button with a play icon and a label.
+- The news rack is a hotspot of at least 48 px with a visible "Paisa Times" label and a "New" badge while the current edition has unanswered articles.
+- A small idle loop on the character (blink or breathe) makes the scene feel alive. Turn it off with reduced motion or data saver.
+- Back from the map or the paper returns here.
+- Open question for the team: where do **Me** (badges, XP) and **Notes** (lesson cards, Word Wallet) go now? Two small icon buttons on this screen is the simplest answer.
+
+**Prompt 2a — the screen with placeholder art**
+
+```text
+Use plan mode. Read src/features/classroom/ClassroomScreen.tsx, classroom.css and src/design/kenney.css first, and copy their patterns (a 360x640 stage scaled as one, Kenney buttons and panels, a content/ folder with en.json + hi.json and t()).
+Build MainScreen in apps/student/src/features/main: the screen every session starts on. The team replaced CLAUDE.md's Room hub with this. Export <MainScreen profile={profile} onPlay={() => void} onOpenNews={() => void} />.
+- Scene (top ~60%): a room with the player's persona (Sana or Ravi, from the saved profile) sitting on a couch. Placeholder art for now: CSS wall and floor, a couch shape, an emoji for the character. A gentle 2-frame idle loop (blink or breathe); none with reduced motion or data saver.
+- News rack: a tappable object in the room with a visible "Paisa Times" label and a "New" badge while the current edition has unanswered articles (hard-code true until Paisa Times exists). Tap area at least 48 px. Tapping calls onOpenNews.
+- Play: one large Kenney primary button near the bottom (at least 56 px tall, play icon + "Play"). Tapping calls onPlay.
+- Optional small top bar: wallet total in Indian rupee format and "Month 1 · Week 2" (fake values until the game store exists).
+- Track app_open when the screen first shows (local stub if the shared track() does not exist).
+- Every word through t() keys in en and hi. Test at 360 px. Run pnpm check.
+```
+
+**Prompt 2b — make it the start screen**
+
+```text
+In App.tsx add 'main' and 'news' screens the same way 'classroom' is added. After onboarding, and on every later launch, start on 'main'. MainScreen's onPlay opens 'map' and onOpenNews opens 'news' (a placeholder until Paisa Times exists), both with history.pushState so Android back returns to the main screen. Keep the change small and list exactly what you changed so I can tell the other UI dev.
+```
+
+**Prompt 2c — real art (only once the flow works)**
+
+```text
+Look at tools/build-classroom.py and how it builds public/assets/classroom.png. Propose how to build a matching 360x640 living-room backdrop with a couch, plus separate sprites for each persona sitting (2 idle frames) and a news rack, from assets already in the repo or CC0 packs you name with their licence. Show me the plan first; don't download anything yet.
+```
+
+**Done when**
+
+- [ ] After onboarding, the app opens on the main screen with the chosen persona on the couch
+- [ ] Play opens the map, and Android back returns to the main screen
+- [ ] The news rack opens the news screen (or its placeholder) and shows "New"
+- [ ] Play is the biggest thing on screen and sits in thumb reach at 360 px
+- [ ] Hindi works, and nothing moves with reduced motion on
+- [ ] Merged by the **01:30** checkpoint, together with onboarding
+
+### Phase 3 — Paisa Times reader (01:00–01:40)
+
+**Goal:** the newspaper opens from the main screen's news rack: a front page with 5 headlines, each opening a short article.
+
+**Prompt 3a — a stand-in edition** (skip it if BE-1's edition has landed)
 
 ```text
 Read CLAUDE.md sections 5.1 (Article, GlossaryTerm), 5.8 (Paisa Times rules) and 7.2 (guardrails). Create apps/student/src/features/news/sample-edition.ts: one edition "2026-W41" with 5 short articles (UPI fraud, inflation and prices, interest and family loans, loan-app rules, payment safety) and the glossary terms they use, in the exact Article and GlossaryTerm shapes, with t: keys and the en + hi strings in our i18n files. Original explainers only; body at most 600 characters; about Class 8 reading level; no real bank, app, fund or scheme names; no advice; 2–3 [[termId]] words per article; one question each with an explanation; a small wage (for example ₹50). Mark everything meta.status "draft" and add a comment that BE-1's edition in packages/content replaces this file.
 ```
 
-**Prompt 2b — the reader screens**
+**Prompt 3b — the reader screens**
 
 ```text
 Use plan mode. Build the Paisa Times reader in apps/student/src/features/news. Export <PaisaTimes /> as the News screen.
@@ -425,11 +501,11 @@ Every word through i18n. Run pnpm typecheck and tell me how to open it in the br
 - [ ] Hindi works, with nothing cut off at 360 px
 - [ ] Only `getEdition()` knows where the articles come from
 
-### Phase 3 — Thought-cloud words (00:45–01:30)
+### Phase 4 — Thought-cloud words (01:40–02:20)
 
 **Goal:** tapping a highlighted word opens a thought-cloud bubble with a simple meaning, an everyday example and a speaker button, and saves the word to the Word Wallet.
 
-**Prompt 3**
+**Prompt 4**
 
 ```text
 Use plan mode. In apps/student/src/features/news:
@@ -449,11 +525,11 @@ Every word through i18n. Run pnpm typecheck.
 - [ ] The speaker reads the meaning in the current language, or is hidden
 - [ ] The word is still in the Word Wallet after a reload
 
-### Phase 4 — Questions and the paper-route wage (01:30–02:15)
+### Phase 5 — Questions and the paper-route wage (02:20–03:00)
 
 **Goal:** each article ends with one question. A right answer pays the paper-route wage into the game wallet; a wrong answer explains and allows one retry for half the wage.
 
-**Prompt 4**
+**Prompt 5**
 
 ```text
 Use plan mode. Build the article question in apps/student/src/features/news, following CLAUDE.md 5.8 exactly.
@@ -473,14 +549,36 @@ Every word through i18n; all money through formatRupees. Run pnpm typecheck.
 - [ ] A reload keeps the answers and never pays twice
 - [ ] Finishing all 5 shows "Edition finished"
 
-### Phase 5 — Word Wallet (02:15–02:45)
+### Hook-up with the other UI dev (03:00–03:15)
 
-**Goal:** a list of every word the player has tapped, which the other UI dev shows inside Notes.
+**Goal:** your pieces work inside the real app, not only on their own. Do this together, on one laptop and one branch, to avoid merge pain.
 
-**Prompt 5**
+- [ ] Onboarding hands over to your main screen, and the main screen is the start screen
+- [ ] Play opens the other UI dev's map; Android back returns to the main screen
+- [ ] The news rack opens `<PaisaTimes />`
+- [ ] The wage lands in the real wallet through the game store's `earn`
+- [ ] Your events go into the shared event queue
 
 ```text
-Use plan mode. Build <WordWallet /> in apps/student/src/features/news from useWordWallet: the collected words (word + simple meaning), newest first, each reopening its ThoughtCloud. Show a count ("12 words"). Empty state: "Tap highlighted words in Paisa Times to collect them here." Export it so the other UI dev's Notes screen can render it. Also export markNewEdition() for the demo panel: it switches getEdition() to a fresh edition (or clears the current edition's answers if there is only one). Every word through i18n.
+Pull main. Check App.tsx end to end: onboarding → main screen → Play → map, and news rack → PaisaTimes, with Android back working everywhere. Connect my wage payment to the game store's earn() and replace my local track() stub with the shared one, if they exist. List every file you change outside my folders and why.
+```
+
+### M2 gate (03:15–03:30)
+
+- [ ] On a real phone, in Hindi: fresh start → onboarding → main screen → news rack → article → tap a word → thought cloud → answer → wage lands; back → Play → map → back to the main screen
+- [ ] No English left on Hindi screens; nothing cut off
+- [ ] `pnpm check` passes; your branch is merged at the **03:15** checkpoint
+- [ ] A 60-second screen recording for the progress PDF
+- [ ] Tell BE-2 which parts still use stand-ins (content, `join_class`, `earn`)
+
+### Phase 6 — Word Wallet (03:30–04:00, after M2)
+
+**Goal:** a list of every word the player has tapped, for the Notes screen (owner to be decided).
+
+**Prompt 6**
+
+```text
+Use plan mode. Build <WordWallet /> in apps/student/src/features/news from useWordWallet: the collected words (word + simple meaning), newest first, each reopening its ThoughtCloud. Show a count ("12 words"). Empty state: "Tap highlighted words in Paisa Times to collect them here." Export it so whichever screen shows Notes can render it. Also export markNewEdition() for the demo panel: it switches getEdition() to a fresh edition (or clears the current edition's answers if there is only one). Every word through i18n.
 ```
 
 **Done when**
@@ -489,33 +587,11 @@ Use plan mode. Build <WordWallet /> in apps/student/src/features/news from useWo
 - [ ] An empty wallet shows the empty-state line
 - [ ] `markNewEdition()` makes the front page fresh again
 
-### Hook-up with the other UI dev (02:45–03:15)
-
-**Goal:** your pieces work inside the real app, not only on their own. Do this together, on one laptop and one branch, to avoid merge pain.
-
-- [ ] Onboarding's `onDone` opens the Room
-- [ ] The Room's newspaper and the News tab open `<PaisaTimes />`
-- [ ] The wage lands in the real top-bar wallet through `useGame.earn`
-- [ ] Notes shows `<WordWallet />`
-- [ ] Your events go into the shared event queue
-
-```text
-Pull main. Wire my Onboarding, PaisaTimes, WordWallet and markNewEdition into the app shell following the hand-off table in our plan (Onboarding onDone → start game + Room; News screen → PaisaTimes; Notes → WordWallet; useGame.earn for wages; demo panel → markNewEdition). Replace my local stubs for track() and pay with the shared ones. List every file you change outside my folders and why.
-```
-
-### M2 gate (03:15–03:30)
-
-- [ ] On a real phone, in Hindi: fresh start → onboarding → Room → newspaper → article → tap a word → thought cloud → answer → wage in the wallet
-- [ ] No English left on Hindi screens; nothing cut off
-- [ ] `pnpm typecheck` passes; your branch is merged at the **03:15** checkpoint
-- [ ] A 60-second screen recording for the progress PDF
-- [ ] Tell BE-2 which parts still use stand-ins (content, `join_class`, `earn`)
-
-### Phases 6–9 — Staff dashboard (03:30–08:30, shared with your sleep shift)
+### Phases 7–10 — Staff dashboard (04:00–08:30, shared with your sleep shift)
 
 **Goal:** four plain screens for a facilitator on a laptop: Sign in → Class setup (code and QR) → Class progress → Learning gains. After a 3-hour sleep you have about 2 hours of building, so everything runs on seed data first and swaps to BE-2's real functions in one file. Agree your sleep slot with the team before M2.
 
-#### Phase 6 — Dashboard app and sign-in
+#### Phase 7 — Dashboard app and sign-in
 
 ```text
 Read CLAUDE.md sections 4, 5.5, 5.6 and 7.5. Use plan mode. Create apps/dashboard: Vite + React + TypeScript, using the same tokens.css as the student app (import or copy it; tell me which). Add root scripts "dev:dashboard" (pnpm --filter dashboard dev) and a typecheck script for it.
@@ -529,7 +605,7 @@ Read CLAUDE.md sections 4, 5.5, 5.6 and 7.5. Use plan mode. Create apps/dashboar
 - [ ] Any email and code reach an empty Classes screen
 - [ ] It looks right at 1280 px and is usable at 360 px
 
-#### Phase 7 — Class setup with code and QR
+#### Phase 8 — Class setup with code and QR
 
 ```text
 Use plan mode. In apps/dashboard build Class setup: a form (class name; default language English or Hindi) → Create → a class card with the class code in large letters and a Copy button, a QR code (qrcode.react) that opens the student app at /?code=<code>, and a "Print join sheet" button that prints one clean A4 page (class name, code, QR, 3 steps for students). The student app URL comes from VITE_STUDENT_URL with a localhost default, added to .env.example. Existing classes are listed below the form.
@@ -541,7 +617,7 @@ Use plan mode. In apps/dashboard build Class setup: a form (class name; default 
 
 For the QR to work from a phone, `VITE_STUDENT_URL` must be the deployed student app or your laptop's Network address.
 
-#### Phase 8 — Class progress table
+#### Phase 9 — Class progress table
 
 ```text
 Use plan mode. In apps/dashboard build Class progress for the selected class from classProgress(classId): one row per student with the fields class_progress returns in CLAUDE.md 5.5 (nickname, modules done, last active), sortable columns, numbers right-aligned, a search box, and an "Inactive 7+ days" flag shown as icon + label. Nicknames only. A "Demo data" badge on seed data. For a class with no students, show the code and QR again with "Share this code to get students started."
@@ -551,7 +627,7 @@ Use plan mode. In apps/dashboard build Class progress for the selected class fro
 - [ ] Inactive students are flagged with icon and label, not colour alone
 - [ ] Readable on a projector (try browser zoom at 125%)
 
-#### Phase 9 — Learning-gains chart
+#### Phase 10 — Learning-gains chart
 
 ```text
 Use plan mode. In apps/dashboard build Learning gains from learningGain(classId): a Recharts grouped bar chart with the 4 pillars (Plan & budget, Save & manage, Understand investing, Stay financially safe) on the x-axis and two bars each, baseline and end-line average score (0–100%), with a legend, value labels, and a one-line summary above it computed from the data (for example "Average score rose from X% to Y%"). A "Demo data" badge on seed data and a friendly empty state when nobody has taken the end-line quiz yet. Colours from tokens, never colour alone.
@@ -563,26 +639,26 @@ Use plan mode. In apps/dashboard build Learning gains from learningGain(classId)
 
 Ask the other UI dev and BE-2 how quiz answers reach `learning_gain` (`quiz_submitted` events → the `quiz_attempts` table), so the chart can switch from seed data to real data.
 
-### Phase 10 — Polish and deliverables (08:30–10:30)
+### Phase 11 — Polish and deliverables (08:30–10:30)
 
 After 08:30 there are **no new features**: bugs, copy and polish only.
 
 - [ ] Run the Section 6 polish checklist on your three pieces
-- [ ] Help record the demo video: steps 2 (onboarding), 7 (Paisa Times) and 9 (dashboard) of the CLAUDE.md §9 script are yours
+- [ ] Help record the demo video: steps 2 (onboarding), 3 (main screen → map), 7 (Paisa Times) and 9 (dashboard) of the CLAUDE.md §9 script are yours
 - [ ] Agree with the team who finishes the slides (by 10:00) and the final report (by 10:30)
 
 ### Cut list (when you are behind)
 
 Cut from the top, one item at a time, and tell the team what you cut.
 
-1. Real art → emoji avatars and grey article pictures
-2. Coin animation → the toast alone
+1. Real art → an emoji character on a grey couch, grey article pictures
+2. Idle and coin animations → a still scene and the toast alone
 3. Speaker button → hidden
 4. Print join sheet → code and QR on screen only
 5. Progress search and sorting → a plain table
 6. Dashboard sign-in → one "Enter as demo facilitator" button (tell BE-2)
 
-**Never cut:** Hindi, the question → wage flow, thought-cloud words, the class code and QR, the learning-gains chart, "Demo data" labels.
+**Never cut:** Hindi, the main screen's Play and news rack, the question → wage flow, thought-cloud words, the class code and QR, the learning-gains chart, "Demo data" labels.
 
 ## 5. Working with Claude
 
@@ -592,7 +668,7 @@ Claude writes most of the code. Your job is three things: give it one clear, sma
 
 1. **One task per conversation.** Type `/clear` before each new phase so Claude is not distracted by old context. CLAUDE.md reloads automatically.
 2. **Plan mode for anything over 3 files** (Shift+Tab). CLAUDE.md requires a short plan for these.
-3. **Read the plan before approving.** Check two things: it only touches your folders (`src/features/onboarding`, `src/features/news`, `src/api`, `apps/dashboard`), and it puts words through i18n. Anything else (the other UI dev's Room, Map, design system or stores; `packages/*`; `supabase`) needs a heads-up to its owner first.
+3. **Read the plan before approving.** Check two things: it only touches your folders (`src/features/onboarding`, `src/features/main`, `src/features/news`, `src/api`, `apps/dashboard`, plus small additions to the shared `App.tsx`), and it puts words through translation keys. Anything else (the map, the classroom, `design/kenney.css`, `packages/*`, `supabase`) needs a heads-up to its owner first.
 4. **Let it run,** and use the wait: write the next prompt, or test the last phase on your phone.
 5. **Look at it in the browser.** Claude cannot see your screen unless you show it.
 6. **Give feedback with a screenshot** (5.3).
@@ -680,22 +756,24 @@ Test every phase as you go (2 minutes): phone screens at 360 px in both language
 
 | Check | How | Passes when |
 | --- | --- | --- |
-| Real phone | `pnpm dev:student --host`, or the deployed link | Onboarding and Paisa Times work one-handed |
-| Slow phone | DevTools: Network Slow 4G, CPU 4× slowdown | No tap feels laggy; popups open at once |
+| Start flow | Clear site data, reload; finish onboarding; reload again | First launch shows onboarding, every later launch opens the main screen |
+| Main screen loop | Play → map → Android back; news rack → paper → Android back | Both return to the main screen; the app never closes by surprise |
+| Real phone | `pnpm dev:student --host`, or the deployed link | Everything works one-handed; Play is in thumb reach |
+| Slow phone | DevTools: Network Slow 4G, CPU 4× slowdown | No tap feels laggy; the main screen appears without a long blank |
 | Hindi | Walk every screen in Hindi | No English left, no text cut off, articles still short |
-| Offline | DevTools Network → Offline | Paisa Times still opens (editions are bundled), answers still pay, the banner shows |
+| Offline | DevTools Network → Offline | The main screen and Paisa Times still open (editions are bundled); answers still pay |
 | Popup edges | Tap glossary words at the far left, far right and bottom of the screen | The whole thought cloud is always visible |
 | Wage once | Answer, reload, answer again; try a wrong answer then a right retry | Full wage once; half wage on a right retry; never twice |
 | QR join | Scan the dashboard's QR with your phone | The student app opens with the class code filled in |
 | Projector | Dashboard at 125% browser zoom, from 3 m away | Table and chart readable; "Demo data" visible |
-| Reduced motion | DevTools → Rendering → emulate `prefers-reduced-motion: reduce`; also data saver | No animations play |
+| Reduced motion | DevTools → Rendering → emulate `prefers-reduced-motion: reduce`; also data saver | The character and coins stay still |
 | Accessibility | DevTools → Lighthouse → Accessibility, on each of your screens | No contrast or tap-target warnings |
-| New player | Section 6.3 | Onboarding in under 60 seconds |
+| New player | Section 6.3 | Onboarding in under 60 seconds; Play found without help |
 
 ### 6.3 Run the new-player test properly
 
 1. Find someone who has never seen the app. Say only: "It's a money game. Play it, and read the newspaper."
-2. Stay silent. Do not point or explain. Time onboarding, then watch them find and use Paisa Times.
+2. Stay silent. Do not point or explain. Time onboarding, then watch whether they find Play and the news rack on the main screen without help.
 3. Write down every moment they hesitate or tap the wrong thing. Each one is a design bug, not a user mistake.
 4. Fix the top 3, then test with someone else.
 5. For the dashboard, ask a teammate to "create a class and show me how a student joins" without help.
@@ -704,16 +782,16 @@ Test every phase as you go (2 minutes): phone screens at 360 px in both language
 
 Polish is the small things that make a hackathon build look finished.
 
-- [ ] Every button, card and glossary word has a pressed state
+- [ ] Every button, hotspot and glossary word has a pressed state
 - [ ] Spacing follows the 8 px grid, and items line up on the same left edge
-- [ ] Each screen has one clear main button
+- [ ] Each screen has one clear main button; on the main screen it is Play
+- [ ] The main screen feels alive: the character's idle loop, a "New" badge on the news rack (both still with reduced motion)
+- [ ] Your screens use the same Kenney buttons and panels as the classroom
 - [ ] No blank screens: empty states say what will appear (Word Wallet, a class with no students)
 - [ ] Money always shows as ₹ with Indian grouping (₹1,00,000)
 - [ ] The newspaper looks like a newspaper: masthead, date, thin rules, readable body text
 - [ ] The wage moment feels earned: toast plus coins (off in data saver)
-- [ ] Onboarding steps slide between each other instead of jumping
 - [ ] The dashboard looks calm and professional, with "Demo data" on every seeded number
-- [ ] Browser tab titles and favicons set for both apps
 - [ ] The demo path for your steps runs 3 times in a row from `?demo=1` without a reload
 
 ### 6.5 Before the final push (your part of CLAUDE.md §11)
@@ -732,23 +810,25 @@ Tick this list as you go; each line points to its full "Done when" list in Secti
 
 **Before M2 (submit by 03:30)**
 
-- [ ] Setup: pnpm fixed, app runs, "Budget Android" view, Claude started in the repo folder
-- [ ] Phase 0 — Split agreed, CLAUDE.md §3 updated, requests sent, translations and tokens exist
-- [ ] Phase 1 — Onboarding (merged by 01:30)
-- [ ] Phase 2 — Paisa Times reader
-- [ ] Phase 3 — Thought-cloud words
-- [ ] Phase 4 — Questions and the paper-route wage
-- [ ] Phase 5 — Word Wallet and `markNewEdition()`
+- [ ] Setup: pnpm fixed and its `packageManager` line committed; app runs; "Budget Android" view; Claude started in the repo folder
+- [ ] Phase 0 — Split agreed, CLAUDE.md updated (lanes + main screen), requests sent, repo patterns learned
+- [ ] Phase 1 — Onboarding
+- [ ] Phase 2 — Main screen (merged with onboarding by 01:30)
+- [ ] Phase 3 — Paisa Times reader
+- [ ] Phase 4 — Thought-cloud words
+- [ ] Phase 5 — Questions and the paper-route wage
 - [ ] Hook-up with the other UI dev (merged at 03:15)
 - [ ] M2 gate: Hindi run on a real phone, 60-second recording, stand-ins reported to BE-2
 
 **Before freeze (08:30)**
 
+- [ ] Phase 6 — Word Wallet and `markNewEdition()`
 - [ ] Stand-ins swapped for BE-1's edition and BE-2's `join_class` as they land
-- [ ] Phase 6 — Dashboard app and sign-in
-- [ ] Phase 7 — Class setup with code and QR (QR opens onboarding with the code)
-- [ ] Phase 8 — Class progress table
-- [ ] Phase 9 — Learning-gains chart (merged at 07:30)
+- [ ] Phase 7 — Dashboard app and sign-in
+- [ ] Phase 8 — Class setup with code and QR (QR opens onboarding with the code)
+- [ ] Phase 9 — Class progress table
+- [ ] Phase 10 — Learning-gains chart (merged at 07:30)
+- [ ] Main screen real art (Prompt 2c), only if everything above is done
 
 **Before final (10:30)**
 
@@ -758,11 +838,11 @@ Tick this list as you go; each line points to its full "Done when" list in Secti
 
 **Messages to send tonight**
 
-- [ ] Other UI dev: who owns the foundations; the hand-off table; `useGame.earn`; that you touched `App.tsx` (if you did)
+- [ ] Other UI dev: the hand-off table; `App.tsx` is shared; an `earn()` you can call; that the main screen is now yours
 - [ ] BE-1: dates for a sample edition, `glossary.json` and `personas.json`
-- [ ] BE-2: api-client `join_class`, staff sign-in, `class_progress`, `learning_gain`, dashboard seed data, the deployed student URL for the QR
+- [ ] BE-2: api-client `join_class`, staff sign-in, `class_progress`, `learning_gain`, dashboard seed data, the deployed student URL for the QR; the pnpm pin
 - [ ] BE-1 and BE-2: the life meters proposal (`docs/life-meters-api.md` §4 engine functions, the common `money` wallet and `vitals`; §5 the `shop_purchase`, `work_shift` and `school_attended` events)
-- [ ] Team: owners for MessageInspector, Scam or Safe? and Time Machine; your sleep slot
+- [ ] Team: owners for MessageInspector, Scam or Safe?, Time Machine, Me and Notes; where the baseline and end-line quizzes live; your sleep slot
 
 ### Glossary
 
