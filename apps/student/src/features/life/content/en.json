@@ -18,7 +18,7 @@
   "life.school.hint": "Classes take energy, so sanity goes down.",
   "life.blocked.not_enough_money": "Not enough money.",
   "life.blocked.already_worked": "You already worked today.",
-  "life.blocked.already_at_school": "You already went to school this week.",
+  "life.blocked.already_at_school": "You already went to school today.",
   "life.meter.debt": "Owe {{debt}}",
   "life.blocked.school_first": "Go to school first. You can work after school."
 }
