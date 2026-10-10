@@ -1,4 +1,4 @@
--- Paisa Path MVP schema (CLAUDE.md 5.5, 5.6, 7.5).
+-- MoneyFollows MVP schema (CLAUDE.md 5.5, 5.6, 7.5).
 -- Students never get accounts: they reach the database only through the
 -- security-definer functions join_class and push_events. Facilitators sign in
 -- with Supabase Auth, must be on the staff allowlist, and see only their own

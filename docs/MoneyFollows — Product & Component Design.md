@@ -1,10 +1,10 @@
-# Paisa Path — Product & Component Design
+# MoneyFollows — Product & Component Design
 
 Oct 10, 2026 · @Ojas
 
 ## Overview
 
-Paisa Path is a mobile-first life-simulation game. Class 11–12 students in Hyderabad manage a character's money for 12 in-game months, make weekly decisions and see the consequences in a safe sandbox. It covers Vanguard India's four learning pillars, launches with about 1,500 students through partner NGOs, and is built to scale to new cities and languages.
+MoneyFollows is a mobile-first life-simulation game. Class 11–12 students in Hyderabad manage a character's money for 12 in-game months, make weekly decisions and see the consequences in a safe sandbox. It covers Vanguard India's four learning pillars, launches with about 1,500 students through partner NGOs, and is built to scale to new cities and languages.
 
 | Brief principle | How the product delivers it |
 | --- | --- |

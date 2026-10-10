@@ -18,7 +18,7 @@ export interface PersonaPreset {
   goalAmount: number | null;   // null: the design doc gives no amount
 }
 
-// TEMPORARY: from the personas table in "docs/Paisa Path — Product & Component Design.md".
+// TEMPORARY: from the personas table in "docs/MoneyFollows — Product & Component Design.md".
 // Replace with packages/content/personas.json once BE-1 lands it; strings are persona.<id>.*.
 export const PERSONAS: PersonaPreset[] = [
   { id: 'sana', portrait: '👧', age: 18, monthlyIncome: 4000, goalAmount: null },

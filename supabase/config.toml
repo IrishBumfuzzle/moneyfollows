@@ -2,7 +2,7 @@
 # https://supabase.com/docs/guides/local-development/cli/config
 # A string used to distinguish different Supabase projects on the same host. Defaults to the
 # working directory name when running `supabase init`.
-project_id = "paisa-path"
+project_id = "money-follows"
 
 [api]
 enabled = true
@@ -252,18 +252,18 @@ port = 587
 user = "env(SMTP_USER)"
 pass = "env(SMTP_PASS)"
 admin_email = "env(SMTP_FROM)"
-sender_name = "Paisa Path"
+sender_name = "MoneyFollows"
 
 # Staff accept the invite link once (it confirms the account), then sign in with a code.
 # An OTP request before the invite is accepted fails with signup_disabled.
 [auth.email.template.invite]
-subject = "You have been invited to Paisa Path"
+subject = "You have been invited to MoneyFollows"
 content_path = "./supabase/templates/invite.html"
 
 # The default sign-in email has only a link; the dashboard asks for the 6-digit code
 # (api-client verifyEmailCode), so the template must include {{ .Token }}.
 [auth.email.template.magic_link]
-subject = "Your Paisa Path sign-in code"
+subject = "Your MoneyFollows sign-in code"
 content_path = "./supabase/templates/magic_link.html"
 
 # Uncomment to customize notification email template
@@ -468,4 +468,4 @@ port = 587
 user = "env(SMTP_USER)"
 pass = "env(SMTP_PASS)"
 admin_email = "env(SMTP_FROM)"
-sender_name = "Paisa Path"
+sender_name = "MoneyFollows"

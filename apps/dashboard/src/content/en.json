@@ -1,5 +1,5 @@
 {
-  "app.name": "Paisa Path · Staff",
+  "app.name": "MoneyFollows · Staff",
   "app.loading": "Loading…",
   "app.crash": "This page didn't load properly. That can happen after an update or when the connection drops. Reload the page to carry on.",
   "app.reload": "Reload page",
@@ -20,11 +20,11 @@
   "staffcheck.failed": "We couldn't check your account. Check your connection and try again.",
   "notstaff.title": "You're signed in, but not on the staff list",
   "notstaff.signed_in_as": "Signed in as {{email}}.",
-  "notstaff.body": "Your account isn't on the staff list yet. Ask the Paisa Path admin to add you.",
+  "notstaff.body": "Your account isn't on the staff list yet. Ask the MoneyFollows admin to add you.",
   "notstaff.retry": "Check again",
 
   "signin.title": "Staff sign-in",
-  "signin.intro": "Sign in with the email address the Paisa Path admin invited. We'll email you a 6-digit code.",
+  "signin.intro": "Sign in with the email address the MoneyFollows admin invited. We'll email you a 6-digit code.",
   "signin.email": "Email address",
   "signin.send": "Send code",
   "signin.sending": "Sending…",
@@ -94,7 +94,7 @@
   "class.endline_closed": "End-line quiz closed",
   "class.created_on": "Created {{date}}",
 
-  "sheet.title": "Join Paisa Path",
+  "sheet.title": "Join MoneyFollows",
   "sheet.class": "Class",
   "sheet.code": "Class code",
   "sheet.steps": "How to join",

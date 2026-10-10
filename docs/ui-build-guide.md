@@ -8,7 +8,7 @@ You own four pieces: **onboarding**, the **main screen**, the **Paisa Times** ne
 
 ### What the game is, in UI terms
 
-Paisa Path is a web app that looks and plays like a small pixel-art game on a phone. The player runs Sana's or Ravi's money week by week. The **engine** (BE-1's lane) decides what happens; the UI shows the state and passes taps to it. Your pieces frame that loop: onboarding is the way in, the main screen is where every session starts, Paisa Times is a side activity that pays a wage, and the dashboard is a separate website for teachers (called facilitators). The map, places and decisions behind the Play button belong to the other UI dev.
+MoneyFollows is a web app that looks and plays like a small pixel-art game on a phone. The player runs Sana's or Ravi's money week by week. The **engine** (BE-1's lane) decides what happens; the UI shows the state and passes taps to it. Your pieces frame that loop: onboarding is the way in, the main screen is where every session starts, Paisa Times is a side activity that pays a wage, and the dashboard is a separate website for teachers (called facilitators). The map, places and decisions behind the Play button belong to the other UI dev.
 
 ### Your four pieces
 
@@ -52,7 +52,7 @@ This split differs from CLAUDE.md, which gives onboarding and the Room hub to UI
 
 ### Which document wins
 
-- **CLAUDE.md** is the source of truth for this weekend. **docs/Paisa Path — Product & Component Design.md** describes the long-term product; use it for ideas, not scope.
+- **CLAUDE.md** is the source of truth for this weekend. **docs/MoneyFollows — Product & Component Design.md** describes the long-term product; use it for ideas, not scope.
 - **Main screen:** the team replaced CLAUDE.md's Room hub (door, newspaper, trophy, notebook) with a character on a couch, a Play button and a news rack. Until Phase 0 updates CLAUDE.md, tell Claude this in your prompt.
 - **Onboarding:** CLAUDE.md's list (language, class code, nickname and avatar, persona, 3 cards). No baseline quiz and no picture-PIN in onboarding. Where the baseline and end-line quizzes live is still open: the School classroom quiz is practice only, kept separate so it cannot inflate learning gains.
 - **Dashboard:** the design doc lists 9 staff screens; CLAUDE.md asks for 4: Sign in → Class setup (code and QR) → Class progress table → Learning gains chart. Build only those.
@@ -116,7 +116,7 @@ const onCorrect = () => {
 
 ### 2.2 Why this is easier than "real" game dev
 
-There is no game loop running 60 times a second and no physics. Paisa Path is **turn-based**: nothing changes until the player taps. Ordinary web UI (buttons, panels, CSS animation) is enough. The game feel comes from three things: the pixel art, short animations, and sound. Game designers call those small touches **juice**.
+There is no game loop running 60 times a second and no physics. MoneyFollows is **turn-based**: nothing changes until the player taps. Ordinary web UI (buttons, panels, CSS animation) is enough. The game feel comes from three things: the pixel art, short animations, and sound. Game designers call those small touches **juice**.
 
 ### 2.3 UI patterns you will build
 
@@ -388,7 +388,7 @@ Build onboarding in apps/student/src/features/onboarding as 5 steps with progres
 1. Language: two large buttons, "English" and "हिन्दी". Switches the language immediately and tracks language_changed.
 2. Join class: a large uppercase class-code input and a Join button. If the page URL has ?code=XXXX, pre-fill it (the dashboard's QR will link here). Create src/api/joinClass.ts faking join_class from CLAUDE.md 5.5 (any non-empty code works; returns a fake anon_id and class_id) so BE-2's api-client can replace it later. A wrong code shows a friendly message, never a raw error.
 3. Nickname and avatar: a text input (max 16 characters, letters and numbers) and a grid of 6 preset avatars (emoji placeholders for now). The hint says "a nickname, not your real name".
-4. Persona: two cards, Sana and Ravi, each with a portrait placeholder, age, a one-line story, monthly income and goal, from the personas table in docs/Paisa Path — Product & Component Design.md (marked temporary until packages/content/personas.json exists).
+4. Persona: two cards, Sana and Ravi, each with a portrait placeholder, age, a one-line story, monthly income and goal, from the personas table in docs/MoneyFollows — Product & Component Design.md (marked temporary until packages/content/personas.json exists).
 5. How to play: 3 cards (Play opens the map, where pins show this week's tasks; choose and see what happens, and you can rewind; the news rack holds Paisa Times, which pays for your paper-route shift).
 On finish: save the profile (nickname, avatar, persona, language, class) to IndexedDB (install idb-keyval), track onboarding_complete and persona_selected, then call onDone(profile). Export loadProfile() so the app can skip onboarding on reload.
 Track events with the shared track() helper if it exists; otherwise a local stub that logs to the console, in one file, so it is easy to connect later.

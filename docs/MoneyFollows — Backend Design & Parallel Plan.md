@@ -1,12 +1,12 @@
 > **Superseded (2026-10-10).** The team follows `CLAUDE.md` on `main`: a pnpm workspace with Supabase, `packages/shared` contracts and the BE-1 / BE-2 lanes. The Fastify/Drizzle `backend/` this doc describes was removed. Kept for reference only.
 
-# Paisa Path — Backend Design & Parallel Plan
+# MoneyFollows — Backend Design & Parallel Plan
 
 Oct 10, 2026 · Parth Sharma · Draft v0.1
 
-This doc is for the two developers building the Paisa Path backend. It explains what we are building, how the code is laid out, and how we split the work so both of us can push to `main` every day without breaking each other. If you are new, read it top to bottom once. After that, use **Work split**, **Phase plan** and **Rules that keep main green** as your day-to-day reference.
+This doc is for the two developers building the MoneyFollows backend. It explains what we are building, how the code is laid out, and how we split the work so both of us can push to `main` every day without breaking each other. If you are new, read it top to bottom once. After that, use **Work split**, **Phase plan** and **Rules that keep main green** as your day-to-day reference.
 
-The product itself is described in [Paisa Path — Product & Component Design.md](Paisa%20Path%20—%20Product%20%26%20Component%20Design.md), and repo-wide rules are in [CLAUDE.md](../CLAUDE.md). This doc covers only the backend and does not repeat the product design.
+The product itself is described in [MoneyFollows — Product & Component Design.md](MoneyFollows%20—%20Product%20%26%20Component%20Design.md), and repo-wide rules are in [CLAUDE.md](../CLAUDE.md). This doc covers only the backend and does not repeat the product design.
 
 ## Summary
 

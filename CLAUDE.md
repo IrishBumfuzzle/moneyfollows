@@ -1,4 +1,4 @@
-# CLAUDE.md — Paisa Path (Vanguard India Financial Literacy Hackathon)
+# CLAUDE.md — MoneyFollows (Vanguard India Financial Literacy Hackathon)
 
 Read this file fully at the start of every session. It is the source of truth for scope, contracts, ownership and deadlines. If something here conflicts with a chat instruction, ask which one wins before proceeding.
 
@@ -15,7 +15,7 @@ Read this file fully at the start of every session. It is the source of truth fo
 
 ## 1. Project in one paragraph
 
-**Paisa Path** is a mobile-first life-simulation game for Class 11–12 students from underserved communities in Hyderabad. A student picks a persona (e.g. Sana, who tutors to save for college fees), runs that character's money month by month, makes weekly decisions, sees consequences in a safe sandbox (fictional money, rewind allowed) and learns four pillars: **Plan & budget, Save & manage, Understand investing, Stay financially safe.** It is offline-first (PWA), privacy-conscious (nickname + class code only), delivered through partner NGOs, and built to scale to ~1,500 students first, then new cities and languages.
+**MoneyFollows** is a mobile-first life-simulation game for Class 11–12 students from underserved communities in Hyderabad. A student picks a persona (e.g. Sana, who tutors to save for college fees), runs that character's money month by month, makes weekly decisions, sees consequences in a safe sandbox (fictional money, rewind allowed) and learns four pillars: **Plan & budget, Save & manage, Understand investing, Stay financially safe.** It is offline-first (PWA), privacy-conscious (nickname + class code only), delivered through partner NGOs, and built to scale to ~1,500 students first, then new cities and languages.
 
 Full product spec: `docs/spec.md` (paste the team's spec there). Visual rules: `DESIGN.md`. This file summarizes what we build *this weekend*.
 

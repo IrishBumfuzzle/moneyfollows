@@ -137,7 +137,7 @@ async function post(body: string): Promise<Posted> {
       headers: {
         Authorization: `Bearer ${KEY}`,
         'Content-Type': 'application/json',
-        'X-Title': 'Paisa Path glossary builder',
+        'X-Title': 'MoneyFollows glossary builder',
       },
       body,
       signal: ac.signal,

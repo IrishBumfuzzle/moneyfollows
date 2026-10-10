@@ -7,5 +7,6 @@ coverage/
 *.log
 .DS_Store
 .serena/
+.claude/
 apps/student/assets-src/schwarnhild/
 apps/student/tests/e2e-output/

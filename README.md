@@ -1,4 +1,4 @@
-# Paisa Path
+# MoneyFollows
 
 Build and run instructions. `CLAUDE.md` is the source of truth for scope, contracts and ownership.
 

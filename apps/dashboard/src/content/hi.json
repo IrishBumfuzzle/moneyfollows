@@ -1,5 +1,5 @@
 {
-  "app.name": "Paisa Path · स्टाफ़",
+  "app.name": "MoneyFollows · स्टाफ़",
   "app.loading": "लोड हो रहा है…",
   "app.crash": "यह पेज ठीक से लोड नहीं हुआ। अपडेट के बाद या इंटरनेट टूटने पर ऐसा हो सकता है। आगे बढ़ने के लिए पेज दोबारा लोड करें।",
   "app.reload": "पेज दोबारा लोड करें",
@@ -20,11 +20,11 @@
   "staffcheck.failed": "आपका अकाउंट जाँच नहीं पाए। इंटरनेट देखें और फिर कोशिश करें।",
   "notstaff.title": "आप साइन इन हैं, पर स्टाफ़ लिस्ट में नहीं हैं",
   "notstaff.signed_in_as": "साइन इन: {{email}}।",
-  "notstaff.body": "आपका अकाउंट अभी स्टाफ़ लिस्ट में नहीं है। Paisa Path के एडमिन से कहें कि आपको जोड़ दें।",
+  "notstaff.body": "आपका अकाउंट अभी स्टाफ़ लिस्ट में नहीं है। MoneyFollows के एडमिन से कहें कि आपको जोड़ दें।",
   "notstaff.retry": "फिर से जाँचें",
 
   "signin.title": "स्टाफ़ साइन-इन",
-  "signin.intro": "जिस ईमेल पर Paisa Path के एडमिन ने आपको invite भेजा था, उसी से साइन इन करें। हम आपको 6 अंकों का कोड ईमेल करेंगे।",
+  "signin.intro": "जिस ईमेल पर MoneyFollows के एडमिन ने आपको invite भेजा था, उसी से साइन इन करें। हम आपको 6 अंकों का कोड ईमेल करेंगे।",
   "signin.email": "ईमेल पता",
   "signin.send": "कोड भेजें",
   "signin.sending": "भेज रहे हैं…",
@@ -94,7 +94,7 @@
   "class.endline_closed": "एंड-लाइन क्विज़ बंद",
   "class.created_on": "बनाई गई: {{date}}",
 
-  "sheet.title": "Paisa Path से जुड़ें",
+  "sheet.title": "MoneyFollows से जुड़ें",
   "sheet.class": "क्लास",
   "sheet.code": "क्लास कोड",
   "sheet.steps": "जुड़ने का तरीक़ा",
