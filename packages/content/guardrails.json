@@ -73,6 +73,6 @@
     "glossaryWord": 30,
     "glossarySimple": 100,
     "glossaryExample": 140,
-    "placeName": 24
+    "conceptName": 30, "guideTitle": 50, "guideStep": 160, "placeName": 24
   }
 }

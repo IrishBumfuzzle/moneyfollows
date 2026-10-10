@@ -1,0 +1,289 @@
+/* Learn: guides, progress and the Notebook. A readable page like Paisa Times: warm notebook paper,
+   dark ink, Noto Sans at 16 px+, Kenney buttons and panels. Colour is never the only signal:
+   every state chip has an icon and a word. Mobile-first at 360 px, taps at least 48 px. */
+
+.ln-screen {
+  --ln-paper: #fbf5e6;
+  --ln-ink: #2a2118;
+  --ln-muted: #5f5446;
+  --ln-rule: #4a2b17;
+  --ln-marigold: #e8960c;
+  --ln-right: #2f7a2a;
+  --ln-wrong: #a2412f;
+  min-height: 100dvh;
+  background: var(--ln-paper);
+  color: var(--ln-ink);
+  font:
+    16px/1.55 'Noto Sans Devanagari',
+    sans-serif;
+}
+.ln-screen p,
+.ln-screen h1,
+.ln-screen h2,
+.ln-screen ol,
+.ln-screen ul,
+.ln-screen dl,
+.ln-screen dd {
+  margin: 0;
+  padding: 0;
+}
+.ln-screen ol,
+.ln-screen ul {
+  list-style: none;
+}
+
+.ln-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  min-height: 56px;
+  background: var(--ln-paper);
+  border-bottom: 2px solid var(--ln-rule);
+}
+/* The 32 px Kenney round button; .k-round::before already makes the hit area 48 px. */
+.ln-back {
+  flex: none;
+}
+.ln-title {
+  font-size: 20px;
+  line-height: 1.3;
+}
+
+.ln-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 12px 16px 0;
+}
+.ln-tab {
+  min-height: 48px;
+  padding: 4px 6px;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.ln-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 16px 32px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+.ln-intro,
+.ln-meta {
+  color: var(--ln-muted);
+}
+.ln-meta {
+  font-size: 16px;
+}
+.ln-h2 {
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+/* ---- guides ---- */
+.ln-guides {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ln-guide {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 72px;
+  text-align: start;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.ln-guide-icon {
+  flex: none;
+  color: var(--ln-rule);
+}
+.ln-guide-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+.ln-guide-title {
+  font-weight: 700;
+}
+
+.ln-reader {
+  gap: 14px;
+}
+.ln-draft {
+  padding: 8px 12px;
+  border: 2px dashed var(--ln-marigold);
+  border-radius: 4px;
+  color: var(--ln-muted);
+}
+.ln-lead {
+  font-size: 18px;
+}
+.ln-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ln-step {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ln-step-n {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ln-rule);
+}
+.ln-check {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 2px solid var(--ln-rule);
+}
+.ln-q {
+  font-weight: 700;
+}
+.ln-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ln-option {
+  min-height: 52px;
+  padding: 6px 12px;
+  font-size: 16px;
+  line-height: 1.3;
+}
+.ln-feedback {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ln-verdict {
+  font-weight: 700;
+}
+.ln-verdict.is-right {
+  color: var(--ln-right);
+}
+.ln-verdict.is-wrong {
+  color: var(--ln-wrong);
+}
+.ln-help {
+  padding: 8px 12px;
+  border-inline-start: 4px solid var(--ln-marigold);
+  background: #fff8e3;
+}
+.ln-finish {
+  min-height: 56px;
+  font-size: 18px;
+}
+
+/* ---- progress ---- */
+.ln-pillar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ln-pillar-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+}
+.ln-bar {
+  height: 10px;
+  border: 2px solid var(--ln-rule);
+  background: #fff;
+}
+.ln-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--ln-right);
+}
+.ln-concepts {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid #d9ccb2;
+}
+.ln-concept {
+  border-bottom: 1px solid #d9ccb2;
+}
+.ln-concept summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  cursor: pointer;
+  list-style: none;
+}
+.ln-concept summary::-webkit-details-marker {
+  display: none;
+}
+.ln-concept[open] summary .ln-concept-name {
+  font-weight: 700;
+}
+.ln-concept p {
+  padding: 0 0 12px;
+  color: var(--ln-muted);
+}
+
+.ln-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  padding: 2px 8px;
+  border: 2px solid currentColor;
+  border-radius: 999px;
+  font-size: 16px;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+.ln-chip.is-understood {
+  color: var(--ln-right);
+}
+.ln-chip.is-met {
+  color: #8a5a00;
+}
+.ln-chip.is-new {
+  color: var(--ln-muted);
+}
+
+/* ---- notebook ---- */
+.ln-empty {
+  color: var(--ln-muted);
+}
+.ln-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ln-note {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ln-words {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ln-word dt {
+  font-weight: 700;
+}
+.ln-word dd {
+  color: var(--ln-muted);
+}

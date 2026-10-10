@@ -5,20 +5,21 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 import { track } from '../../api/track';
 import { idbStorage } from '../../game/storage';
 import { useGame } from '../../game/useGame';
+import { learnFromEvent } from '../learn/record';
 import { lifeApi } from '../life/life';
 import type { LifeDelta } from '../life/types';
 import { getEvent } from './data';
 import { dueIds, resolveChoice } from './resolve';
 
 export interface InboxItem {
-  id: string;          // PhoneThread id
+  id: string; // PhoneThread id
   read: boolean;
-  choice?: string;     // set once answered
-  delta?: LifeDelta;   // what the answer changed
+  choice?: string; // set once answered
+  delta?: LifeDelta; // what the answer changed
 }
 
 export interface CallLogItem {
-  id: string;          // PhoneCall id
+  id: string; // PhoneCall id
   status: 'missed' | 'answered';
   choice?: string;
   delta?: LifeDelta;
@@ -26,7 +27,7 @@ export interface CallLogItem {
 
 export interface SuddenState {
   id: string;
-  hit: LifeDelta;      // what the event itself did (health −30, …)
+  hit: LifeDelta; // what the event itself did (health −30, …)
   choice?: string;
   delta?: LifeDelta;
 }
@@ -34,11 +35,11 @@ export interface SuddenState {
 interface EventsStore {
   steps: number;
   fired: string[];
-  inbox: InboxItem[];            // newest first
+  inbox: InboxItem[]; // newest first
   sudden: SuddenState | null;
-  notify: string | null;         // thread id to show as a banner (not saved)
-  calls: CallLogItem[];          // newest first
-  ringing: string | null;        // call id ringing now (not saved: a reload misses it)
+  notify: string | null; // thread id to show as a banner (not saved)
+  calls: CallLogItem[]; // newest first
+  ringing: string | null; // call id ringing now (not saved: a reload misses it)
   /** One step of play (a map visit or an action); delivers whatever is now due. */
   tick: () => void;
   /** Delivers an event now, scheduled or not (demo panel, ?event=). */
@@ -57,8 +58,11 @@ interface EventsStore {
 
 const addOnce = (list: string[], id: string) => (list.includes(id) ? list : [...list, id]);
 
-const event = (id: string, choiceId: string, month: number, week: number) =>
+// Every answer: the sync event, and the concept and lesson for Learn (My progress, Notebook).
+const event = (id: string, choiceId: string, month: number, week: number) => {
   track('event_triggered', { eventId: id, choiceId, month, week });
+  learnFromEvent(id, choiceId);
+};
 
 export const useEvents = create<EventsStore>()(
   persist(
@@ -75,10 +79,18 @@ export const useEvents = create<EventsStore>()(
           set({ sudden: { id, hit: out.delta }, fired: addOnce(s.fired, id) });
         } else if (ev.kind === 'call') {
           if (s.ringing) return; // one call at a time; the schedule moves on
-          set({ ringing: id, calls: [{ id, status: 'missed' as const }, ...s.calls.filter((c) => c.id !== id)], fired: addOnce(s.fired, id) });
+          set({
+            ringing: id,
+            calls: [{ id, status: 'missed' as const }, ...s.calls.filter((c) => c.id !== id)],
+            fired: addOnce(s.fired, id),
+          });
         } else {
           // A repeat (demo) replaces the old thread with a fresh, unanswered one.
-          set({ inbox: [{ id, read: false }, ...s.inbox.filter((m) => m.id !== id)], notify: id, fired: addOnce(s.fired, id) });
+          set({
+            inbox: [{ id, read: false }, ...s.inbox.filter((m) => m.id !== id)],
+            notify: id,
+            fired: addOnce(s.fired, id),
+          });
         }
       };
 
@@ -137,7 +149,9 @@ export const useEvents = create<EventsStore>()(
           game.apply(out);
           event(id, choiceId, game.life.month, game.life.week);
           set((s) => ({
-            calls: s.calls.map((c) => (c.id === id ? { ...c, status: 'answered' as const, choice: choiceId, delta: out.delta } : c)),
+            calls: s.calls.map((c) =>
+              c.id === id ? { ...c, status: 'answered' as const, choice: choiceId, delta: out.delta } : c,
+            ),
           }));
         },
       };

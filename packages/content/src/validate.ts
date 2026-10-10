@@ -2,8 +2,10 @@
 // scripts/lint-content.ts reads the files and calls validateContent.
 import {
   ArticleSchema,
+  ConceptSchema,
   EventCardSchema,
   GlossaryTermSchema,
+  GuideSchema,
   I18nFileSchema,
   PersonaSchema,
   PlaceSchema,
@@ -57,7 +59,19 @@ export interface ValidateInput {
   contentVersion?: string;
 }
 
-type Kind = 'scenario' | 'event' | 'quiz' | 'scam' | 'persona' | 'badge' | 'jar' | 'place' | 'glossary' | 'article';
+type Kind =
+  | 'scenario'
+  | 'event'
+  | 'quiz'
+  | 'scam'
+  | 'persona'
+  | 'badge'
+  | 'jar'
+  | 'place'
+  | 'glossary'
+  | 'article'
+  | 'concept'
+  | 'guide';
 
 interface Item {
   kind: Kind;
@@ -77,6 +91,8 @@ const SCHEMAS = {
   place: PlaceSchema,
   glossary: GlossaryTermSchema,
   article: ArticleSchema,
+  concept: ConceptSchema,
+  guide: GuideSchema,
 } as const;
 
 function kindOf(path: string): Kind | null {
@@ -85,6 +101,8 @@ function kindOf(path: string): Kind | null {
   if (base === 'personas.json') return 'persona';
   if (base === 'places.json') return 'place';
   if (base === 'glossary.json') return 'glossary';
+  if (base === 'concepts.json') return 'concept';
+  if (parts.includes('guides')) return 'guide';
   if (parts.includes('news')) return 'article';
   if (parts.includes('rewards') && base === 'badges.json') return 'badge';
   if (parts.includes('scenarios')) return 'scenario';
@@ -329,6 +347,10 @@ export function capFor(key: string): string | null {
   if (key.startsWith('glossary.') && key.endsWith('.simple')) return 'glossarySimple';
   if (key.startsWith('glossary.') && key.endsWith('.example')) return 'glossaryExample';
   if (key.startsWith('place.')) return 'placeName';
+  if (key.startsWith('concept.') && key.endsWith('.name')) return 'conceptName';
+  if (key.startsWith('concept.') && key.endsWith('.simple')) return 'glossarySimple';
+  if (key.startsWith('guide.') && key.endsWith('.title')) return 'guideTitle';
+  if (key.startsWith('guide.') && /\.(?:intro|step\d+)$/.test(key)) return 'guideStep';
   if (key.startsWith('scam.why.')) return 'hint';
   if (key.startsWith('reflection.')) return 'reflection';
   if (key === 'assumption.banner') return 'banner';
@@ -436,7 +458,11 @@ export function validateContent(input: ValidateInput, opts: { strict: boolean })
         // Places, glossary terms and articles have their own id spaces; an article id is unique per edition.
         const edition = isRecord(raw) && typeof raw.edition === 'string' ? raw.edition : '';
         const scope =
-          kind === 'place' || kind === 'glossary' ? `${kind}:${id}` : kind === 'article' ? `news:${edition}:${id}` : id;
+          kind === 'place' || kind === 'glossary' || kind === 'concept'
+            ? `${kind}:${id}`
+            : kind === 'article'
+              ? `news:${edition}:${id}`
+              : id;
         const first = seenIds.get(scope);
         if (first) add(file.path, id, 'duplicate_id', `id "${id}" is also used in ${first}`);
         else seenIds.set(scope, file.path);
@@ -535,6 +561,27 @@ export function validateContent(input: ValidateInput, opts: { strict: boolean })
             `sublocation "${sub}" is not a sub-map location of "${String(location)}" in places.json`,
           );
         }
+      }
+    }
+  }
+
+  // ---- Concepts: every concept tag is in concepts.json --------------------------------------
+  // Checked only when concepts.json is part of the input, like places.
+  const conceptItems = items.filter((i) => i.kind === 'concept');
+  if (conceptItems.length > 0) {
+    const conceptIds = new Set(conceptItems.map((c) => c.id));
+    for (const item of items) {
+      const tags =
+        item.kind === 'guide'
+          ? Array.isArray(item.data.concepts)
+            ? item.data.concepts.filter((c): c is string => typeof c === 'string')
+            : []
+          : typeof item.data.concept === 'string'
+            ? [item.data.concept]
+            : [];
+      for (const tag of tags) {
+        if (!conceptIds.has(tag))
+          add(item.file, item.id, 'unknown_concept', `concept "${tag}" is not in concepts.json`);
       }
     }
   }
@@ -793,7 +840,11 @@ export function validateContent(input: ValidateInput, opts: { strict: boolean })
       add(item.file, item.id, 'draft', 'status is "draft". A human must review it and set "reviewed".');
     }
     const checkedBy = isRecord(meta) ? meta.factsCheckedBy : undefined;
-    if (opts.strict && item.kind === 'article' && !(typeof checkedBy === 'string' && checkedBy.trim())) {
+    if (
+      opts.strict &&
+      (item.kind === 'article' || item.kind === 'guide') &&
+      !(typeof checkedBy === 'string' && checkedBy.trim())
+    ) {
       add(
         item.file,
         item.id,

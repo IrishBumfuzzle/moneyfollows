@@ -35,6 +35,7 @@ const SAMPLES: Record<SyncEventType, Record<string, unknown>> = {
   work_shift: { wage: 300, health: -5, sanity: -3, month: 1, week: 2, day: 3 },
   school_attended: { health: 0, sanity: -2, month: 1, week: 2, day: 3 },
   day_rested: { month: 1, week: 2, day: 3, health: 2, sanity: 6 },
+  guide_completed: { guide_id: 'guide.bank_account', correct: true },
 };
 
 const TYPES = SyncEventSchema.shape.type.options;

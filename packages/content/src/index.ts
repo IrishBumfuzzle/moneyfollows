@@ -2,16 +2,20 @@
 // load, so a bad file fails loudly the moment anything imports this package.
 import {
   ArticleSchema,
+  ConceptSchema,
   EventCardSchema,
   GlossaryTermSchema,
+  GuideSchema,
   PersonaSchema,
   PlaceSchema,
   QuizQuestionSchema,
   ScamMessageSchema,
   ScenarioSchema,
   type Article,
+  type Concept,
   type ContentBundle,
   type GlossaryTerm,
+  type Guide,
   type Place,
 } from '@paisa/shared';
 import events from '../events/events.json';
@@ -27,6 +31,8 @@ import classroom from '../quizzes/classroom.json';
 import manifest from '../manifest.json';
 import placeDefs from '../places.json';
 import glossaryDefs from '../glossary.json';
+import conceptDefs from '../concepts.json';
+import realLifeGuides from '../guides/real-life.json';
 import badgeDefs from '../rewards/badges.json';
 import { BadgeSchema, type Badge } from './badges';
 import jarRounds from '../minigames/jar-splitter.json';
@@ -69,6 +75,15 @@ export const content: ContentBundle = {
 
 /** Badges the engine's rewards module can award (rewards/badges.json). Kept outside ContentBundle so the frozen contract is unchanged. */
 export const badges: Badge[] = BadgeSchema.array().parse(badgeDefs);
+
+/**
+ * Every idea the game teaches (concepts.json), in pillar order. Scenarios, events, quiz questions and
+ * guides tag one by id, and the content check fails on a tag that is not here. Outside ContentBundle.
+ */
+export const concepts: Concept[] = ConceptSchema.array().parse(conceptDefs);
+
+/** Short real-life guides (guides/real-life.json): steps, then one check question. Outside ContentBundle. */
+export const guides: Guide[] = GuideSchema.array().parse(realLifeGuides);
 
 /** Jar Splitter practice rounds (minigames/jar-splitter.json). Also kept outside ContentBundle. */
 export const jarSplitRounds: JarSplitRound[] = JarSplitRoundSchema.array().parse(jarRounds);

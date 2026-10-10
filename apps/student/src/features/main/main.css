@@ -120,6 +120,8 @@
 /* The rejoin code, for the student to note down: small, under the greeting, in the same ink. */
 .ms-rejoin { margin-top: -4px; text-align: center; color: #fff3dc; text-shadow: 0 2px #4a2b17; }
 .ms-play { min-height: 72px; gap: 12px; font-size: 28px; }
+/* Learn: guides, progress and the Notebook. Secondary to Play, still a 48 px+ target. */
+.ms-learn { min-height: 52px; gap: 10px; font-size: 20px; }
 
 /* Data saver: the Settings toggle (not built yet) sets <html data-saver>. Both it and reduced motion stop the loops. */
 @media (prefers-reduced-motion: no-preference) {

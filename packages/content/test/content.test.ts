@@ -5,8 +5,10 @@ import {
   buildI18n,
   buildLanguages,
   collectKeys,
+  concepts,
   content,
   glossary,
+  guides,
   i18n,
   isValidContentVersion,
   jarSplitRounds,
@@ -182,6 +184,8 @@ describe('i18n', () => {
       ...bundleKeys(),
       ...collectKeys(badges),
       ...collectKeys(jarSplitRounds),
+      ...collectKeys(concepts),
+      ...collectKeys(guides),
       ...Object.values(REFLECTION_KEYS).map((k) => k.slice(2)),
       'common.ok',
       'common.continue',
@@ -209,5 +213,33 @@ describe('classroom quiz (practice at School)', () => {
   it('every question string exists in en and hi', () => {
     for (const key of collectKeys(classroom))
       for (const lang of ['en', 'hi'] as const) expect(i18n[lang][key], `${lang}:${key}`).toBeTruthy();
+  });
+});
+
+describe('concepts and real-life guides', () => {
+  const ids = new Set(concepts.map((c) => c.id));
+  it('lists every concept once, with each pillar covered', () => {
+    expect(ids.size).toBe(concepts.length);
+    for (const pillar of PILLARS)
+      expect(
+        concepts.some((c) => c.pillar === pillar),
+        pillar,
+      ).toBe(true);
+  });
+  it('has a catalogue entry for every concept that scenarios, events and quiz questions tag', () => {
+    const tagged = [...content.scenarios, ...content.events, ...content.quizzes].map((i) => i.concept);
+    expect(tagged.filter((c) => !ids.has(c))).toEqual([]);
+  });
+  it('has guides that tag known concepts, with a check answer and every string in en and hi', () => {
+    expect(guides.length).toBeGreaterThanOrEqual(6);
+    for (const g of guides) {
+      expect(
+        g.concepts.filter((c) => !ids.has(c)),
+        g.id,
+      ).toEqual([]);
+      expect(g.check.correct).toBeLessThan(g.check.options.length);
+      for (const key of collectKeys(g))
+        for (const lang of ['en', 'hi'] as const) expect(i18n[lang][key], `${lang}:${key}`).toBeTruthy();
+    }
   });
 });

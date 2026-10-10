@@ -35,11 +35,19 @@ function useStageScale() {
  * The screen every session starts on (CLAUDE.md 1.1): the persona on a couch, a news rack that
  * opens Paisa Times, and one big Play button that opens the map.
  */
-export function MainScreen({ profile, lang, onPlay, onOpenNews }: {
+export function MainScreen({
+  profile,
+  lang,
+  onPlay,
+  onOpenNews,
+  onOpenLearn,
+}: {
   profile: Profile;
   lang: Profile['lang'];
   onPlay: () => void;
   onOpenNews: () => void;
+  /** Learn: real-life guides, My progress and the Notebook. */
+  onOpenLearn: () => void;
 }) {
   const scale = useStageScale();
   const tr = (k: string, vars?: Record<string, string | number>) => t(lang, k, vars);
@@ -77,12 +85,27 @@ export function MainScreen({ profile, lang, onPlay, onOpenNews }: {
           <p className="k-panel ms-chip">{tr('main.week', { month: life.month, week: life.week, day: life.day })}</p>
         </div>
 
-        <div className="ms-char" role="img" aria-label={tr('main.persona', { name })} style={{ backgroundImage: `url(/assets/main/${sprite}.png)` }} />
+        <div
+          className="ms-char"
+          role="img"
+          aria-label={tr('main.persona', { name })}
+          style={{ backgroundImage: `url(/assets/main/${sprite}.png)` }}
+        />
 
-        <button className="ms-news" onClick={onOpenNews} aria-label={tr(unread ? 'main.news.open_new' : 'main.news.open')}>
+        <button
+          className="ms-news"
+          onClick={onOpenNews}
+          aria-label={tr(unread ? 'main.news.open_new' : 'main.news.open')}
+        >
           <img className="ms-rack" src="/assets/main/rack.png" alt="" width={80} height={110} />
-          {unread && <span className="ms-new" aria-hidden="true">{tr('main.new')}</span>}
-          <span className="ms-news-label" aria-hidden="true">{tr('main.news')}</span>
+          {unread && (
+            <span className="ms-new" aria-hidden="true">
+              {tr('main.new')}
+            </span>
+          )}
+          <span className="ms-news-label" aria-hidden="true">
+            {tr('main.news')}
+          </span>
         </button>
 
         <div className="ms-bottom">
@@ -98,7 +121,18 @@ export function MainScreen({ profile, lang, onPlay, onOpenNews }: {
             {paid !== null && life.debt === 0 ? tr('main.paid_back', { amount: formatRupees(paid) }) : ''}
           </p>
           <p className="ms-greeting">{tr('main.greeting', { nickname: profile.nickname })}</p>
-          {profile.rejoinCode && <p className="ms-rejoin">{tr('main.rejoin', { code: formatRejoinCode(profile.rejoinCode) })}</p>}
+          {profile.rejoinCode && (
+            <p className="ms-rejoin">{tr('main.rejoin', { code: formatRejoinCode(profile.rejoinCode) })}</p>
+          )}
+          <button className="k-btn ms-learn" onClick={onOpenLearn}>
+            <svg viewBox="0 0 9 9" width="24" height="24" aria-hidden="true" shapeRendering="crispEdges">
+              <path
+                fill="currentColor"
+                d="M0 1h4v1H0zM5 1h4v1H5zM0 2h1v6H0zM8 2h1v6H8zM4 2h1v7H4zM1 7h3v1H1zM5 7h3v1H5zM2 3h1v1H2zM6 3h1v1H6zM2 5h1v1H2zM6 5h1v1H6z"
+              />
+            </svg>
+            <span>{tr('main.learn')}</span>
+          </button>
           <button className="k-btn is-primary ms-play" onClick={onPlay}>
             <svg viewBox="0 0 5 9" width="15" height="27" aria-hidden="true" shapeRendering="crispEdges">
               <path fill="currentColor" d="M0 0h1v9H0zM1 1h1v7H1zM2 2h1v5H2zM3 3h1v3H3zM4 4h1v1H4z" />
@@ -115,7 +149,10 @@ export function MainScreen({ profile, lang, onPlay, onOpenNews }: {
 function Coin() {
   return (
     <svg viewBox="0 0 7 7" width="21" height="21" aria-hidden="true" shapeRendering="crispEdges">
-      <path fill="#a0603a" d="M2 0h3v1H2zM1 1h1v1H1zM5 1h1v1H5zM0 2h1v3H0zM6 2h1v3H6zM1 5h1v1H1zM5 5h1v1H5zM2 6h3v1H2z" />
+      <path
+        fill="#a0603a"
+        d="M2 0h3v1H2zM1 1h1v1H1zM5 1h1v1H5zM0 2h1v3H0zM6 2h1v3H6zM1 5h1v1H1zM5 5h1v1H5zM2 6h3v1H2z"
+      />
       <path fill="#ffd23f" d="M2 1h3v1H2zM1 2h5v3H1zM2 5h3v1H2z" />
       <path fill="#fff3a6" d="M2 2h1v2H2z" />
     </svg>

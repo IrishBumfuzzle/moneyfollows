@@ -112,3 +112,43 @@ export function wrongAnswer(
   const position = choice + 1;
   return { position, text: lookup(dicts, lang, `${questionId}.o${position}`) ?? null };
 }
+
+// ---- By concept: practice answers grouped by the idea each question checks ----
+
+export interface ConceptRow {
+  concept: string;
+  pillar: ClassroomQuizSummaryRow['pillar'];
+  /** Practice questions the class answered for this concept. */
+  questions: number;
+  /** Answers across those questions; every round counts. */
+  answers: number;
+  /** Percent of those answers that were right, weighted by answers. */
+  correct_pct: number;
+}
+
+/**
+ * Groups classroom_quiz_summary rows by concept, weakest first. A question the map doesn't know
+ * (content changed since) is left out rather than guessed.
+ */
+export function conceptRows(
+  rows: readonly ClassroomQuizSummaryRow[],
+  conceptOf: Readonly<Record<string, string>>,
+): ConceptRow[] {
+  const groups = new Map<string, ConceptRow & { right: number }>();
+  for (const r of rows) {
+    const concept = conceptOf[r.question_id];
+    if (!concept) continue;
+    const g = groups.get(concept) ?? { concept, pillar: r.pillar, questions: 0, answers: 0, correct_pct: 0, right: 0 };
+    g.questions += 1;
+    g.answers += r.attempts;
+    g.right += (r.correct_pct / 100) * r.attempts;
+    groups.set(concept, g);
+  }
+  return [...groups.values()]
+    .map(({ right, ...g }) => ({ ...g, correct_pct: g.answers > 0 ? Math.round((1000 * right) / g.answers) / 10 : 0 }))
+    .sort((a, b) => a.correct_pct - b.correct_pct || b.answers - a.answers || a.concept.localeCompare(b.concept));
+}
+
+/** A concept's name from the content pack (concept.<id>.name); the raw id when the pack has none. */
+export const conceptName = (dicts: PackDicts, lang: Lang, concept: string) =>
+  lookup(dicts, lang, `concept.${concept}.name`) ?? concept;

@@ -15,3 +15,22 @@ export function loadQuestionDicts(): Promise<PackDicts> {
     });
   return cached;
 }
+
+let conceptsCached: Promise<Record<string, string>> | null = null;
+
+/**
+ * Question id to concept id, from the pack's classroom bank, loaded on demand like the text.
+ * Resolves with an empty map if the import fails (the by-concept card then shows nothing).
+ */
+export function loadConceptMap(): Promise<Record<string, string>> {
+  conceptsCached ??= import('@paisa/content/quizzes/classroom.json')
+    .then((m) => {
+      const questions = m.default as { id: string; concept: string }[];
+      return Object.fromEntries(questions.map((q) => [q.id, q.concept]));
+    })
+    .catch(() => {
+      conceptsCached = null;
+      return {};
+    });
+  return conceptsCached;
+}

@@ -952,3 +952,85 @@ describe('rules 3 and 6: guardrails apply to articles, glossary and places', () 
     expect(rules(runPT({ hi }))).toEqual(['advice']);
   });
 });
+
+describe('concepts and real-life guides', () => {
+  const concept = {
+    id: 'needs_first',
+    pillar: 'plan_budget',
+    name: 't:concept.needs_first.name',
+    simple: 't:concept.needs_first.simple',
+  };
+  const conceptTexts = {
+    'concept.needs_first.name': 'Needs first',
+    'concept.needs_first.simple': 'Pay for needs before wants.',
+  };
+  const guide = (over: Record<string, unknown> = {}) => ({
+    id: 'guide.test',
+    pillar: 'plan_budget',
+    icon: 'wallet',
+    concepts: ['needs_first'],
+    title: 't:guide.test.title',
+    intro: 't:guide.test.intro',
+    steps: ['t:guide.test.step1', 't:guide.test.step2'],
+    check: {
+      prompt: 't:guide.test.q',
+      options: ['t:guide.test.o1', 't:guide.test.o2'],
+      correct: 0,
+      explanation: 't:guide.test.why',
+    },
+    meta,
+    ...over,
+  });
+  const guideTexts = {
+    'guide.test.title': 'A test guide',
+    'guide.test.intro': 'Why this matters.',
+    'guide.test.step1': 'First step.',
+    'guide.test.step2': 'Second step.',
+    'guide.test.q': 'Which comes first?',
+    'guide.test.o1': 'Needs',
+    'guide.test.o2': 'Wants',
+    'guide.test.why': 'Needs come first.',
+  };
+  const lint = (opts: { guide?: unknown; scenarioConcept?: string; en?: Record<string, unknown>; strict?: boolean }) =>
+    run({
+      files: [
+        { path: 'concepts.json', data: [concept] },
+        { path: 'guides/real-life.json', data: [opts.guide ?? guide()] },
+        { path: 'scenarios/plan_budget.json', data: [scenario({ concept: opts.scenarioConcept ?? 'needs_first' })] },
+      ],
+      en: opts.en ?? { ...baseTexts(), ...conceptTexts, ...guideTexts },
+      strict: opts.strict,
+    });
+
+  it('passes a guide and a scenario whose concepts are in concepts.json', () => {
+    expect(lint({})).toEqual([]);
+  });
+  it('flags a concept tag that is not in concepts.json, on scenarios and guides', () => {
+    expect(rules(lint({ scenarioConcept: 'missing' }))).toEqual(['unknown_concept']);
+    expect(rules(lint({ guide: guide({ concepts: ['needs_first', 'missing'] }) }))).toEqual(['unknown_concept']);
+  });
+  it('checks guide text like any other: missing keys, caps and guardrails', () => {
+    const en = { ...baseTexts(), ...conceptTexts, ...guideTexts };
+    expect(rules(lint({ en: { ...en, 'guide.test.step2': '' } }))).toContain('missing_key');
+    expect(rules(lint({ en: { ...en, 'guide.test.step1': 'x'.repeat(161) } }))).toEqual(['length']);
+    expect(rules(lint({ en: { ...en, 'guide.test.step1': 'Open an account with SBI.' } }))).toEqual(['real_brand']);
+    expect(rules(lint({ en: { ...en, 'guide.test.step1': 'Report it at cybercrime.gov.in or call 1930.' } }))).toEqual(
+      [],
+    );
+  });
+  it('maps concept and guide keys to their caps', () => {
+    expect(capFor('concept.kyc.name')).toBe('conceptName');
+    expect(capFor('concept.kyc.simple')).toBe('glossarySimple');
+    expect(capFor('guide.bank_account.title')).toBe('guideTitle');
+    expect(capFor('guide.bank_account.intro')).toBe('guideStep');
+    expect(capFor('guide.bank_account.step3')).toBe('guideStep');
+    expect(capFor('guide.bank_account.q')).toBe('question');
+  });
+  it('strict mode needs factsCheckedBy on guides, like articles', () => {
+    expect(rules(lint({ strict: true }))).toEqual(['facts_unchecked']);
+    expect(lint({ strict: true, guide: guide({ meta: { ...meta, factsCheckedBy: 'NGO trainer' } }) })).toEqual([]);
+  });
+  it('rejects a guide whose check answer is out of range', () => {
+    expect(rules(lint({ guide: guide({ check: { ...guide().check, correct: 5 } }) }))).toEqual(['schema']);
+  });
+});

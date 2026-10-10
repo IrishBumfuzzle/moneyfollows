@@ -6,6 +6,7 @@
   "main.rejoin": "Rejoin code: {{code}}",
   "main.persona": "You are playing as {{name}}.",
   "main.news": "Paisa Times",
+  "main.learn": "Learn",
   "main.news.open": "Open Paisa Times",
   "main.news.open_new": "Open Paisa Times, new edition",
   "main.new": "New",

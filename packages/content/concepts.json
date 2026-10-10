@@ -1,0 +1,176 @@
+[
+  {
+    "id": "needs_vs_wants",
+    "pillar": "plan_budget",
+    "name": "t:concept.needs_vs_wants.name",
+    "simple": "t:concept.needs_vs_wants.simple"
+  },
+  {
+    "id": "simple_budget_split",
+    "pillar": "plan_budget",
+    "name": "t:concept.simple_budget_split.name",
+    "simple": "t:concept.simple_budget_split.simple"
+  },
+  {
+    "id": "wants_budget",
+    "pillar": "plan_budget",
+    "name": "t:concept.wants_budget.name",
+    "simple": "t:concept.wants_budget.simple"
+  },
+  {
+    "id": "goal_setting",
+    "pillar": "plan_budget",
+    "name": "t:concept.goal_setting.name",
+    "simple": "t:concept.goal_setting.simple"
+  },
+  {
+    "id": "pay_goal_first",
+    "pillar": "plan_budget",
+    "name": "t:concept.pay_goal_first.name",
+    "simple": "t:concept.pay_goal_first.simple"
+  },
+  {
+    "id": "planning_ahead",
+    "pillar": "plan_budget",
+    "name": "t:concept.planning_ahead.name",
+    "simple": "t:concept.planning_ahead.simple"
+  },
+  {
+    "id": "festival_budget",
+    "pillar": "plan_budget",
+    "name": "t:concept.festival_budget.name",
+    "simple": "t:concept.festival_budget.simple"
+  },
+  {
+    "id": "opportunity_cost",
+    "pillar": "plan_budget",
+    "name": "t:concept.opportunity_cost.name",
+    "simple": "t:concept.opportunity_cost.simple"
+  },
+  {
+    "id": "gross_vs_net",
+    "pillar": "plan_budget",
+    "name": "t:concept.gross_vs_net.name",
+    "simple": "t:concept.gross_vs_net.simple"
+  },
+  {
+    "id": "savings_account",
+    "pillar": "save_manage",
+    "name": "t:concept.savings_account.name",
+    "simple": "t:concept.savings_account.simple"
+  },
+  {
+    "id": "kyc",
+    "pillar": "save_manage",
+    "name": "t:concept.kyc.name",
+    "simple": "t:concept.kyc.simple"
+  },
+  {
+    "id": "emergency_fund",
+    "pillar": "save_manage",
+    "name": "t:concept.emergency_fund.name",
+    "simple": "t:concept.emergency_fund.simple"
+  },
+  {
+    "id": "surprise",
+    "pillar": "save_manage",
+    "name": "t:concept.surprise.name",
+    "simple": "t:concept.surprise.simple"
+  },
+  {
+    "id": "tracking_spending",
+    "pillar": "save_manage",
+    "name": "t:concept.tracking_spending.name",
+    "simple": "t:concept.tracking_spending.simple"
+  },
+  {
+    "id": "impulse_buy",
+    "pillar": "save_manage",
+    "name": "t:concept.impulse_buy.name",
+    "simple": "t:concept.impulse_buy.simple"
+  },
+  {
+    "id": "borrowing_safely",
+    "pillar": "save_manage",
+    "name": "t:concept.borrowing_safely.name",
+    "simple": "t:concept.borrowing_safely.simple"
+  },
+  {
+    "id": "interest_cost",
+    "pillar": "save_manage",
+    "name": "t:concept.interest_cost.name",
+    "simple": "t:concept.interest_cost.simple"
+  },
+  {
+    "id": "never_share_otp",
+    "pillar": "stay_safe",
+    "name": "t:concept.never_share_otp.name",
+    "simple": "t:concept.never_share_otp.simple"
+  },
+  {
+    "id": "upi_collect",
+    "pillar": "stay_safe",
+    "name": "t:concept.upi_collect.name",
+    "simple": "t:concept.upi_collect.simple"
+  },
+  {
+    "id": "job_offer_fee",
+    "pillar": "stay_safe",
+    "name": "t:concept.job_offer_fee.name",
+    "simple": "t:concept.job_offer_fee.simple"
+  },
+  {
+    "id": "loan_apps",
+    "pillar": "stay_safe",
+    "name": "t:concept.loan_apps.name",
+    "simple": "t:concept.loan_apps.simple"
+  },
+  {
+    "id": "lottery_scam",
+    "pillar": "stay_safe",
+    "name": "t:concept.lottery_scam.name",
+    "simple": "t:concept.lottery_scam.simple"
+  },
+  {
+    "id": "reporting_fraud",
+    "pillar": "stay_safe",
+    "name": "t:concept.reporting_fraud.name",
+    "simple": "t:concept.reporting_fraud.simple"
+  },
+  {
+    "id": "risk_return",
+    "pillar": "understand_investing",
+    "name": "t:concept.risk_return.name",
+    "simple": "t:concept.risk_return.simple"
+  },
+  {
+    "id": "diversification",
+    "pillar": "understand_investing",
+    "name": "t:concept.diversification.name",
+    "simple": "t:concept.diversification.simple"
+  },
+  {
+    "id": "compounding",
+    "pillar": "understand_investing",
+    "name": "t:concept.compounding.name",
+    "simple": "t:concept.compounding.simple"
+  },
+  {
+    "id": "inflation",
+    "pillar": "understand_investing",
+    "name": "t:concept.inflation.name",
+    "simple": "t:concept.inflation.simple"
+  },
+  {
+    "id": "long_term_view",
+    "pillar": "understand_investing",
+    "name": "t:concept.long_term_view.name",
+    "simple": "t:concept.long_term_view.simple"
+  },
+  {
+    "id": "hot_tips",
+    "pillar": "understand_investing",
+    "name": "t:concept.hot_tips.name",
+    "simple": "t:concept.hot_tips.simple"
+  }
+]

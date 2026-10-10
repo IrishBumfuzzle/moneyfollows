@@ -195,6 +195,7 @@ export const SyncEventSchema = z.strictObject({
     'work_shift',
     'school_attended',
     'day_rested',
+    'guide_completed',
   ]),
   payload: z.record(z.string(), z.unknown()),
   client_ts: z.iso.datetime({ offset: true }),
@@ -236,6 +237,47 @@ export const ArticleSchema = z
   .refine((a) => a.question.correct < a.question.options.length, {
     message: 'question.correct must index an option',
     path: ['question', 'correct'],
+  });
+
+// ---- Learning: concepts and real-life guides (additive) ----
+
+const ConceptIdSchema = z.string().regex(/^[a-z0-9_]+$/);
+
+/** One idea the game teaches (concepts.json). Scenarios, events, quiz questions and guides tag it by id. */
+export const ConceptSchema = z.strictObject({
+  id: ConceptIdSchema,
+  pillar: PillarSchema,
+  name: TKeySchema,
+  /** One line: "what this means". */
+  simple: TKeySchema,
+});
+
+/** A short step-by-step guide for real life (guides/*.json), ending with one check question. */
+export const GuideSchema = z
+  .strictObject({
+    id: z.string().regex(/^guide\.[a-z0-9_]+$/),
+    pillar: PillarSchema,
+    /** Pixel icon name in the student app. */
+    icon: z.string().regex(/^[a-z_]+$/),
+    concepts: z.array(ConceptIdSchema).min(1),
+    title: TKeySchema,
+    intro: TKeySchema,
+    steps: z.array(TKeySchema).min(2).max(6),
+    check: z.strictObject({
+      prompt: TKeySchema,
+      options: z.array(TKeySchema).min(2).max(4),
+      correct: z.int().min(0),
+      explanation: TKeySchema,
+    }),
+    meta: z.strictObject({
+      status: z.enum(['draft', 'reviewed']),
+      author: z.string().min(1),
+      factsCheckedBy: z.string().min(1).optional(),
+    }),
+  })
+  .refine((g) => g.check.correct < g.check.options.length, {
+    message: 'check.correct must index an option',
+    path: ['check', 'correct'],
   });
 
 export const PlaceSchema = z

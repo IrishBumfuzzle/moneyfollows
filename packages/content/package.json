@@ -5,7 +5,9 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./i18n/*": "./i18n/*"
+    "./i18n/*": "./i18n/*",
+    "./concepts.json": "./concepts.json",
+    "./quizzes/*": "./quizzes/*"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"

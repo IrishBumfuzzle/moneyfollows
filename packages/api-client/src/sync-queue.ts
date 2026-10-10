@@ -314,6 +314,8 @@ export interface SyncEventPayloads {
   school_attended: { health: number; sanity: number; month: number; week: number; day?: number };
   /** A night's rest at home: the day that ended, and the clamped meter changes. */
   day_rested: { month: number; week: number; day: number; health: number; sanity: number };
+  /** A real-life guide finished; correct is the first answer to its check question. */
+  guide_completed: { guide_id: string; correct: boolean };
 }
 
 export type SyncEventPayload<T extends SyncEventType> = T extends keyof SyncEventPayloads

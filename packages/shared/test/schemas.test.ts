@@ -292,6 +292,7 @@ describe('map and Paisa Times contracts (5.1, 5.5, 5.7)', () => {
       'work_shift',
       'school_attended',
       'day_rested',
+      'guide_completed',
     ])
       expect(SyncEventSchema.safeParse({ ...base, type }).success, type).toBe(true);
   });
