@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { ApiClient } from '@paisa/api-client';
+import type { DashboardApi } from '../types';
 
 export type AuthState =
   | { status: 'loading' }
@@ -14,7 +14,7 @@ export type AuthState =
  * Who is signed in, and are they staff. supabase-js restores the session itself (including one
  * from an invite link in the URL), so this only listens: it never reads tokens.
  */
-export function useAuth(api: ApiClient) {
+export function useAuth(api: DashboardApi) {
   const [email, setEmail] = useState<string | null | undefined>(undefined);
   const [check, setCheck] = useState<{ email: string; result: 'staff' | 'not_staff' | 'failed' } | null>(null);
   const [attempt, setAttempt] = useState(0);

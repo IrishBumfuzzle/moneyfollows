@@ -1,5 +1,6 @@
 import { t } from '../content';
 import type { Lang } from '../i18n';
+import { sampleModeHref } from '../mode';
 
 /** Shown when the build has no Supabase URL or anon key (apps/dashboard/src/api.ts). */
 export function SetupCard({ lang }: { lang: Lang }) {
@@ -18,7 +19,25 @@ export function SetupCard({ lang }: { lang: Lang }) {
         </li>
       </ul>
       <p className="muted">{t(lang, 'setup.vercel')}</p>
+      <div className="sample-offer">
+        <p className="muted">{t(lang, 'sample.try_body')}</p>
+        <a className="btn" href={sampleModeHref(true)}>
+          {t(lang, 'sample.try')}
+        </a>
+      </div>
     </section>
+  );
+}
+
+/** Always on top in sample mode, so nobody mistakes the made-up school for real children. */
+export function SampleBanner({ lang }: { lang: Lang }) {
+  return (
+    <div className="banner info sample-banner" role="note">
+      <span>{t(lang, 'sample.banner')}</span>
+      <a className="btn" href={sampleModeHref(false)}>
+        {t(lang, 'sample.leave')}
+      </a>
+    </div>
   );
 }
 

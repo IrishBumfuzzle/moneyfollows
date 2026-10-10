@@ -1,11 +1,12 @@
 import { useRef, useState, type FormEvent } from 'react';
-import type { ApiClient, ClassRow } from '@paisa/api-client';
+import type { ClassRow } from '@paisa/api-client';
+import type { DashboardApi } from '../../types';
 import { t } from '../../content';
 import { LANGS, type Lang } from '../../i18n';
 import { NAME_MAX, validateClassName } from './classes';
 
 interface Props {
-  api: ApiClient;
+  api: DashboardApi;
   lang: Lang;
   onCreated: (cls: ClassRow) => void;
 }

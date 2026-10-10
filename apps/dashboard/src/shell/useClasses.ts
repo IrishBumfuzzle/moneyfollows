@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { ApiClient, ClassRow } from '@paisa/api-client';
+import type { ClassRow } from '@paisa/api-client';
+import type { DashboardApi } from '../types';
 import { mergeClass, patchClassRow, type ClassPatch } from '../screens/classes/classes';
 
 /** The signed-in facilitator's classes (RLS hides everyone else's), newest first, shared by every screen. */
-export function useClasses(api: ApiClient) {
+export function useClasses(api: DashboardApi) {
   const [classes, setClasses] = useState<ClassRow[] | null>(null);
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);

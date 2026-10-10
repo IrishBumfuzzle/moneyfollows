@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import type { ApiClient, StudentRow } from '@paisa/api-client';
+import type { StudentRow } from '@paisa/api-client';
+import type { DashboardApi } from '../../types';
 import type { Lang } from '../../i18n';
 import { t } from './content';
 
 type Note = { anonId: string; kind: 'done' | 'error' };
 
 interface Props {
-  api: ApiClient;
+  api: DashboardApi;
   students: StudentRow[];
   lang: Lang;
   /** Called with the student's new code after a reset. */

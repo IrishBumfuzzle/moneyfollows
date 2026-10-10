@@ -6,7 +6,9 @@ import { isDemoClass } from '../../demo';
 import { formatDate } from '../../format';
 import type { Lang } from '../../i18n';
 import { hashFor } from '../../shell/route';
+import { formatCode } from './classes';
 import { CodeBlock, JoinQr, StatusChips } from './ClassParts';
+import { CopyButton } from './CopyButton';
 
 interface Props {
   cls: ClassRow;
@@ -16,6 +18,7 @@ interface Props {
   onPrint: (cls: ClassRow) => void;
 }
 
+/** The full card: big code and QR. Shown for a class just created, so it can be shared straight away. */
 export function ClassCard({ cls, lang, highlighted, onPrint }: Props) {
   const tr = (key: string, vars?: Record<string, string | number>) => t(lang, key, vars);
   const heading = useRef<HTMLHeadingElement>(null);
@@ -55,6 +58,49 @@ export function ClassCard({ cls, lang, highlighted, onPrint }: Props) {
         <a className="btn quiet" href={link('settings')}>
           {tr('nav.settings')}
         </a>
+      </div>
+    </article>
+  );
+}
+
+/**
+ * One line of the class list: name, status, code and the two things staff do most (open the class,
+ * print the join sheet). Compact, so a school with many classes still reads as a short list.
+ */
+export function ClassListItem({ cls, lang, onPrint }: Omit<Props, 'highlighted'>) {
+  const tr = (key: string, vars?: Record<string, string | number>) => t(lang, key, vars);
+  const open = hashFor({ name: 'class', id: cls.id, tab: 'progress' });
+
+  return (
+    <article className="card class-item" aria-labelledby={`class-${cls.id}`}>
+      <div className="class-item-main">
+        <div className="row">
+          <h2 id={`class-${cls.id}`}>{cls.name}</h2>
+          {isDemoClass(cls) && <span className="badge demo">{tr('class.demo')}</span>}
+        </div>
+        <StatusChips cls={cls} lang={lang} />
+      </div>
+      <div className="class-item-code">
+        <span className="muted">{tr('class.code')}</span>
+        <span className="class-code" translate="no">
+          {formatCode(cls.class_code)}
+        </span>
+        <CopyButton
+          text={cls.class_code}
+          label={tr('class.copy_code')}
+          doneLabel={tr('class.copied_code')}
+          failLabel={tr('class.copy_failed')}
+        />
+      </div>
+      <div className="class-item-actions">
+        <a className="btn primary" href={open}>
+          {tr('class.open')}
+        </a>
+        {studentUrlConfigured && (
+          <button type="button" className="btn" onClick={() => onPrint(cls)}>
+            {tr('class.print')}
+          </button>
+        )}
       </div>
     </article>
   );

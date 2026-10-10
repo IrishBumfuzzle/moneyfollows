@@ -12,6 +12,7 @@ import { ProgressTable } from './ProgressTable';
 import {
   DEFAULT_SORT,
   filterRows,
+  isInactive,
   loadErrorKey,
   nextSort,
   sortRows,
@@ -36,6 +37,7 @@ export function ProgressScreen({ api, cls, lang }: ClassScreenProps) {
   const [error, setError] = useState<LoadErrorKey | null>(null);
   const [sort, setSort] = useState(DEFAULT_SORT);
   const [query, setQuery] = useState('');
+  const [onlyInactive, setOnlyInactive] = useState(false);
   // Only the latest request may write state (a refresh, or another class, can overtake it).
   const seq = useRef(0);
 
@@ -59,6 +61,7 @@ export function ProgressScreen({ api, cls, lang }: ClassScreenProps) {
   useEffect(() => {
     setData(null);
     setQuery('');
+    setOnlyInactive(false);
     void load();
     return () => {
       seq.current++;
@@ -67,10 +70,14 @@ export function ProgressScreen({ api, cls, lang }: ClassScreenProps) {
 
   const rows = data?.progress;
   const summary = useMemo(() => (rows ? summarize(rows, loadedAt) : null), [rows, loadedAt]);
-  const visible = useMemo(() => (rows ? sortRows(filterRows(rows, query), sort) : []), [rows, query, sort]);
+  const visible = useMemo(() => {
+    if (!rows) return [];
+    const picked = onlyInactive ? rows.filter((r) => isInactive(r.last_active, loadedAt)) : rows;
+    return sortRows(filterRows(picked, query), sort);
+  }, [rows, query, sort, onlyInactive, loadedAt]);
 
   const demo = isDemoClass(cls);
-  const searching = query.trim() !== '';
+  const searching = query.trim() !== '' || onlyInactive;
 
   function onStudentChange(student: StudentRow) {
     setData((d) => d && { ...d, students: d.students.map((s) => (s.anon_id === student.anon_id ? student : s)) });
@@ -157,12 +164,20 @@ export function ProgressScreen({ api, cls, lang }: ClassScreenProps) {
                 onChange={(e) => setQuery(e.target.value)}
               />
             </div>
+            {summary.inactive > 0 && (
+              <label className="progress-filter">
+                <input type="checkbox" checked={onlyInactive} onChange={(e) => setOnlyInactive(e.target.checked)} />
+                <span>{tr('filter.inactive', { n: formatNumber(summary.inactive) })}</span>
+              </label>
+            )}
             <p className="muted" aria-live="polite">
               {searching
                 ? tr('search.count', { shown: formatNumber(visible.length), total: formatNumber(rows.length) })
                 : ''}
             </p>
           </div>
+
+          <p className="muted">{tr('table.help')}</p>
 
           {visible.length > 0 ? (
             <ProgressTable
