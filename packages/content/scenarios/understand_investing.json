@@ -3,6 +3,9 @@
     "id": "invest.compound.01",
     "pillar": "understand_investing",
     "concept": "compounding",
+    "location": "bank",
+    "channel": "in_person",
+    "speaker": "t:speaker.bank_guide",
     "personas": [
       "ravi",
       "sana",
@@ -77,6 +80,9 @@
     "id": "invest.diversify.01",
     "pillar": "understand_investing",
     "concept": "diversification",
+    "location": "bank",
+    "channel": "in_person",
+    "speaker": "t:speaker.bank_guide",
     "personas": [
       "ravi",
       "sana",
@@ -166,6 +172,9 @@
     "id": "invest.hot_tip.01",
     "pillar": "understand_investing",
     "concept": "hot_tips",
+    "location": "bank",
+    "channel": "phone",
+    "speaker": "t:speaker.classmate",
     "personas": [
       "ravi",
       "sana",
@@ -242,6 +251,10 @@
     "id": "invest.inflation.01",
     "pillar": "understand_investing",
     "concept": "inflation",
+    "location": "convenience",
+    "sublocation": "convenience.kirana",
+    "channel": "in_person",
+    "speaker": "t:speaker.shopkeeper",
     "personas": [
       "ravi",
       "sana",
@@ -312,6 +325,9 @@
     "id": "invest.loss.01",
     "pillar": "understand_investing",
     "concept": "long_term_view",
+    "location": "bank",
+    "channel": "phone",
+    "speaker": "t:speaker.classmate",
     "personas": [
       "ravi",
       "sana",
@@ -371,6 +387,9 @@
     "id": "invest.risk.01",
     "pillar": "understand_investing",
     "concept": "risk_return",
+    "location": "bank",
+    "channel": "in_person",
+    "speaker": "t:speaker.bank_guide",
     "personas": [
       "ravi",
       "sana",

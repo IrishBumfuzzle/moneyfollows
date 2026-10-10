@@ -297,6 +297,7 @@ export function capFor(key: string): string | null {
   if (key.startsWith('badge.') && key.endsWith('.name')) return 'badgeName';
   if (key.startsWith('badge.') && key.endsWith('.desc')) return 'badgeDesc';
   if (key.startsWith('jar.check.')) return 'feedback';
+  if (key.startsWith('speaker.')) return 'speaker';
   if (key.endsWith('.story')) return 'story';
   if (key.endsWith('.label')) return 'label';
   if (key.endsWith('.lesson')) return 'lesson';

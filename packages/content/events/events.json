@@ -3,6 +3,9 @@
     "id": "event.bicycle_puncture.01",
     "pillar": "save_manage",
     "concept": "surprise",
+    "location": "school",
+    "channel": "in_person",
+    "speaker": "t:speaker.shopkeeper",
     "personas": [
       "ravi",
       "sana",
@@ -38,6 +41,9 @@
     "id": "event.bonus_tip.01",
     "pillar": "save_manage",
     "concept": "surprise",
+    "location": "convenience",
+    "channel": "in_person",
+    "speaker": "t:speaker.customer",
     "personas": [
       "ravi",
       "kiran"
@@ -72,6 +78,9 @@
     "id": "event.exam_fee.01",
     "pillar": "save_manage",
     "concept": "surprise",
+    "location": "school",
+    "channel": "in_person",
+    "speaker": "t:speaker.college_office",
     "personas": [
       "ravi",
       "sana",
@@ -138,6 +147,9 @@
     "id": "event.festival_gift.01",
     "pillar": "plan_budget",
     "concept": "surprise",
+    "location": "home",
+    "channel": "in_person",
+    "speaker": "t:speaker.relatives",
     "personas": [
       "ravi",
       "sana",
@@ -199,6 +211,9 @@
     "id": "event.friend_borrow.01",
     "pillar": "save_manage",
     "concept": "surprise",
+    "location": "school",
+    "channel": "in_person",
+    "speaker": "t:speaker.friend",
     "personas": [
       "ravi",
       "sana",
@@ -266,6 +281,9 @@
     "id": "event.hospital.01",
     "pillar": "save_manage",
     "concept": "surprise",
+    "location": "hospital",
+    "channel": "in_person",
+    "speaker": "t:speaker.doctor",
     "personas": [
       "ravi",
       "sana",
@@ -342,6 +360,10 @@
     "id": "event.prices_rise.01",
     "pillar": "plan_budget",
     "concept": "surprise",
+    "location": "convenience",
+    "sublocation": "convenience.kirana",
+    "channel": "in_person",
+    "speaker": "t:speaker.shopkeeper",
     "personas": [
       "ravi",
       "sana",
@@ -412,6 +434,9 @@
     "id": "event.rain_stock.01",
     "pillar": "save_manage",
     "concept": "surprise",
+    "location": "home",
+    "channel": "in_person",
+    "speaker": "t:speaker.father",
     "personas": [
       "ravi"
     ],
@@ -499,6 +524,10 @@
     "id": "event.screen_crack.01",
     "pillar": "save_manage",
     "concept": "surprise",
+    "location": "convenience",
+    "sublocation": "convenience.phone_shop",
+    "channel": "in_person",
+    "speaker": "t:speaker.shopkeeper",
     "personas": [
       "ravi",
       "sana",
@@ -569,6 +598,9 @@
     "id": "event.slow_week.01",
     "pillar": "save_manage",
     "concept": "surprise",
+    "location": "home",
+    "channel": "in_person",
+    "speaker": "t:speaker.you",
     "personas": [
       "sana",
       "ravi"

@@ -48,6 +48,7 @@ function draftOf(state: GameState): GameState {
       return copy;
     }),
     history: [...state.history],
+    earned: [...(state.earned ?? [])],
     scores: [...(state.scores ?? [])],
     lessons: [...(state.lessons ?? [])],
   };
@@ -179,6 +180,7 @@ export function createGame(
     pending: [],
     rewindTokens: REWIND_TOKENS_PER_MONTH,
     history: [],
+    earned: [],
     stage: 'decision',
     scores: [],
     lessons: [],

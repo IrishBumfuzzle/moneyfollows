@@ -432,5 +432,21 @@
   "jar.check.save.ok": "लक्ष्य और बचत को {{percent}}% या ज़्यादा पैसे मिले। आगे चलकर यह काम आएगा।",
   "jar.check.save.fix": "लक्ष्य और बचत को {{percent}}% से कम मिला। इतना हिस्सा ₹{{amount}} होता है।",
   "jar.check.wants.ok": "इच्छाएँ {{percent}}% (₹{{amount}}) के अंदर हैं। मज़े भी, हद में भी।",
-  "jar.check.wants.fix": "इच्छाएँ {{percent}}% से ज़्यादा हैं। इस महीने की हद ₹{{amount}} है।"
+  "jar.check.wants.fix": "इच्छाएँ {{percent}}% से ज़्यादा हैं। इस महीने की हद ₹{{amount}} है।",
+  "speaker.you": "आप",
+  "speaker.shopkeeper": "दुकानदार",
+  "speaker.friend": "दोस्त",
+  "speaker.cousin": "कज़िन",
+  "speaker.parent": "घरवाले",
+  "speaker.teacher": "टीचर",
+  "speaker.doctor": "डॉक्टर",
+  "speaker.classmate": "क्लासमेट",
+  "speaker.phone_ad": "फ़ोन पर विज्ञापन",
+  "speaker.unknown_number": "अनजान नंबर",
+  "speaker.buyer": "ख़रीदार",
+  "speaker.bank_guide": "बैंक गाइड",
+  "speaker.customer": "ग्राहक",
+  "speaker.college_office": "कॉलेज ऑफ़िस",
+  "speaker.relatives": "रिश्तेदार",
+  "speaker.father": "पिताजी"
 }

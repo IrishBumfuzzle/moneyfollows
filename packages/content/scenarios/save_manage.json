@@ -3,6 +3,9 @@
     "id": "save.account.01",
     "pillar": "save_manage",
     "concept": "savings_account",
+    "location": "bank",
+    "channel": "in_person",
+    "speaker": "t:speaker.parent",
     "personas": [
       "ravi",
       "sana",
@@ -75,6 +78,9 @@
     "id": "save.borrow.01",
     "pillar": "save_manage",
     "concept": "borrowing_safely",
+    "location": "school",
+    "channel": "in_person",
+    "speaker": "t:speaker.you",
     "personas": [
       "ravi",
       "sana",
@@ -150,6 +156,9 @@
     "id": "save.emergency.01",
     "pillar": "save_manage",
     "concept": "emergency_fund",
+    "location": "school",
+    "channel": "in_person",
+    "speaker": "t:speaker.teacher",
     "personas": [
       "ravi",
       "sana",
@@ -212,6 +221,9 @@
     "id": "save.impulse.01",
     "pillar": "save_manage",
     "concept": "impulse_buy",
+    "location": "convenience",
+    "channel": "in_person",
+    "speaker": "t:speaker.shopkeeper",
     "personas": [
       "ravi",
       "sana",
@@ -274,6 +286,9 @@
     "id": "save.rainy_day.01",
     "pillar": "save_manage",
     "concept": "emergency_fund",
+    "location": "hospital",
+    "channel": "in_person",
+    "speaker": "t:speaker.doctor",
     "personas": [
       "ravi",
       "sana",
@@ -359,6 +374,9 @@
     "id": "save.track.01",
     "pillar": "save_manage",
     "concept": "tracking_spending",
+    "location": "home",
+    "channel": "in_person",
+    "speaker": "t:speaker.you",
     "personas": [
       "ravi",
       "sana",

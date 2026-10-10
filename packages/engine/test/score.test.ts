@@ -26,6 +26,7 @@ function state(p: { s: number; e: number; g: number; d: number }): GameState {
     pending: [],
     rewindTokens: 3,
     history: [],
+    earned: [],
     monthStart: {
       jars: { needs: 0, wants: 0, goals: 0, savings: savings + goals - Math.round(p.s * 2000) },
       debt: 0,

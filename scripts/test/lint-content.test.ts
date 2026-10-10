@@ -29,6 +29,9 @@ const scenario = (over: Record<string, unknown> = {}) => ({
   id: 'budget.test.01',
   pillar: 'plan_budget',
   concept: 'test',
+  location: 'home',
+  channel: 'in_person',
+  speaker: 't:speaker.you',
   personas: ['sana'],
   difficulty: 1,
   text: 't:budget.test.01.story',
@@ -37,6 +40,7 @@ const scenario = (over: Record<string, unknown> = {}) => ({
   ...over,
 });
 const baseTexts = (key = 'budget.test.01') => ({
+  'speaker.you': 'You',
   [`${key}.story`]: 'Payday is here.',
   [`${key}.a.label`]: 'Save first',
   [`${key}.a.lesson`]: 'Saving first makes it happen.',
@@ -103,6 +107,9 @@ describe('rule 1: schema, choice counts, unique ids', () => {
       id: 'event.test.01',
       pillar: 'save_manage',
       concept: 'surprise',
+      location: 'hospital',
+      channel: 'in_person',
+      speaker: 't:speaker.doctor',
       personas: ['sana'],
       levels: ['starter'],
       weight: 1,
@@ -110,7 +117,12 @@ describe('rule 1: schema, choice counts, unique ids', () => {
       choices: [choice('a', 'event.test.01')],
       meta,
     };
-    const en = { 'event.test.01.story': 'Rain.', 'event.test.01.a.label': 'OK', 'event.test.01.a.lesson': 'Fine.' };
+    const en = {
+      'speaker.doctor': 'Doctor',
+      'event.test.01.story': 'Rain.',
+      'event.test.01.a.label': 'OK',
+      'event.test.01.a.lesson': 'Fine.',
+    };
     expect(run({ items: [ev], file: 'events/events.json', en })).toEqual([]);
   });
   it('flags duplicate ids across files', () => {

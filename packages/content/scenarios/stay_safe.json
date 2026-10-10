@@ -3,6 +3,9 @@
     "id": "safe.job_fee.01",
     "pillar": "stay_safe",
     "concept": "job_offer_fee",
+    "location": "school",
+    "channel": "in_person",
+    "speaker": "t:speaker.classmate",
     "personas": [
       "ravi",
       "sana",
@@ -56,6 +59,9 @@
     "id": "safe.loan_app.01",
     "pillar": "stay_safe",
     "concept": "loan_apps",
+    "location": "home",
+    "channel": "phone",
+    "speaker": "t:speaker.phone_ad",
     "personas": [
       "ravi",
       "sana",
@@ -116,6 +122,9 @@
     "id": "safe.lottery.01",
     "pillar": "stay_safe",
     "concept": "lottery_scam",
+    "location": "home",
+    "channel": "phone",
+    "speaker": "t:speaker.unknown_number",
     "personas": [
       "ravi",
       "sana",
@@ -177,6 +186,9 @@
     "id": "safe.otp.01",
     "pillar": "stay_safe",
     "concept": "never_share_otp",
+    "location": "convenience",
+    "channel": "phone",
+    "speaker": "t:speaker.unknown_number",
     "personas": [
       "ravi",
       "sana",
@@ -227,6 +239,9 @@
     "id": "safe.report.01",
     "pillar": "stay_safe",
     "concept": "reporting_fraud",
+    "location": "bank",
+    "channel": "in_person",
+    "speaker": "t:speaker.you",
     "personas": [
       "ravi",
       "sana",
@@ -293,6 +308,9 @@
     "id": "safe.upi_collect.01",
     "pillar": "stay_safe",
     "concept": "upi_collect",
+    "location": "home",
+    "channel": "phone",
+    "speaker": "t:speaker.buyer",
     "personas": [
       "ravi",
       "sana",
