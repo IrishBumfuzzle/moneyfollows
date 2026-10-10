@@ -1,0 +1,18 @@
+{
+  "main.title": "{{name}} का कमरा",
+  "main.week": "महीना {{month}} · हफ़्ता {{week}}",
+  "main.money": "पैसे",
+  "main.greeting": "नमस्ते, {{nickname}}!",
+  "main.persona": "तुम {{name}} बनकर खेल रहे हो।",
+  "main.news": "Paisa Times",
+  "main.news.open": "Paisa Times खोलो",
+  "main.news.open_new": "Paisa Times खोलो, नया अंक",
+  "main.new": "नया",
+  "main.play": "खेलो",
+  "main.back": "वापस",
+  "persona.sana.name": "सना",
+  "persona.ravi.name": "रवि",
+  "main.owe": "उधार: {{debt}}",
+  "main.pay_back": "उधार चुकाओ",
+  "main.paid_back": "{{amount}} चुका दिए"
+}

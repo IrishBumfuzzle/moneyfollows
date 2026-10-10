@@ -1,0 +1,18 @@
+{
+  "main.title": "{{name}}'s room",
+  "main.week": "Month {{month}} · Week {{week}}",
+  "main.money": "Money",
+  "main.greeting": "Hi, {{nickname}}!",
+  "main.persona": "You are playing as {{name}}.",
+  "main.news": "Paisa Times",
+  "main.news.open": "Open Paisa Times",
+  "main.news.open_new": "Open Paisa Times, new edition",
+  "main.new": "New",
+  "main.play": "Play",
+  "main.back": "Back",
+  "persona.sana.name": "Sana",
+  "persona.ravi.name": "Ravi",
+  "main.owe": "You owe {{debt}}",
+  "main.pay_back": "Pay back",
+  "main.paid_back": "Paid back {{amount}}"
+}
