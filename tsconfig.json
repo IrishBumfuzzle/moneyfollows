@@ -1,5 +1,5 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": { "types": ["node"] },
-  "include": ["scripts", "supabase/tests", "vitest.config.ts", "eslint.config.js"]
+  "include": ["scripts", "supabase/tests", "supabase/scripts", "vitest.config.ts", "eslint.config.js"]
 }

@@ -340,6 +340,19 @@ export interface JoinClassResult {
   anon_id: string;
   class_id: string;
   default_lang: Lang;
+  // Additive (join_class and rejoin_class):
+  /** Whether the facilitator has opened the end-line quiz for the class. */
+  endline_open?: boolean;
+  /** 6-character recovery code: show it on the Me screen; rejoin_class takes it on a new phone. */
+  rejoin_code?: string;
+}
+
+/** class_status(anon_id, class_id): the class settings a joined student's app reads. */
+export interface ClassStatus {
+  endline_open: boolean;
+  default_lang: Lang;
+  /** The student's current rejoin code (a teacher may have reset it). */
+  rejoin_code: string;
 }
 
 export interface PushEventsResult {

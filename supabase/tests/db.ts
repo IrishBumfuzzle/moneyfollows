@@ -39,7 +39,14 @@ export interface TestDb {
   asUser<T>(userId: string, fn: (tx: Sql) => Promise<T>): Promise<T>;
   /** An auth user; on the staff allowlist unless `staff` is false. */
   createFacilitator(email?: string, staff?: boolean): Promise<string>;
+  /** Applies the migrations `migrationsBefore` held back (for testing a migration's backfill). */
+  applyRemainingMigrations(): Promise<void>;
   drop(): Promise<void>;
+}
+
+export interface TestDbOptions {
+  /** Apply only migrations whose file name sorts before this (e.g. '20261011120500'). */
+  migrationsBefore?: string;
 }
 
 /** Built by make-template.sh in the supabase/postgres test container (docker-compose.yml). */
@@ -50,7 +57,7 @@ const SUPABASE_TEMPLATE = 'paisa_template';
  * the real initialised database (roles, default grants, auth schema); on plain Postgres the
  * auth stub stands in for those.
  */
-export async function createTestDb(): Promise<TestDb> {
+export async function createTestDb(options: TestDbOptions = {}): Promise<TestDb> {
   const name = `paisa_test_${randomBytes(5).toString('hex')}`;
   const admin = postgres(ADMIN_URL, { max: 1, onnotice: () => {} });
   const [tpl] = await admin`select 1 from pg_database where datname = ${SUPABASE_TEMPLATE} and datistemplate`;
@@ -61,9 +68,11 @@ export async function createTestDb(): Promise<TestDb> {
 
   if (!tpl) await sql.unsafe(readFileSync(here('./auth-stub.sql'), 'utf8'));
   const dir = here('../migrations/');
-  for (const file of readdirSync(dir)
+  const files = readdirSync(dir)
     .filter((f) => f.endsWith('.sql'))
-    .sort()) {
+    .sort();
+  const held = options.migrationsBefore ? files.filter((f) => f >= options.migrationsBefore!) : [];
+  for (const file of files.filter((f) => !held.includes(f))) {
     await sql.unsafe(readFileSync(dir + file, 'utf8'));
   }
 
@@ -85,6 +94,9 @@ export async function createTestDb(): Promise<TestDb> {
       await sql`insert into auth.users (id, email) values (${id}, ${email})`;
       if (staff) await sql`insert into staff (email) values (${email.toLowerCase()})`;
       return id;
+    },
+    async applyRemainingMigrations() {
+      for (const file of held.splice(0)) await sql.unsafe(readFileSync(dir + file, 'utf8'));
     },
     async drop() {
       await sql.end();

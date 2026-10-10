@@ -2,6 +2,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import {
   SYNC_BATCH_MAX,
   type ClassProgressRow,
+  type ClassStatus,
   type JoinClassResult,
   type Lang,
   type LearningGainRow,
@@ -20,6 +21,15 @@ export interface ClassRow {
   created_at: string;
   /** false: join_class refuses new students with class_closed (setJoinOpen). */
   join_open: boolean;
+  /** true: students may take the end-line quiz (setEndlineOpen; students read it with classStatus). */
+  endline_open: boolean;
+}
+
+/** listStudents: what a teacher needs to read a student their rejoin code. */
+export interface StudentRow {
+  anon_id: string;
+  nickname: string;
+  rejoin_code: string;
 }
 
 /** learning_gain row plus the additive `n`: matched students for that pillar (= baseline_n = endline_n). */
@@ -52,6 +62,13 @@ export function createApiClient(options: ApiClientOptions) {
     return res.data as T;
   }
 
+  /** Updates one of the facilitator's own classes; RLS hides the rest, so no row means class_not_found. */
+  async function updateClass(classId: string, patch: Partial<Pick<ClassRow, 'join_open' | 'endline_open'>>) {
+    const { data, error } = await sb.from('classes').update(patch).eq('id', classId).select('id');
+    if (error) throw toApiError(error);
+    if (!data?.length) throw new ApiError('class_not_found', undefined, 404);
+  }
+
   return {
     supabase: sb,
 
@@ -67,10 +84,32 @@ export function createApiClient(options: ApiClientOptions) {
       return rpc<JoinClassResult>('join_class', args);
     },
 
+    /**
+     * Gets an existing student back on a new or reset phone (works even in a closed class).
+     * Any wrong part gives rejoin_failed, never saying which; repeated failures in a class give
+     * join_rate_limited for a few minutes.
+     */
+    async rejoinClass(classCode: string, nickname: string, rejoinCode: string): Promise<JoinClassResult> {
+      const res = await rpc<JoinClassResult | { message?: string }>('rejoin_class', {
+        class_code: classCode,
+        nickname,
+        rejoin_code: rejoinCode,
+      });
+      // The server returns rejoin_failed as a 404 body (so the failure is recorded); should a
+      // proxy ever pass it through as a 200, it is still an error.
+      if (!res || !('anon_id' in res)) throw new ApiError('rejoin_failed', undefined, 404);
+      return res;
+    },
+
     /** `signal` aborts the request (the sync queue uses it for its timeout). */
     pushEvents(events: SyncEvent[], signal?: AbortSignal): Promise<PushEventsResponse> {
       if (events.length > SYNC_BATCH_MAX) throw new ApiError('too_many_events');
       return rpc<PushEventsResponse>('push_events', { events }, signal);
+    },
+
+    /** The class settings for a joined student (end-line gate, language, current rejoin code). */
+    classStatus(anonId: string, classId: string): Promise<ClassStatus> {
+      return rpc<ClassStatus>('class_status', { anon_id: anonId, class_id: classId });
     },
 
     // ---- Staff (dashboard) ----
@@ -111,11 +150,8 @@ export function createApiClient(options: ApiClientOptions) {
     },
 
     /** Closes (false) or reopens (true) a class to new joins. Students already in it keep playing. */
-    async setJoinOpen(classId: string, open: boolean): Promise<void> {
-      const { data, error } = await sb.from('classes').update({ join_open: open }).eq('id', classId).select('id');
-      if (error) throw toApiError(error);
-      // RLS hides other facilitators' classes, so no row updated means not yours (or no such class).
-      if (!data?.length) throw new ApiError('class_not_found', undefined, 404);
+    setJoinOpen(classId: string, open: boolean): Promise<void> {
+      return updateClass(classId, { join_open: open });
     },
 
     /**
@@ -124,6 +160,27 @@ export function createApiClient(options: ApiClientOptions) {
      */
     rotateClassCode(classId: string): Promise<string> {
       return rpc<string>('rotate_class_code', { class_id: classId });
+    },
+
+    /** Opens (true) or closes (false) the end-line quiz for the class. */
+    setEndlineOpen(classId: string, open: boolean): Promise<void> {
+      return updateClass(classId, { endline_open: open });
+    },
+
+    /** The class's students with their rejoin codes, so a teacher can read a code out. */
+    async listStudents(classId: string): Promise<StudentRow[]> {
+      const { data, error } = await sb
+        .from('students')
+        .select('anon_id, nickname, rejoin_code')
+        .eq('class_id', classId)
+        .order('nickname');
+      if (error) throw toApiError(error);
+      return data as StudentRow[];
+    },
+
+    /** A new rejoin code for a student (e.g. the old one was shared); returns it. */
+    resetRejoinCode(anonId: string): Promise<string> {
+      return rpc<string>('reset_rejoin_code', { anon_id: anonId });
     },
 
     classProgress(classId: string): Promise<ClassProgressRow[]> {

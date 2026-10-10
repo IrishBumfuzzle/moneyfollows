@@ -134,7 +134,14 @@ describe.skipIf(skipDbTests)('database', () => {
   describe('join_class', () => {
     it('creates an anonymous profile and returns the class language', async () => {
       const r = await join(cls.class_code.toLowerCase(), '  Chai Star ');
-      expect(r).toEqual({ anon_id: expect.any(String), class_id: cls.id, default_lang: 'hi' });
+      expect(r).toEqual({
+        anon_id: expect.any(String),
+        class_id: cls.id,
+        default_lang: 'hi',
+        // Additive (20261011120500_class_settings_rejoin.sql).
+        endline_open: false,
+        rejoin_code: expect.stringMatching(/^[A-HJKMNP-Z2-9]{6}$/),
+      });
       const [s] = await db.sql`select nickname, lang, level from students where anon_id = ${r.anon_id}`;
       expect(s).toEqual({ nickname: 'Chai Star', lang: 'hi', level: 'starter' });
     });
