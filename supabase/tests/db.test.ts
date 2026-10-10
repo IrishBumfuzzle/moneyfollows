@@ -112,8 +112,11 @@ describe.skipIf(skipDbTests)('database', () => {
     });
 
     it('survive an attempt to delete their facilitator (restrict, not cascade)', async () => {
-      // 23001 restrict_violation
-      await expect(db.sql`delete from auth.users where id = ${facilitator}`).rejects.toMatchObject({ code: '23001' });
+      // Postgres raises 23503 foreign_key_violation for on delete restrict (23001 is never used for it).
+      await expect(db.sql`delete from auth.users where id = ${facilitator}`).rejects.toMatchObject({
+        code: '23503',
+        constraint_name: 'classes_facilitator_id_fkey',
+      });
       expect(await count(db.sql`select count(*)::int as n from classes where id = ${cls.id}`)).toBe(1);
     });
 
