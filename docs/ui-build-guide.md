@@ -42,7 +42,11 @@ This split differs from CLAUDE.md, which gives onboarding and the Room hub to UI
 | Translations: each feature keeps `content/en.json` + `hi.json` and a small `t()` (see `features/classroom/content/index.ts`); react-i18next not installed | Pattern to copy |
 | `pnpm check` (typecheck + tests) and Vitest | Works |
 | `pnpm` on your laptop | Fixed; your `package.json` has a new `packageManager` line that is not committed yet |
-| Onboarding, main screen, Paisa Times, `apps/dashboard` | Nothing yet |
+| Onboarding (`src/features/onboarding`) | Works |
+| Main screen (`src/features/main`): persona on a couch (placeholder pixel art), news rack with "New" badge, Play → map | Works; start screen after onboarding |
+| Paisa Times (`src/features/news`): front page, articles, thought-cloud words with speaker, questions with full/half wage, toast and coins, Word Wallet, `markNewEdition()` | Works on a copy of BE-1's edition 2026-W41 (`content/pack/`) |
+| Shared game store (`src/game/useGame.ts`, Zustand + IndexedDB): common money wallet, health, sanity, `earn(amount, sourceId)` | Works; swap its internals for the engine when `packages/engine` is on main |
+| `apps/dashboard` | Nothing yet |
 | `packages/shared`, engine (`earn()`), content, api-client | Not on `main` yet (an `origin/Backend` branch exists) |
 | Life meters API (`src/features/life`, see `docs/life-meters-api.md`): one common money wallet, health, sanity; the store's necessity/want options, work, school | Frontend API, meters bar and store sheet built; work/school buttons, engine and backend not yet |
 

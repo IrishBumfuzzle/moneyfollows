@@ -21,7 +21,7 @@ Full product spec: `docs/spec.md` (paste the team's spec there). Visual rules: `
 
 ### 1.1 App and game structure
 
-- **Hub:** the app opens on the character's **room**. Objects in the room open the app's sections: door → **Map** (the game), newspaper on the table → **Paisa Times**, trophy shelf → **Me** (badges, XP), notebook → **Notes** (lesson cards + Word Wallet). A labelled tab bar (Room, Map, News, Me) is always available too. Sections come from a config array, so adding a section later is one new entry.
+- **Hub:** the app opens on a **main screen**: the player's character sits on a couch at the top, a big **Play** button opens the **Map** (the game), and a **news rack** opens **Paisa Times**. This replaces the earlier room with a door, newspaper, trophy shelf and notebook. Where **Me** (badges, XP) and **Notes** (lesson cards + Word Wallet) go is open; the simplest answer is two small icon buttons on the main screen.
 - **Game map:** a tall, vertically scrolling illustrated Hyderabad neighbourhood with places: **Home, Shop (`convenience`), School, Hospital, Bank**. The Shop opens a **sub-map** (phone shop, kirana, clothes stall). The player plays inside places and sub-map locations.
 - **Weekly loop on the map:** each week the engine pins 2–4 places that hold this week's decisions; going Home to **sleep** ends the week (rules in 5.8).
 - **Inside a place:** in-person events play as a **dialogue scene**; remote events (family texts, scams) arrive as **phone notifications** that open a chat.
@@ -65,12 +65,14 @@ Assign names at kickoff. Four people:
 
 | Lane | Owner | Owns (may edit) | Does NOT edit |
 |---|---|---|---|
-| **UI-1** | Student app lead, design system owner (+ slides, report, video script) | `apps/student/**` except the UI-2 folders; owns `apps/student/src/design/**` and `DESIGN.md`; `docs/pitch/**` | `packages/engine`, `supabase/**` |
-| **UI-2** | Paisa Times, mini-games, dashboard | `apps/student/src/features/news/**`, `apps/student/src/games/**`, `apps/dashboard/**` | `apps/student/src/design/**` (request changes from UI-1), `packages/engine`, `supabase/**` |
+| **UI-1** | Map, places, decisions, phone and scams, Home (sleep, Month Recap), the School classroom quiz, the life meters (+ slides, report, video script) | `apps/student/**` except the UI-2 folders; owns the Kenney UI kit `apps/student/src/design/**`, `DESIGN.md`, `docs/pitch/**` | `packages/engine`, `supabase/**` |
+| **UI-2** | Onboarding, main screen, Paisa Times, staff dashboard | `apps/student/src/features/onboarding/**`, `apps/student/src/features/main/**`, `apps/student/src/features/news/**`, `apps/dashboard/**` | `apps/student/src/design/**` (request changes from UI-1), `packages/engine`, `supabase/**` |
 | **BE-1** | Engine + content | `packages/engine/**`, `packages/content/**`, `scripts/**` | `apps/**` |
 | **BE-2** | API, DB, sync, deploy, integrator | `supabase/**`, `packages/api-client/**`, `.github/**`, deployment config | `packages/engine`, `packages/content` |
 
 `packages/shared/**` is **shared and frozen** (section 5): changes need a heads-up in the team channel.
+
+`apps/student/src/App.tsx` (navigation) and `apps/student/src/game/**` (the shared game store) are **shared by UI-1 and UI-2**: either may add a screen or a store action; tell the other each time. MessageInspector, Scam or Safe?, Time Machine, Me and Notes have **no owner yet**.
 
 BE-2 is also the **integrator**: owns "does it run end-to-end, deployed, right now?", merges, submissions (M1, M2, final, zip) and the deadline clock.
 
@@ -310,8 +312,8 @@ No real names, phone numbers, birth dates, addresses or bank data. Facilitators 
 - Show **offline / sync status as a banner**, not as a separate screen.
 - Android hardware back always goes up one level; it never exits the app from inside a place.
 - No timers by default (anxiety).
-- Build order (UI-1): Onboarding → Room (hub) → Map → week pins → Place scene + decision → Consequence + rewind → Phone layer + scams → Home (payday, sleep, Month Recap) → Shop sub-map + remaining places → flashbacks → Me, Notes, Settings → demo panel.
-- Build order (UI-2): Paisa Times reader → thought-cloud popup → questions + wage → Word Wallet → Message Inspector (needed by UI-1's scam flow) → Scam or Safe? → Time Machine → dashboard.
+- Build order (UI-1): Map → week pins → Place scene + decision → Consequence + rewind → Phone layer + scams → Home (payday, sleep, Month Recap) → Shop sub-map + remaining places → flashbacks → Settings → demo panel.
+- Build order (UI-2): Onboarding → main screen (hub) → Paisa Times reader → thought-cloud popup → questions + wage → Word Wallet → dashboard. Message Inspector, Scam or Safe? and Time Machine need an owner.
 - Dashboard screens: Sign in → Class setup (code + QR) → Class progress table → Learning gains chart.
 - Component names to reuse: `RoomHub`, `MapView`, `PlacePin`, `PlaceScene`, `DialogueBubble`, `PhoneNotification`, `ChatThread`, `WalletCard`, `JarCard`, `JarDelta`, `ChoiceButton`, `ConsequenceSheet`, `LessonCard`, `RewindButton`, `FlashbackCard`, `MonthRecap`, `ScoreRing`, `NewsFrontPage`, `ArticleView`, `GlossaryWord`, `ThoughtCloud`, `WordWallet`, `SwipeCard`, `MessageInspector`, `TimeSlider`, `GrowthChart`, `AssumptionBanner`, `OfflineBanner`.
 - The UI talks to the engine **only through the engine API** (5.2) and to the backend **only through `api-client`**. Develop against the mock engine (`packages/engine/src/mock.ts`) until the real one lands.
@@ -443,6 +445,9 @@ Append decisions here as `YYYY-MM-DD HH:MM — decision — who`.
 - 2026-10-10 — Map places: home, convenience (Shop, with sub-map), school, hospital, bank; weekly pins, sleep at Home ends the week — team.
 - 2026-10-10 — Paisa Times: original explainers bundled in the content pack; reward is an earned paper-route wage, once per edition — team.
 - 2026-10-10 22:30 — School opens the Classroom: a repeatable 5-question practice quiz across all four pillars. Its own question bank, separate from baseline/end-line so practice can't inflate learning gain. Additive `QuizKind 'classroom'`; client API built, backend change proposed in `API.md` §5 — UI-1.
+- 2026-10-11 — Lanes reassigned: UI-2 owns onboarding, the main screen, Paisa Times and the dashboard; UI-1 owns the map, places, decisions, Home, the classroom and the life meters; `App.tsx` and `src/game/**` are shared — team.
+- 2026-10-11 — The Room hub is replaced by a main screen: character on a couch, a Play button to the map, a news rack to Paisa Times — team.
+- 2026-10-11 — Translations stay per feature (`content/en.json` + `hi.json` + a small `t()`), not react-i18next: the pattern is already used by three features and keeps the bundle small. Shared game state is one Zustand store (`src/game/useGame.ts`) saved to IndexedDB — team.
 
 Open questions:
 - Which license does Section 11 of the brief require for the `LICENSE` file?
