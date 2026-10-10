@@ -86,6 +86,44 @@ describe('createApiClient', () => {
   });
 });
 
+describe('makeEvent', () => {
+  it('builds the map and news events with their 5.5 payload keys', () => {
+    const now = new Date('2026-10-11T00:00:00Z');
+    expect(makeEvent(ctx, 'location_selected', { location_id: 'convenience.phone_shop' }, now, 'id-1')).toEqual({
+      event_id: 'id-1',
+      ...ctx,
+      type: 'location_selected',
+      payload: { location_id: 'convenience.phone_shop' },
+      client_ts: '2026-10-11T00:00:00.000Z',
+    });
+    expect(makeEvent(ctx, 'map_opened').payload).toEqual({});
+    expect(
+      makeEvent(ctx, 'news_question_answered', {
+        edition: '2026-W41',
+        article_id: 'upi_fraud',
+        correct: true,
+        attempt: 1,
+      }).type,
+    ).toBe('news_question_answered');
+    expect(makeEvent(ctx, 'decision_made', { scenarioId: 'x', anything: 1 }).payload).toEqual({
+      scenarioId: 'x',
+      anything: 1,
+    });
+  });
+
+  it('rejects wrong payload keys for the typed events at compile time', () => {
+    // @ts-expect-error: payload required for week_slept
+    makeEvent(ctx, 'week_slept');
+    // @ts-expect-error: camelCase key (5.5 is snake_case)
+    makeEvent(ctx, 'glossary_term_opened', { termId: 'inflation', article_id: 'a' });
+    // @ts-expect-error: correct_count missing
+    makeEvent(ctx, 'news_edition_completed', { edition: '2026-W41' });
+    // @ts-expect-error: map_opened carries nothing
+    makeEvent(ctx, 'map_opened', { location_id: 'home' });
+    expect(true).toBe(true);
+  });
+});
+
 describe('createSyncQueue', () => {
   it('keeps events offline and sends them in batches when back online', async () => {
     const storage = memory();

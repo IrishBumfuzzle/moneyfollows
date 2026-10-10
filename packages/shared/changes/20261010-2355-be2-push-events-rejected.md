@@ -27,6 +27,15 @@ Date: 2026-10-10 23:55 IST. Lane: BE-2. Nothing in `packages/shared/src` changed
 - Fallback: with no `rejected` (an older server), or a list that does not account for every event
   that was not accepted, the whole batch is dead-lettered as `'partial'`, as before.
 
+## Typed map and news events (`makeEvent`)
+
+- `SyncEventPayloads` / `SyncEventPayload<T>` (exported): the payloads of `map_opened`,
+  `location_selected`, `week_slept`, `glossary_term_opened`, `news_question_answered` and
+  `news_edition_completed`, with exactly the 5.5 keys. `makeEvent(ctx, type, payload)` checks
+  them at compile time (a camelCase or missing key is an error, and `week_slept` needs its
+  payload). Every other type keeps a free-form `Record<string, unknown>` payload, so existing
+  calls compile unchanged.
+
 ## Request for BE-1
 
 Add `rejected?: string[]` to `PushEventsResult` in `packages/shared/src/types.ts` when convenient;

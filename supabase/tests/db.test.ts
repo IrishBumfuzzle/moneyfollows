@@ -40,21 +40,12 @@ describe.skipIf(skipDbTests)('database', () => {
         },
     );
 
-  // The map and news types (5.5) until BE-1's contracts PR adds them to SyncEvent['type'].
-  type EventType =
-    | SyncEvent['type']
-    | 'map_opened'
-    | 'location_selected'
-    | 'week_slept'
-    | 'glossary_term_opened'
-    | 'news_question_answered'
-    | 'news_edition_completed';
   const ev = (
     s: JoinClassResult,
-    type: EventType,
+    type: SyncEvent['type'],
     payload: Record<string, unknown> = {},
     ts = '2026-10-10T10:00:00+05:30',
-  ): Omit<SyncEvent, 'type'> & { type: EventType } => ({
+  ): SyncEvent => ({
     event_id: randomUUID(),
     anon_id: s.anon_id,
     class_id: s.class_id,

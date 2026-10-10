@@ -1,4 +1,10 @@
-import { SYNC_BATCH_MAX, type PushEventsResult, type SyncEvent, type SyncEventType } from '@paisa/shared';
+import {
+  SYNC_BATCH_MAX,
+  type LocationId,
+  type PushEventsResult,
+  type SyncEvent,
+  type SyncEventType,
+} from '@paisa/shared';
 import { ApiError, isRetryableError } from './errors';
 
 /** Any async key-value store. idb-keyval's get/set fit as-is. */
@@ -279,13 +285,32 @@ export interface EventContext {
   content_version: string;
 }
 
+/**
+ * Payloads of the map and news events, with exactly the CLAUDE.md 5.5 keys (snake_case).
+ * push_events drops any other key. Other event types stay free-form.
+ */
+export interface SyncEventPayloads {
+  map_opened: Record<string, never>;
+  /** A place id, or a sub-map location id such as "convenience.phone_shop". */
+  location_selected: { location_id: LocationId | (string & {}) };
+  week_slept: { month: number; week: number };
+  glossary_term_opened: { term_id: string; article_id: string };
+  news_question_answered: { edition: string; article_id: string; correct: boolean; attempt: number };
+  news_edition_completed: { edition: string; correct_count: number };
+}
+
+export type SyncEventPayload<T extends SyncEventType> = T extends keyof SyncEventPayloads
+  ? SyncEventPayloads[T]
+  : Record<string, unknown>;
+
+/** The payload may be left out only for types whose payload can be empty. */
+type MakeEventArgs<T extends SyncEventType> =
+  Record<string, never> extends SyncEventPayload<T>
+    ? [payload?: SyncEventPayload<T>, now?: Date, id?: string]
+    : [payload: SyncEventPayload<T>, now?: Date, id?: string];
+
 /** Builds a SyncEvent with a device-generated id and timestamp. */
-export function makeEvent(
-  ctx: EventContext,
-  type: SyncEventType,
-  payload: Record<string, unknown> = {},
-  now: Date = new Date(),
-  id: string = crypto.randomUUID(),
-): SyncEvent {
-  return { event_id: id, ...ctx, type, payload, client_ts: now.toISOString() };
+export function makeEvent<T extends SyncEventType>(ctx: EventContext, type: T, ...args: MakeEventArgs<T>): SyncEvent {
+  const [payload = {}, now = new Date(), id = crypto.randomUUID()] = args;
+  return { event_id: id, ...ctx, type, payload: payload as Record<string, unknown>, client_ts: now.toISOString() };
 }
