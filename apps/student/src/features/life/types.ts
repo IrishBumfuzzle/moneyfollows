@@ -25,6 +25,9 @@ export interface LifeState {
   vitals: Vitals;
 }
 
+/** Pixel icons drawn by PixelIcon. */
+export type IconId = 'coin' | 'heart' | 'smile' | 'sack' | 'headphones';
+
 /** The convenience store's two options. */
 export type ShopKind = 'necessity' | 'want';
 
@@ -32,7 +35,7 @@ export interface ShopOffer {
   kind: ShopKind;
   label: TKey;
   hint: TKey;
-  icon: string;
+  icon: IconId;
   price: number;   // whole rupees, from the common wallet
   health: number;  // meter change, before clamping
   sanity: number;

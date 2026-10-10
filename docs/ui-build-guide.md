@@ -36,7 +36,7 @@ This split differs from CLAUDE.md §3, which puts onboarding with UI-1. Phase 0 
 | --- | --- |
 | Student app: Vite + React, one map screen (`LocationScreen`), the `PixelText` component | Works |
 | Classroom quiz at School (`features/classroom`, see `API.md`) | Works |
-| Life meters API: money, health, sanity; the store's necessity/want options, work, school (`features/life`, see `docs/life-meters-api.md`) | Frontend API and tests built; screens, engine and backend not yet |
+| Life meters API: money, health, sanity; the store's necessity/want options, work, school (`features/life`, see `docs/life-meters-api.md`) | Frontend API, meters bar and store sheet built; work/school buttons, engine and backend not yet |
 | Onboarding, Paisa Times, dashboard | Nothing yet |
 | `apps/dashboard` | Folder does not exist; `pnpm dev:dashboard` is in CLAUDE.md but not in `package.json` |
 | `packages/shared` (types), engine (`earn()`), content (editions, glossary, personas), api-client | Not created yet (backend lanes) |
@@ -332,7 +332,7 @@ Placeholders are fine in every phase: an emoji avatar or a grey box for an artic
 | Notes shows the Word Wallet | Other UI dev → you | They render your `<WordWallet />` inside Notes |
 | Demo panel "mark a new edition" | Other UI dev → you | Their panel calls your `markNewEdition()` |
 | Quiz scores for the dashboard | Other UI dev → BE-2 → you | Their `quiz_submitted` events; your dashboard reads `learning_gain` |
-| Meters bar, store sheet, work and school | Other UI dev | They call `lifeApi.shopOffers / buy / work / attendSchool` and render the result (`docs/life-meters-api.md` §6) |
+| Meters bar, store sheet, work and school | Other UI dev | `MetersBar` and `StoreSheet` are built; work and school buttons call `lifeApi.work / attendSchool` (`docs/life-meters-api.md` §6) |
 
 **Prompt 0a — record the new lanes**
 
