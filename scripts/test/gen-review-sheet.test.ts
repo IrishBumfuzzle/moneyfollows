@@ -112,3 +112,86 @@ describe('the real content', () => {
     expect(sheet).not.toContain('**MISSING**');
   });
 });
+
+describe('map and Paisa Times kinds', () => {
+  const article = {
+    id: 'upi_fraud',
+    edition: '2026-W41',
+    headline: 't:news.2026-W41.upi_fraud.headline',
+    body: 't:news.2026-W41.upi_fraud.body',
+    terms: ['upi'],
+    question: {
+      prompt: 't:news.2026-W41.upi_fraud.q',
+      options: ['t:news.2026-W41.upi_fraud.o1', 't:news.2026-W41.upi_fraud.o2'],
+      correct: 1,
+      explanation: 't:news.2026-W41.upi_fraud.why',
+    },
+    reward: { wage: 60, xp: 12 },
+    meta: draft,
+  };
+  const sheet = buildReviewSheet({
+    contentVersion: 'v',
+    files: [
+      {
+        path: 'news/2026-W41.json',
+        data: [article, { ...article, id: 'done', meta: { ...reviewed, factsCheckedBy: 'Asha' } }],
+      },
+      {
+        path: 'glossary.json',
+        data: [
+          {
+            id: 'upi',
+            word: 't:glossary.upi.word',
+            simple: 't:glossary.upi.simple',
+            example: 't:glossary.upi.example',
+          },
+        ],
+      },
+      {
+        path: 'places.json',
+        data: [
+          {
+            id: 'convenience.kirana',
+            name: 't:place.convenience.kirana',
+            parent: 'convenience',
+            position: { x: 10, y: 20 },
+          },
+        ],
+      },
+      {
+        path: 'scenarios/plan_budget.json',
+        data: [
+          {
+            id: 'budget.x.01',
+            location: 'convenience',
+            sublocation: 'convenience.phone_shop',
+            channel: 'phone',
+            speaker: 't:speaker.friend',
+            choices: [],
+            meta: draft,
+          },
+        ],
+      },
+    ],
+    i18n: { en: { 'news.2026-W41.upi_fraud.headline': 'The PIN trick' }, hi: {} },
+  });
+
+  it('lists draft articles with their reward, answer and a fact-check box', () => {
+    expect(sheet).toContain('### upi_fraud');
+    expect(sheet).toContain('- Edition 2026-W41 · glossary words: upi · pays ₹60 and 12 XP');
+    expect(sheet).toContain('- Correct answer: option 2 (`t:news.2026-W41.upi_fraud.o2`)');
+    expect(sheet).toContain('- [ ] Facts checked by: ________');
+    expect(sheet).not.toContain('### done');
+  });
+
+  it('shows where a card is played and who speaks', () => {
+    expect(sheet).toContain('- Place: convenience › convenience.phone_shop · phone chat · speaker `t:speaker.friend`');
+  });
+
+  it('lists glossary terms and places as reference sections, outside the draft count', () => {
+    expect(sheet).toContain('## `glossary.json` (reference: 1, no status to flip)');
+    expect(sheet).toContain('## `places.json` (reference: 1, no status to flip)');
+    expect(sheet).toContain('- Map position 10%, 20% · inside convenience');
+    expect(sheet).toContain('**2 draft** and 1 reviewed out of 3 items');
+  });
+});
