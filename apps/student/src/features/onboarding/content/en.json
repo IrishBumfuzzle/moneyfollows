@@ -1,0 +1,48 @@
+{
+  "onboarding.progress": "Step {{n}} of {{total}}",
+  "onboarding.back": "Back",
+  "onboarding.next": "Next",
+  "onboarding.start": "Start playing",
+  "onboarding.joining": "Joining your class…",
+  "onboarding.error.generic": "Something went wrong. Check your internet and try again.",
+
+  "onboarding.lang.title": "Choose your language",
+  "onboarding.lang.name": "English",
+
+  "onboarding.class.title": "Join your class",
+  "onboarding.class.label": "Class code",
+  "onboarding.class.hint": "Your teacher gives you this code.",
+  "onboarding.class.placeholder": "AB12CD",
+  "onboarding.class.join": "Join",
+  "onboarding.class.notFound": "We couldn't find that class. Check the code with your teacher and try again.",
+
+  "onboarding.nickname.title": "Pick a nickname and an avatar",
+  "onboarding.nickname.label": "Nickname",
+  "onboarding.nickname.hint": "A nickname, not your real name. Letters and numbers, up to 16.",
+  "onboarding.nickname.invalid": "Use only letters and numbers, with no spaces.",
+  "onboarding.nickname.rejected": "Please choose a different nickname.",
+  "onboarding.avatar.label": "Avatar",
+  "onboarding.avatar.tiger": "Tiger",
+  "onboarding.avatar.peacock": "Peacock",
+  "onboarding.avatar.elephant": "Elephant",
+  "onboarding.avatar.parrot": "Parrot",
+  "onboarding.avatar.lion": "Lion",
+  "onboarding.avatar.rabbit": "Rabbit",
+
+  "onboarding.persona.title": "Choose your character",
+  "onboarding.persona.age": "Age {{age}}",
+  "onboarding.persona.goal": "Goal: {{goal}}",
+  "persona.sana.name": "Sana",
+  "persona.sana.story": "First in her family to head to college. She teaches tuition.",
+  "persona.sana.income": "{{amount}} a month, steady",
+  "persona.sana.goal": "College admission fees",
+  "persona.ravi.name": "Ravi",
+  "persona.ravi.story": "Helps at his father's tiffin stall in the Old City.",
+  "persona.ravi.income": "{{amount}} a month, changes with sales",
+  "persona.ravi.goal": "A second-hand bike, {{amount}}",
+
+  "onboarding.howto.title": "How to play",
+  "onboarding.howto.pins": "Play opens the map. Glowing pins show this week's tasks.",
+  "onboarding.howto.choose": "Choose, then see what happens. Changed your mind? Rewind and try again.",
+  "onboarding.howto.week": "Sleep at Home to end the week. Read Paisa Times to earn your paper-route wage."
+}
