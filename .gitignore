@@ -1,1 +1,6 @@
 .env
+.serena
+.serena/
+node_modules
+dist
+apps/student/assets-src/schwarnhild/
