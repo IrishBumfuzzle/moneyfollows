@@ -194,6 +194,7 @@ export const SyncEventSchema = z.strictObject({
     'shop_purchase',
     'work_shift',
     'school_attended',
+    'day_rested',
   ]),
   payload: z.record(z.string(), z.unknown()),
   client_ts: z.iso.datetime({ offset: true }),

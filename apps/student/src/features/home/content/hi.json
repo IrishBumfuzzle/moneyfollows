@@ -1,0 +1,21 @@
+{
+  "home.title": "घर",
+  "home.close": "बंद करो",
+  "home.today": "महीना {{month}} · हफ़्ता {{week}} · दिन {{day}}",
+  "home.done.school": "स्कूल हो गया",
+  "home.done.work": "काम हो गया",
+  "home.todo.school": "स्कूल अभी बाकी",
+  "home.todo.work": "काम अभी बाकी",
+  "home.menu.label": "मेन्यू पर वापस",
+  "home.menu.hint": "अपने कमरे में जाओ।",
+  "home.rest.label": "आराम करो",
+  "home.rest.hint": "कल तक सो जाओ। मन की शांति +{{sanity}}, सेहत +{{health}}।",
+  "rest.scene": "घर पर रात। अम्मी तुम्हें बिस्तर में चादर ओढ़ाती हैं।",
+  "rest.ammi": "\"अच्छे से सो जाओ, बेटा। कल नया दिन है।\"",
+  "rest.skip": "आगे बढ़ो",
+  "rest.morning": "सुप्रभात!",
+  "rest.day": "दिन {{day}} · हफ़्ता {{week}} · महीना {{month}}",
+  "rest.new_week": "नया हफ़्ता शुरू।",
+  "rest.gained": "आराम मिला: मन की शांति +{{sanity}}, सेहत +{{health}}",
+  "rest.wake": "उठ जाओ"
+}

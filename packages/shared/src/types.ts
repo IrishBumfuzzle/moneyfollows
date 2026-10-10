@@ -324,7 +324,9 @@ export type SyncEventType =
   // Additive: life meters (docs/life-meters-api.md section 5 on main).
   | 'shop_purchase'
   | 'work_shift'
-  | 'school_attended';
+  | 'school_attended'
+  // Additive: a night's rest at home ends the day.
+  | 'day_rested';
 
 export interface SyncEvent {
   event_id: string; // uuid, generated on device
@@ -411,8 +413,10 @@ export interface ClassWellbeingRow {
   want_purchases: number;
   /** Rupees spent on wants. */
   want_spend: number;
-  /** Weeks with a work shift. */
+  /** Days with a work shift (weeks, for older events without a day). */
   work_shifts: number;
-  /** Weeks with a school day. */
+  /** Days with a school day (weeks, for older events without a day). */
   school_days: number;
+  /** Days rested at home. */
+  rest_days: number;
 }

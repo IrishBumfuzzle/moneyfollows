@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { WORK } from '../life/config';
 import { localLifeApi, startLife } from '../life/life';
+import type { LifeState } from '../life/types';
 import { STRINGS } from './content';
 import {
   CUSTOMERS_PER_SHIFT,
@@ -108,17 +109,18 @@ describe('shiftWage and work()', () => {
     expect(shiftWage([])).toBe(0);
   });
 
-  it('work() pays the shift wage once a week, capped at the weekly wage, never negative', () => {
-    const life = startLife();
-    const paid = localLifeApi.work(life, 120);
-    expect(paid.delta.money).toBe(120);
-    expect(paid.state.money).toBe(life.money + 120);
+  it('work() pays the shift wage once a day after school, capped at the full wage, never negative', () => {
+    const life: LifeState = localLifeApi.attendSchool(startLife()).state;
+    const before = JSON.stringify(life);
+    const paid = localLifeApi.work(life, 60);
+    expect(paid.delta.money).toBe(60);
+    expect(paid.state.money).toBe(life.money + 60);
     expect(paid.delta.sanity).toBe(WORK.sanity);
-    expect(localLifeApi.work(paid.state, 120).blocked).toBe('already_worked');
+    expect(localLifeApi.work(paid.state, 60).blocked).toBe('already_worked');
     expect(localLifeApi.work(life, 10_000).delta.money).toBe(WORK.wage);
     expect(localLifeApi.work(life, -50).delta.money).toBe(0);
     expect(localLifeApi.work(life).delta.money).toBe(WORK.wage);
-    expect(life).toEqual(startLife()); // input untouched
+    expect(JSON.stringify(life)).toBe(before); // input untouched
   });
 });
 

@@ -4,9 +4,14 @@ import type { IconId, ShopKind, TKey, Vitals } from './types';
 
 export const LIFE_CONTENT_VERSION = 'life-2026-10-10';
 
+// Both meters are out of 25, so every hit matters. Every effect below is sized for that.
 export const VITALS_MIN = 0;
-export const VITALS_MAX = 100;
-export const START_VITALS: Vitals = { health: 80, sanity: 70 };
+export const VITALS_MAX = 25;
+export const START_VITALS: Vitals = { health: 20, sanity: 18 };
+
+// The calendar: resting at home ends the day; 7 days make a week, 4 weeks a month.
+export const DAYS_PER_WEEK = 7;
+export const WEEKS_PER_MONTH = 4;
 // Placeholder until the persona's starting money comes from packages/content/personas.json
 // (Sana's starting jars add up to ₹2,000).
 export const START_MONEY = 2000;
@@ -22,8 +27,8 @@ export interface ShopOption {
 
 // Satisfaction scales with what you spend. Needs give more sanity per rupee; wants cost more,
 // so each one lifts sanity more, but at a lower rate per rupee. Needs also keep you healthy.
-export const SANITY_PER_100: Record<ShopKind, number> = { necessity: 4, want: 3 };
-export const NEED_HEALTH = 5;
+export const SANITY_PER_100: Record<ShopKind, number> = { necessity: 2, want: 1.5 };
+export const NEED_HEALTH = 3;
 /**
  * Sanity an item of this kind and price gives: whole points, at least 1. Needs round up and
  * wants round down, so every need's rate per rupee stays above every want's.
@@ -54,6 +59,7 @@ export const SHOP: Record<ShopKind, ShopOption> = {
   },
 };
 
-// Work and school both cost sanity. Each can be done once per week.
-export const WORK = { wage: 200, health: 0, sanity: -8 };
-export const SCHOOL = { health: 0, sanity: -5 };
+// School, then work, at most once each a day: both cost sanity. Resting at home brings some back.
+export const WORK = { wage: 100, health: 0, sanity: -4 };
+export const SCHOOL = { health: 0, sanity: -3 };
+export const REST = { health: 2, sanity: 6 };

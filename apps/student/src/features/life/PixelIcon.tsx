@@ -30,6 +30,8 @@ const ICONS: Record<IconId, readonly string[]> = {
   school: ['...kk...', '..krrk..', '.krrrrk.', 'kkkkkkkk', 'kwwkkwwk', 'kwwkkwwk', 'kwwkkwwk', 'kkkkkkkk'],
   cross: ['..kkkk..', '..kwwk..', 'kkkrrkkk', 'kwrrrrwk', 'kwrrrrwk', 'kkkrrkkk', '..kwwk..', '..kkkk..'],
   bandage: ['......kk', '.....kpk', '....kpwk', '...kwpk.', '..kpwk..', '.kwpk...', 'kpwk....', 'kkk.....'],
+  moon: ['..kkk...', '.kyyk...', 'kyyk....', 'kyok....', 'kyok....', 'kyyok.kk', '.kyyyyk.', '..kkkk..'],
+  house: ['...kk...', '..krrk..', '.krrrrk.', 'krrrrrrk', '.kwwwwk.', '.kwbbwk.', '.kwbbwk.', '.kkkkkk.'],
 };
 
 export function PixelIcon({ id, size = 16 }: { id: IconId; size?: number }) {

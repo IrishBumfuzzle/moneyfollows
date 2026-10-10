@@ -20,7 +20,7 @@ describe('shelf rules', () => {
     expect(worstNeed).toBeGreaterThan(bestWant);
   });
 
-  it('every need gives +5 health; wants give none', () => {
+  it('every need gives NEED_HEALTH health; wants give none', () => {
     for (const n of NEEDS) expect(n.health).toBe(NEED_HEALTH);
     for (const w of WANTS) expect(w.health).toBe(0);
   });

@@ -74,7 +74,7 @@ export function MainScreen({ profile, lang, onPlay, onOpenNews }: {
             <span className="ms-sr">{`${tr('main.money')}: ${money}`}</span>
             <span aria-hidden="true">{money}</span>
           </p>
-          <p className="k-panel ms-chip">{tr('main.week', { month: life.month, week: life.week })}</p>
+          <p className="k-panel ms-chip">{tr('main.week', { month: life.month, week: life.week, day: life.day })}</p>
         </div>
 
         <div className="ms-char" role="img" aria-label={tr('main.persona', { name })} style={{ backgroundImage: `url(/assets/main/${sprite}.png)` }} />

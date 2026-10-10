@@ -12,14 +12,14 @@ export const INJURY: SuddenEvent = {
   kind: 'sudden',
   title: 't:events.injury.title',
   story: 't:events.injury.story',
-  hit: { health: -30, sanity: -5 },
+  hit: { health: -15, sanity: -3 },
   billTitle: 't:events.injury.bill_title',
   bill: 't:events.injury.bill',
   choices: [
     {
       id: 'pay',
       label: 't:events.injury.pay.label',
-      effects: { money: -600, health: 25 },
+      effects: { money: -600, health: 13 },
       outcome: 't:events.injury.pay.outcome',
       lesson: 't:events.injury.pay.lesson',
       rating: 'best',
@@ -27,7 +27,7 @@ export const INJURY: SuddenEvent = {
     {
       id: 'borrow',
       label: 't:events.injury.borrow.label',
-      effects: { debt: 600, health: 25, sanity: -6 },
+      effects: { debt: 600, health: 13, sanity: -3 },
       outcome: 't:events.injury.borrow.outcome',
       lesson: 't:events.injury.borrow.lesson',
       rating: 'ok',
@@ -35,7 +35,7 @@ export const INJURY: SuddenEvent = {
     {
       id: 'rest',
       label: 't:events.injury.rest.label',
-      effects: { health: 5, sanity: -10 },
+      effects: { health: 3, sanity: -5 },
       outcome: 't:events.injury.rest.outcome',
       lesson: 't:events.injury.rest.lesson',
       rating: 'risky',
@@ -57,7 +57,7 @@ export const THREADS: PhoneThread[] = [
       {
         id: 'tap',
         label: 't:events.kyc.tap.label',
-        effects: { money: -500, sanity: -10 },
+        effects: { money: -500, sanity: -5 },
         ifShort: 'all',
         outcome: 't:events.kyc.tap.outcome',
         lesson: 't:events.kyc.lesson',
@@ -66,7 +66,7 @@ export const THREADS: PhoneThread[] = [
       {
         id: 'ignore',
         label: 't:events.kyc.ignore.label',
-        effects: { sanity: 2 },
+        effects: { sanity: 1 },
         outcome: 't:events.kyc.ignore.outcome',
         lesson: 't:events.kyc.lesson',
         rating: 'best',
@@ -84,7 +84,7 @@ export const THREADS: PhoneThread[] = [
       {
         id: 'accept',
         label: 't:events.tuition.accept.label',
-        effects: { money: 300, sanity: -4 },
+        effects: { money: 300, sanity: -2 },
         reply: 't:events.tuition.accept.reply',
         outcome: 't:events.tuition.accept.outcome',
         lesson: 't:events.tuition.lesson',
@@ -93,7 +93,7 @@ export const THREADS: PhoneThread[] = [
       {
         id: 'decline',
         label: 't:events.tuition.decline.label',
-        effects: { sanity: 2 },
+        effects: { sanity: 1 },
         reply: 't:events.tuition.decline.reply',
         outcome: 't:events.tuition.decline.outcome',
         lesson: 't:events.tuition.lesson',
@@ -111,7 +111,7 @@ export const THREADS: PhoneThread[] = [
       {
         id: 'pay',
         label: 't:events.lottery.pay.label',
-        effects: { money: -299, sanity: -8 },
+        effects: { money: -299, sanity: -4 },
         ifShort: 'all',
         reply: 't:events.lottery.pay.reply',
         outcome: 't:events.lottery.pay.outcome',
@@ -121,7 +121,7 @@ export const THREADS: PhoneThread[] = [
       {
         id: 'block',
         label: 't:events.lottery.block.label',
-        effects: { sanity: 2 },
+        effects: { sanity: 1 },
         outcome: 't:events.lottery.block.outcome',
         lesson: 't:events.lottery.lesson',
         rating: 'best',
@@ -165,7 +165,7 @@ export const THREADS: PhoneThread[] = [
       {
         id: 'send',
         label: 't:events.double.send.label',
-        effects: { money: -1000, sanity: -12 },
+        effects: { money: -1000, sanity: -6 },
         ifShort: 'all',
         reply: 't:events.double.send.reply',
         outcome: 't:events.double.send.outcome',
@@ -175,7 +175,7 @@ export const THREADS: PhoneThread[] = [
       {
         id: 'ignore',
         label: 't:events.double.ignore.label',
-        effects: { sanity: 2 },
+        effects: { sanity: 1 },
         outcome: 't:events.double.ignore.outcome',
         lesson: 't:events.double.lesson',
         rating: 'best',
@@ -193,7 +193,7 @@ export const THREADS: PhoneThread[] = [
       {
         id: 'accept',
         label: 't:events.shift.accept.label',
-        effects: { money: 250, sanity: -5 },
+        effects: { money: 250, sanity: -3 },
         reply: 't:events.shift.accept.reply',
         outcome: 't:events.shift.accept.outcome',
         lesson: 't:events.shift.lesson',
@@ -220,7 +220,7 @@ export const THREADS: PhoneThread[] = [
       {
         id: 'share',
         label: 't:events.otp.share.label',
-        effects: { money: -800, sanity: -12 },
+        effects: { money: -800, sanity: -6 },
         ifShort: 'all',
         reply: 't:events.otp.share.reply',
         outcome: 't:events.otp.share.outcome',
@@ -230,7 +230,7 @@ export const THREADS: PhoneThread[] = [
       {
         id: 'refuse',
         label: 't:events.otp.refuse.label',
-        effects: { sanity: 2 },
+        effects: { sanity: 1 },
         outcome: 't:events.otp.refuse.outcome',
         lesson: 't:events.otp.lesson',
         rating: 'best',
@@ -253,7 +253,7 @@ export const CALLS: PhoneCall[] = [
       {
         id: 'tell',
         label: 't:events.call_bank.tell.label',
-        effects: { money: -700, sanity: -12 },
+        effects: { money: -700, sanity: -6 },
         ifShort: 'all',
         reply: 't:events.call_bank.tell.reply',
         outcome: 't:events.call_bank.tell.outcome',
@@ -263,7 +263,7 @@ export const CALLS: PhoneCall[] = [
       {
         id: 'hang_up',
         label: 't:events.call_bank.hang_up.label',
-        effects: { sanity: 2 },
+        effects: { sanity: 1 },
         outcome: 't:events.call_bank.hang_up.outcome',
         lesson: 't:events.call_bank.lesson',
         rating: 'best',
@@ -283,7 +283,7 @@ export const CALLS: PhoneCall[] = [
       {
         id: 'help',
         label: 't:events.call_ammi.help.label',
-        effects: { money: -150, sanity: 4 },
+        effects: { money: -150, sanity: 2 },
         reply: 't:events.call_ammi.help.reply',
         outcome: 't:events.call_ammi.help.outcome',
         lesson: 't:events.call_ammi.lesson',
@@ -292,7 +292,7 @@ export const CALLS: PhoneCall[] = [
       {
         id: 'later',
         label: 't:events.call_ammi.later.label',
-        effects: { sanity: -2 },
+        effects: { sanity: -1 },
         reply: 't:events.call_ammi.later.reply',
         outcome: 't:events.call_ammi.later.outcome',
         lesson: 't:events.call_ammi.lesson',

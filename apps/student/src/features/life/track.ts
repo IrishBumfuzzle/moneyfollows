@@ -1,4 +1,4 @@
-// Sends a life action (store purchase, work, school) to the backend (docs/life-meters-api.md §5).
+// Sends a life action (store purchase, work, school, rest) to the backend (docs/life-meters-api.md §5).
 import { track } from '../../api/track';
 import { lifeEvent } from './life';
 import type { LifeAction } from './life';

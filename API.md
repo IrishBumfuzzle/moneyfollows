@@ -17,6 +17,7 @@ The School place on the map opens the **Classroom**, a practice quiz (5 question
 | ✅ built | Result sent as `quiz_submitted` through the sync queue; quiz logic in `packages/engine`, questions in `packages/content`; the start- and end-of-term checks run in the same screen |
 | ✅ built (client) | Classroom setup from the class: question count and pillars (§5.5), with offline fallback |
 | 🟡 proposed | Backend: `classroom` setting on the class, returned by `class_status`, set by the facilitator (§5.5). BE-2 to build |
+| ✅ built | A finished classroom round is the day's school (`school_attended`); store, work and rest events are listed in `docs/life-meters-api.md` §5 |
 
 ---
 
