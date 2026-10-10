@@ -1,0 +1,21 @@
+{
+  "home.title": "Home",
+  "home.close": "Close",
+  "home.today": "Month {{month}} · Week {{week}} · Day {{day}}",
+  "home.done.school": "School done",
+  "home.done.work": "Work done",
+  "home.todo.school": "School not yet",
+  "home.todo.work": "Work not yet",
+  "home.menu.label": "Back to the menu",
+  "home.menu.hint": "Go to your room.",
+  "home.rest.label": "Take rest",
+  "home.rest.hint": "Sleep until tomorrow. Sanity +{{sanity}}, health +{{health}}.",
+  "rest.scene": "Night at home. Ammi tucks you into bed.",
+  "rest.ammi": "\"Sleep well, beta. Tomorrow is a new day.\"",
+  "rest.skip": "Skip",
+  "rest.morning": "Good morning!",
+  "rest.day": "Day {{day}} · Week {{week}} · Month {{month}}",
+  "rest.new_week": "A new week begins.",
+  "rest.gained": "Rested: sanity +{{sanity}}, health +{{health}}",
+  "rest.wake": "Wake up"
+}

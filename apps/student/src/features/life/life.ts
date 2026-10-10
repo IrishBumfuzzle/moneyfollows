@@ -1,9 +1,21 @@
-// Life actions API: the convenience store's two options, working, and going to school.
+// Life actions API: the convenience store's two options, working, going to school and resting.
 // The screens call only `lifeApi`. Today it is a local stand-in with the engine's rules
 // (CLAUDE.md 4: pure, no DOM, no clock, no randomness, never mutates its input). When BE-1
 // ships buy/work/attendSchool in packages/engine (docs/life-meters-api.md §4), point
 // `lifeApi` at those and delete the stand-in below; the screens don't change.
-import { LIFE_CONTENT_VERSION, SCHOOL, SHOP, START_MONEY, START_VITALS, VITALS_MAX, VITALS_MIN, WORK } from './config';
+import {
+  DAYS_PER_WEEK,
+  LIFE_CONTENT_VERSION,
+  REST,
+  SCHOOL,
+  SHOP,
+  START_MONEY,
+  START_VITALS,
+  VITALS_MAX,
+  VITALS_MIN,
+  WEEKS_PER_MONTH,
+  WORK,
+} from './config';
 import type {
   LifeBlock,
   LifeDelta,
@@ -21,9 +33,15 @@ import type {
 export interface LifeApi {
   shopOffers<S extends LifeState>(state: S): ShopOffer[];
   buy<S extends LifeState>(state: S, kind: ShopKind): LifeOutcome<S>;
-  /** One shift a week. `wage` is what the shift earned (the Counter Shift pays per customer), 0 to WORK.wage. */
+  /**
+   * One shift a day, and only after school that day. `wage` is what the shift earned (the
+   * Counter Shift pays per customer), 0 to WORK.wage.
+   */
   work<S extends LifeState>(state: S, wage?: number): LifeOutcome<S>;
+  /** Once a day. */
   attendSchool<S extends LifeState>(state: S): LifeOutcome<S>;
+  /** Sleep at home: brings back some health and sanity and moves to the next day (week, month). */
+  rest<S extends LifeState>(state: S): LifeOutcome<S>;
   /** Applies an event or phone choice's effects. A spend beyond the wallet follows `ifShort`. */
   applyEffects<S extends LifeState>(state: S, effects: LifeEffects, ifShort?: ShortMode): LifeOutcome<S>;
   /** Pays back as much debt as the wallet allows. */
@@ -39,12 +57,22 @@ export function startVitals(): Vitals {
 
 /** A fresh life state for screens to play with until the shared game store exists. */
 export function startLife(): LifeState {
-  return { month: 1, week: 1, money: START_MONEY, debt: 0, flags: [], earned: [], vitals: startVitals() };
+  return { month: 1, week: 1, day: 1, money: START_MONEY, debt: 0, flags: [], earned: [], vitals: startVitals() };
 }
 
-/** Once-per-week keys. Work uses the engine's earn() sourceId convention. */
-export const workSourceId = (s: LifeState) => `work:${s.month}:${s.week}`;
-export const schoolFlag = (s: LifeState) => `school:${s.month}:${s.week}`;
+/** Once-per-day keys. Work uses the engine's earn() sourceId convention. */
+const today = (s: LifeState) => `${s.month}:${s.week}:${s.day}`;
+export const workSourceId = (s: LifeState) => `work:${today(s)}`;
+export const schoolFlag = (s: LifeState) => `school:${today(s)}`;
+export const workedToday = (s: LifeState) => s.earned.includes(workSourceId(s));
+export const schoolToday = (s: LifeState) => s.flags.includes(schoolFlag(s));
+
+/** The day after `s`: day 7 rolls the week, week 4 rolls the month. */
+export function nextDay(s: Pick<LifeState, 'month' | 'week' | 'day'>) {
+  if (s.day < DAYS_PER_WEEK) return { month: s.month, week: s.week, day: s.day + 1 };
+  if (s.week < WEEKS_PER_MONTH) return { month: s.month, week: s.week + 1, day: 1 };
+  return { month: s.month + 1, week: 1, day: 1 };
+}
 
 function blocked<S extends LifeState>(state: S, reason: LifeBlock): LifeOutcome<S> {
   return { state, delta: { money: 0, health: 0, sanity: 0 }, blocked: reason };
@@ -76,6 +104,7 @@ export const localLifeApi: LifeApi = {
   work(state, wage = WORK.wage) {
     const id = workSourceId(state);
     if (state.earned.includes(id)) return blocked(state, 'already_worked');
+    if (!schoolToday(state)) return blocked(state, 'school_first');
     const pay = Math.max(0, Math.min(WORK.wage, Math.floor(wage)));
     const v = applyVitals(state.vitals, WORK.health, WORK.sanity);
     const delta: LifeDelta = { money: pay, health: v.health, sanity: v.sanity };
@@ -96,6 +125,14 @@ export const localLifeApi: LifeApi = {
     const v = applyVitals(state.vitals, SCHOOL.health, SCHOOL.sanity);
     return {
       state: { ...state, flags: [...state.flags, flag], vitals: v.vitals },
+      delta: { money: 0, health: v.health, sanity: v.sanity },
+    };
+  },
+
+  rest(state) {
+    const v = applyVitals(state.vitals, REST.health, REST.sanity);
+    return {
+      state: { ...state, ...nextDay(state), vitals: v.vitals },
       delta: { money: 0, health: v.health, sanity: v.sanity },
     };
   },

@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { NEED_HEALTH, SCHOOL, SHOP, WORK } from './config';
+import { DAYS_PER_WEEK, NEED_HEALTH, REST, SCHOOL, SHOP, VITALS_MAX, WORK } from './config';
 import en from './content/en.json';
 import hi from './content/hi.json';
-import { localLifeApi as api, startVitals, toLifeEvent } from './life';
+import { localLifeApi as api, nextDay, startVitals, toLifeEvent } from './life';
 import type { LifeState } from './types';
 
 const base: LifeState = {
   month: 1,
   week: 2,
+  day: 3,
   money: 1000,
   debt: 0,
   flags: [],
@@ -68,23 +69,54 @@ describe('buy', () => {
   });
 });
 
+// Work needs school first that day.
+const schooled = api.attendSchool(base).state;
+
 describe('work', () => {
   it('pays the wage into the wallet and lowers sanity', () => {
-    const { state, delta } = api.work(base);
+    const { state, delta } = api.work(schooled);
     expect(state.money).toBe(1000 + WORK.wage);
     expect(delta).toEqual({ money: WORK.wage, health: 0, sanity: WORK.sanity });
-    expect(state.earned).toEqual(['work:1:2']);
+    expect(state.earned).toEqual(['work:1:2:3']);
   });
 
-  it('pays once per week, again the next week', () => {
-    const worked = api.work(base).state;
+  it('only after school that day', () => {
+    expect(api.work(base).blocked).toBe('school_first');
+    expect(api.work(base).state).toBe(base);
+  });
+
+  it('pays once a day, and again the next day after school', () => {
+    const worked = api.work(schooled).state;
     expect(api.work(worked).blocked).toBe('already_worked');
-    expect(api.work({ ...worked, week: 3 }).blocked).toBeUndefined();
+    const tomorrow = api.rest(worked).state;
+    expect(api.work(tomorrow).blocked).toBe('school_first');
+    expect(api.work(api.attendSchool(tomorrow).state).blocked).toBeUndefined();
+  });
+});
+
+describe('rest', () => {
+  it('brings back some health and sanity and moves to the next day', () => {
+    const low = { ...base, vitals: { health: 10, sanity: 5 } };
+    const { state, delta } = api.rest(low);
+    expect(delta).toEqual({ money: 0, health: REST.health, sanity: REST.sanity });
+    expect([state.month, state.week, state.day]).toEqual([1, 2, 4]);
+    expect(state.vitals).toEqual({ health: 10 + REST.health, sanity: 5 + REST.sanity });
+  });
+
+  it('never goes past the top of the meters', () => {
+    const full = { ...base, vitals: { health: VITALS_MAX, sanity: VITALS_MAX - 1 } };
+    expect(api.rest(full).state.vitals).toEqual({ health: VITALS_MAX, sanity: VITALS_MAX });
+  });
+
+  it('rolls day 7 into the next week, and week 4 into the next month', () => {
+    expect(nextDay({ month: 1, week: 2, day: 3 })).toEqual({ month: 1, week: 2, day: 4 });
+    expect(nextDay({ month: 1, week: 2, day: DAYS_PER_WEEK })).toEqual({ month: 1, week: 3, day: 1 });
+    expect(nextDay({ month: 1, week: 4, day: DAYS_PER_WEEK })).toEqual({ month: 2, week: 1, day: 1 });
   });
 });
 
 describe('attendSchool', () => {
-  it('lowers sanity, costs nothing, once per week', () => {
+  it('lowers sanity, costs nothing, once a day', () => {
     const { state, delta } = api.attendSchool(base);
     expect(state.money).toBe(base.money);
     expect(delta).toEqual({ money: 0, health: 0, sanity: SCHOOL.sanity });
@@ -93,12 +125,12 @@ describe('attendSchool', () => {
 });
 
 describe('rules', () => {
-  it('meters stay within 0–100 and the delta reports the clamped change', () => {
-    const high = { ...base, vitals: { health: 80, sanity: 98 } };
+  it('meters stay within 0–25 and the delta reports the clamped change', () => {
+    const high = { ...base, vitals: { health: 20, sanity: VITALS_MAX - 2 } };
     const up = api.buy(high, 'want');
-    expect(up.state.vitals.sanity).toBe(100);
+    expect(up.state.vitals.sanity).toBe(VITALS_MAX);
     expect(up.delta.sanity).toBe(2);
-    const low = { ...base, vitals: { health: 80, sanity: 3 } };
+    const low = { ...schooled, vitals: { health: 20, sanity: 3 } };
     const down = api.work(low);
     expect(down.state.vitals.sanity).toBe(0);
     expect(down.delta.sanity).toBe(-3);
@@ -107,14 +139,14 @@ describe('rules', () => {
   it('never mutates its input and keeps extra GameState fields', () => {
     const frozen = deepFreeze({ ...base, seed: 7, rewindTokens: 3 });
     const a = api.buy(frozen, 'necessity').state;
-    const b = api.work(a).state;
-    const c = api.attendSchool(b).state;
+    const b = api.attendSchool(a).state;
+    const c = api.rest(api.work(b).state).state;
     expect(c.seed).toBe(7);
     expect(c.rewindTokens).toBe(3);
   });
 
   it('is deterministic and JSON round-trips', () => {
-    const run = () => api.attendSchool(api.work(api.buy(base, 'want').state).state).state;
+    const run = () => api.rest(api.work(api.attendSchool(api.buy(base, 'want').state).state).state).state;
     expect(run()).toEqual(run());
     expect(JSON.parse(JSON.stringify(run()))).toEqual(run());
   });
@@ -133,7 +165,7 @@ describe('toLifeEvent', () => {
     const buy = toLifeEvent({ kind: 'buy', shop: 'want' }, base, api.buy(base, 'want'), ctx)!;
     expect(buy.type).toBe('shop_purchase');
     expect(buy.payload).toEqual({ month: 1, week: 2, health: 0, sanity: SHOP.want.sanity, kind: 'want', price: SHOP.want.price });
-    expect(toLifeEvent({ kind: 'work' }, base, api.work(base), ctx)!.payload.wage).toBe(WORK.wage);
+    expect(toLifeEvent({ kind: 'work' }, schooled, api.work(schooled), ctx)!.payload.wage).toBe(WORK.wage);
     expect(toLifeEvent({ kind: 'school' }, base, api.attendSchool(base), ctx)!.type).toBe('school_attended');
     // push_events keeps only numbers and id-like strings (^[A-Za-z0-9_.:-]{1,64}$).
     for (const v of Object.values(buy.payload)) {
@@ -142,7 +174,7 @@ describe('toLifeEvent', () => {
   });
 
   it('sends nothing for a blocked action', () => {
-    const worked = api.work(base).state;
+    const worked = api.work(schooled).state;
     expect(toLifeEvent({ kind: 'work' }, worked, api.work(worked), ctx)).toBeNull();
   });
 });
@@ -166,9 +198,9 @@ describe('applyEffects and repay (events, phone threads)', () => {
   });
 
   it('borrowing adds debt; health and sanity clamp; earning adds money', () => {
-    const out = api.applyEffects({ ...base, vitals: { health: 90, sanity: 70 } }, { debt: 600, health: 25, sanity: -6 });
-    expect(out.state).toMatchObject({ money: 1000, debt: 600, vitals: { health: 100, sanity: 64 } });
-    expect(out.delta).toEqual({ money: 0, health: 10, sanity: -6, debt: 600 });
+    const out = api.applyEffects({ ...base, vitals: { health: 20, sanity: 18 } }, { debt: 600, health: 13, sanity: -3 });
+    expect(out.state).toMatchObject({ money: 1000, debt: 600, vitals: { health: VITALS_MAX, sanity: 15 } });
+    expect(out.delta).toEqual({ money: 0, health: 5, sanity: -3, debt: 600 });
     expect(api.applyEffects(base, { money: 300 }).state.money).toBe(1300);
   });
 

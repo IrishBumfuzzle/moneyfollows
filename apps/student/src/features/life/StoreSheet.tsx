@@ -10,14 +10,14 @@ import './life.css';
 
 /**
  * The convenience store as a bottom sheet over the map: go shopping (the Kirana Run mini-game)
- * or work a shift at the counter (the Counter Shift mini-game). The games do the buying and
- * earning; this sheet only opens them.
+ * or work a shift at the counter (the Counter Shift mini-game; once a day, after school). The
+ * games do the buying and earning; this sheet only opens them.
  */
-export function StoreSheet({ lang, state, worked, onShop, onWork, onClose }: {
+export function StoreSheet({ lang, state, work, onShop, onWork, onClose }: {
   lang: Lang;
   state: LifeState;
-  /** Already worked this week: the counter shift is practice only. */
-  worked: boolean;
+  /** Work is once a day, after school: 'open', 'practice' (already worked today) or 'school_first'. */
+  work: 'open' | 'practice' | 'school_first';
   onShop: () => void;
   onWork: () => void;
   onClose: () => void;
@@ -62,15 +62,22 @@ export function StoreSheet({ lang, state, worked, onShop, onWork, onClose }: {
               <span className="lf-offer-hint">{storeT(lang, 'store.sheet.shop.hint')}</span>
             </span>
           </button>
-          <button className="k-btn lf-offer" onClick={onWork}>
+          <button
+            className={`k-btn lf-offer ${work === 'school_first' ? 'is-dim' : ''}`}
+            aria-disabled={work === 'school_first'}
+            onClick={() => work !== 'school_first' && onWork()}
+          >
             <span className="lf-offer-icon">
               <PixelIcon id="coin" size={32} />
             </span>
             <span className="lf-offer-body">
               <span className="lf-offer-label">{storeT(lang, 'counter.store.label')}</span>
               <span className="lf-offer-hint">
-                {worked ? storeT(lang, 'counter.store.practice') : storeT(lang, 'counter.store.hint', { money: rupees(WORK.wage) })}
+                {work === 'practice'
+                  ? storeT(lang, 'counter.store.practice')
+                  : storeT(lang, 'counter.store.hint', { money: rupees(WORK.wage) })}
               </span>
+              {work === 'school_first' && <span className="lf-offer-why">{storeT(lang, 'counter.store.school_first')}</span>}
             </span>
           </button>
         </div>

@@ -1,6 +1,6 @@
 {
   "main.title": "{{name}} का कमरा",
-  "main.week": "महीना {{month}} · हफ़्ता {{week}}",
+  "main.week": "महीना {{month}} · हफ़्ता {{week}} · दिन {{day}}",
   "main.money": "पैसे",
   "main.greeting": "नमस्ते, {{nickname}}!",
   "main.rejoin": "वापसी कोड: {{code}}",

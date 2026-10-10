@@ -3,6 +3,7 @@
 // GameState and these actions call the engine. Saved to IndexedDB so a reload keeps progress.
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import { VITALS_MAX } from '../features/life/config';
 import { startLife } from '../features/life/life';
 import type { LifeDelta, LifeOutcome, LifeState } from '../features/life/types';
 import { idbStorage } from './storage';
@@ -53,11 +54,16 @@ export const useGame = create<GameStore>()(
     }),
     {
       name: 'paisa.game',
-      version: 2,
-      // v1 saves had no debt.
+      version: 3,
+      // v1 saves had no debt. v2 saves had no day and meters out of 100 (now 25).
       migrate: (saved, version) => {
         const s = saved as { life: LifeState };
         if (version < 2) s.life = { ...s.life, debt: s.life.debt ?? 0 };
+        if (version < 3) {
+          const quarter = (n: number) => Math.min(VITALS_MAX, Math.max(0, Math.round(n / 4)));
+          const v = s.life.vitals;
+          s.life = { ...s.life, day: 1, vitals: { health: quarter(v.health), sanity: quarter(v.sanity) } };
+        }
         return s as GameStore;
       },
       storage: createJSONStorage(() => idbStorage),

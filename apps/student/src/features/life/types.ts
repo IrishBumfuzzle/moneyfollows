@@ -2,7 +2,7 @@
 export type { TKey } from '@paisa/shared';
 import type { TKey } from '@paisa/shared';
 
-/** Both meters are whole numbers, clamped to 0–100. */
+/** Both meters are whole numbers, clamped to 0–25 (VITALS_MAX). */
 export interface Vitals {
   health: number;
   sanity: number;
@@ -17,6 +17,7 @@ export interface Vitals {
 export interface LifeState {
   month: number;
   week: number;
+  day: number;     // 1–7 within the week; resting at home moves to the next
   money: number;
   debt: number;    // whole rupees owed (e.g. a family loan for a hospital bill); never negative
   flags: string[];
@@ -25,7 +26,7 @@ export interface LifeState {
 }
 
 /** Pixel icons drawn by PixelIcon. */
-export type IconId = 'coin' | 'heart' | 'smile' | 'sack' | 'headphones' | 'phone' | 'warn' | 'person' | 'school' | 'cross' | 'bandage';
+export type IconId = 'coin' | 'heart' | 'smile' | 'sack' | 'headphones' | 'phone' | 'warn' | 'person' | 'school' | 'cross' | 'bandage' | 'moon' | 'house';
 
 /** The convenience store's two options. */
 export type ShopKind = 'necessity' | 'want';
@@ -63,7 +64,7 @@ export interface LifeEffects {
  */
 export type ShortMode = 'block' | 'all';
 
-export type LifeBlock = 'not_enough_money' | 'already_worked' | 'already_at_school' | 'no_debt';
+export type LifeBlock = 'not_enough_money' | 'already_worked' | 'school_first' | 'already_at_school' | 'no_debt';
 
 /** A blocked action returns the input state unchanged (same object) and a zero delta. */
 export interface LifeOutcome<S extends LifeState> {

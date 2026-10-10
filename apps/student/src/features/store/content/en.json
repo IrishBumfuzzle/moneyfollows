@@ -6,7 +6,7 @@
   "counter.intro.title": "Work at the kirana counter",
   "counter.intro.body": "Serve {{total}} customers. Give the right change for cash. For UPI, check your own phone before you hand over the bag.",
   "counter.intro.pay": "You earn {{money}} for each customer served right. Work is tiring: sanity −{{sanity}}.",
-  "counter.intro.practice": "You already worked this week, so this shift is practice. No pay, no tiredness.",
+  "counter.intro.practice": "You already worked today, so this shift is practice. No pay, no tiredness.",
   "counter.start": "Open the counter",
   "counter.who.aunty": "Aunty",
   "counter.who.uncle": "Uncle",
@@ -59,8 +59,8 @@
   "counter.done.practice": "Practice shift: a real shift would have paid {{money}}.",
   "counter.done.back": "Back to the store",
   "counter.store.label": "Work the counter",
-  "counter.store.hint": "Serve 5 customers for up to {{money}}. Tiring: sanity goes down.",
-  "counter.store.practice": "You already worked this week. Play for practice.",
+  "counter.store.hint": "After school, serve 5 customers for up to {{money}}. Tiring: sanity goes down.",
+  "counter.store.practice": "You already worked today. Play for practice.",
   "store.item.chocolates": "Box of chocolates",
   "store.item.comics": "Comic books",
   "store.item.phone_cover": "Phone cover",
@@ -100,5 +100,6 @@
   "kirana.lesson.with_wants": "Wants feel good, but each rupee on needs went further for your mood, and needs kept you healthy.",
   "kirana.lesson.needs_only": "Needs first: your rupees went further for your mood and kept you healthy.",
   "kirana.lesson.wants_only": "Only wants this time. They cost more for each bit of mood, and Ammi's list is still waiting.",
-  "kirana.done": "Back to the store"
+  "kirana.done": "Back to the store",
+  "counter.store.school_first": "Go to school first. You can work after school."
 }

@@ -19,7 +19,7 @@ export interface ShelfItem {
 }
 
 const WANT_PRICES: readonly { id: WantId; price: number }[] = [
-  { id: 'chocolates', price: 260 },
+  { id: 'chocolates', price: 270 },
   { id: 'comics', price: 280 },
   { id: 'phone_cover', price: 300 },
   { id: 'tshirt', price: 350 },
