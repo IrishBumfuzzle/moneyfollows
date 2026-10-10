@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
+import { t as storeT } from '../store/content';
+import { WORK } from './config';
 import { rupees, signed, signedRupees, t } from './content';
 import type { Lang } from './content';
 import { lifeApi } from './life';
@@ -8,13 +10,17 @@ import '../../design/kenney.css';
 import './life.css';
 
 /**
- * The convenience store's two options as a bottom sheet over the map. It only asks lifeApi
- * and reports the outcome; the parent owns the state (and later queues toLifeEvent).
+ * The convenience store's two options as a bottom sheet over the map, plus a shift at the
+ * counter (the Counter Shift mini-game). It only asks lifeApi and reports the outcome; the
+ * parent owns the state (and later queues toLifeEvent).
  */
-export function StoreSheet<S extends LifeState>({ lang, state, onBuy, onClose }: {
+export function StoreSheet<S extends LifeState>({ lang, state, worked, onBuy, onWork, onClose }: {
   lang: Lang;
   state: S;
+  /** Already worked this week: the counter shift is practice only. */
+  worked: boolean;
   onBuy: (kind: ShopKind, outcome: LifeOutcome<S>) => void;
+  onWork: () => void;
   onClose: () => void;
 }) {
   const tr = (key: string, vars?: Record<string, string | number>) => t(lang, key, vars);
@@ -81,6 +87,17 @@ export function StoreSheet<S extends LifeState>({ lang, state, onBuy, onClose }:
               </span>
             </button>
           ))}
+          <button className="k-btn lf-offer" onClick={onWork}>
+            <span className="lf-offer-icon">
+              <PixelIcon id="coin" size={32} />
+            </span>
+            <span className="lf-offer-body">
+              <span className="lf-offer-label">{storeT(lang, 'counter.store.label')}</span>
+              <span className="lf-offer-hint">
+                {worked ? storeT(lang, 'counter.store.practice') : storeT(lang, 'counter.store.hint', { money: rupees(WORK.wage) })}
+              </span>
+            </span>
+          </button>
         </div>
 
         <p className="lf-status" role="status" aria-live="polite">

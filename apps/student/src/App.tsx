@@ -12,6 +12,7 @@ import type { ClassroomConfig } from './features/classroom/config';
 import { PhoneLayer, SuddenEventSheet, triggerEvent, useEvents } from './features/events';
 import { IncomingCall, PhoneScreen } from './features/phone';
 import type { PhoneNav } from './features/phone';
+import { lifeApi, workSourceId } from './features/life/life';
 import { MetersBar } from './features/life/MetersBar';
 import { StoreSheet } from './features/life/StoreSheet';
 import { trackLife } from './features/life/track';
@@ -19,6 +20,7 @@ import { t as mainT } from './features/main/content';
 import { MainScreen } from './features/main/MainScreen';
 import { PaisaTimes } from './features/news';
 import { Onboarding, loadProfile } from './features/onboarding';
+import { CounterShift } from './features/store';
 import { OfflineBanner } from './features/sync/OfflineBanner';
 import type { Profile } from './features/onboarding';
 import { useStoresHydrated } from './game/hydration';
@@ -26,10 +28,10 @@ import { useGame } from './game/useGame';
 import { LocationScreen } from './screens/LocationScreen';
 import './design/kenney.css';
 
-type Screen = 'main' | 'map' | 'classroom' | 'store' | 'news' | 'phone';
-const SCREENS: Screen[] = ['main', 'map', 'classroom', 'store', 'news', 'phone'];
+type Screen = 'main' | 'map' | 'classroom' | 'store' | 'counter' | 'news' | 'phone';
+const SCREENS: Screen[] = ['main', 'map', 'classroom', 'store', 'counter', 'news', 'phone'];
 
-// No router or language picker yet: ?lang=hi switches language, ?screen=map|classroom|store|news|phone
+// No router or language picker yet: ?lang=hi switches language, ?screen=map|classroom|store|counter|news|phone
 // opens that screen directly, ?seed=N fixes the quiz, ?event=<id> fires an event (demo / tests).
 const params = new URLSearchParams(window.location.search);
 const LANG: Lang = params.get('lang') === 'hi' ? 'hi' : 'en';
@@ -101,7 +103,7 @@ function Game({ profile, setProfile, lang, onLang, onOpenClassroom }: {
     window.history.pushState({ screen: s }, '');
     setScreen(s);
   };
-  const parentOf = (s: Screen): Screen => (s === 'store' || s === 'classroom' ? 'map' : 'main');
+  const parentOf = (s: Screen): Screen => (s === 'counter' ? 'store' : s === 'store' || s === 'classroom' ? 'map' : 'main');
   const back = useCallback(() => {
     const from = screenOf(window.history.state);
     if (!(window.history.state as { screen?: Screen } | null)?.screen) return setScreen((s) => parentOf(s));
@@ -191,6 +193,22 @@ function Game({ profile, setProfile, lang, onLang, onOpenClassroom }: {
       />
     );
   }
+  const worked = life.earned.includes(workSourceId(life));
+  if (screen === 'counter') {
+    return (
+      <CounterShift
+        lang={lang}
+        // A new customer queue each week; ?seed= fixes it for demos and tests.
+        seed={(SEED + life.month * 8 + life.week) >>> 0}
+        practice={worked}
+        onFinish={(wage) => {
+          // One paid shift a week (lifeApi.work blocks a second); practice pays nothing.
+          if (!worked) apply(lifeApi.work(useGame.getState().life, wage));
+        }}
+        onExit={back}
+      />
+    );
+  }
   return (
     <>
       <LocationScreen
@@ -208,6 +226,8 @@ function Game({ profile, setProfile, lang, onLang, onOpenClassroom }: {
         <StoreSheet
           lang={lang}
           state={life}
+          worked={worked}
+          onWork={() => open('counter')}
           onBuy={(kind, out) => {
             trackLife({ kind: 'buy', shop: kind }, life, out);
             apply(out);

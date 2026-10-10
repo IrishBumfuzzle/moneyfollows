@@ -21,7 +21,8 @@ import type {
 export interface LifeApi {
   shopOffers<S extends LifeState>(state: S): ShopOffer[];
   buy<S extends LifeState>(state: S, kind: ShopKind): LifeOutcome<S>;
-  work<S extends LifeState>(state: S): LifeOutcome<S>;
+  /** One shift a week. `wage` is what the shift earned (the Counter Shift pays per customer), 0 to WORK.wage. */
+  work<S extends LifeState>(state: S, wage?: number): LifeOutcome<S>;
   attendSchool<S extends LifeState>(state: S): LifeOutcome<S>;
   /** Applies an event or phone choice's effects. A spend beyond the wallet follows `ifShort`. */
   applyEffects<S extends LifeState>(state: S, effects: LifeEffects, ifShort?: ShortMode): LifeOutcome<S>;
@@ -72,15 +73,16 @@ export const localLifeApi: LifeApi = {
     return { state: { ...state, money: state.money - o.price, vitals: v.vitals }, delta };
   },
 
-  work(state) {
+  work(state, wage = WORK.wage) {
     const id = workSourceId(state);
     if (state.earned.includes(id)) return blocked(state, 'already_worked');
+    const pay = Math.max(0, Math.min(WORK.wage, Math.floor(wage)));
     const v = applyVitals(state.vitals, WORK.health, WORK.sanity);
-    const delta: LifeDelta = { money: WORK.wage, health: v.health, sanity: v.sanity };
+    const delta: LifeDelta = { money: pay, health: v.health, sanity: v.sanity };
     return {
       state: {
         ...state,
-        money: state.money + WORK.wage,
+        money: state.money + pay,
         earned: [...state.earned, id],
         vitals: v.vitals,
       },
