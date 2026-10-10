@@ -1,0 +1,18 @@
+{
+  "id": "event.bonus_tip.01",
+  "pillar": "save_manage",
+  "personas": ["ravi", "kiran"],
+  "levels": [1, 2, 3],
+  "weight": 1,
+  "regions": ["hyderabad"],
+  "text": "t:event.bonus_tip.01.story",
+  "choices": [
+    {
+      "id": "ok",
+      "label": "t:common.ok",
+      "icon": "coins",
+      "effects": { "wants": 50, "savings": 50 },
+      "lesson": "t:event.bonus_tip.01.lesson"
+    }
+  ]
+}

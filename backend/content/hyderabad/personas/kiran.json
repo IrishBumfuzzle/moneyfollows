@@ -1,0 +1,10 @@
+{
+  "id": "kiran",
+  "name": "t:persona.kiran.name",
+  "bio": "t:persona.kiran.bio",
+  "income": { "pattern": "irregular", "min": 2000, "max": 5000, "step": 100 },
+  "fixedCosts": 700,
+  "startingJars": { "needs": 300, "wants": 200, "goals": 500, "savings": 400 },
+  "split": { "needs": 45, "wants": 25, "goals": 15, "savings": 15 },
+  "goal": { "label": "t:persona.kiran.goal", "amount": 20000 }
+}

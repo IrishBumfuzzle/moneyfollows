@@ -1,0 +1,38 @@
+{
+  "id": "event.friend_borrow.01",
+  "pillar": "save_manage",
+  "personas": ["ravi", "sana", "kiran", "lakshmi"],
+  "levels": [1, 2, 3],
+  "weight": 3,
+  "regions": ["hyderabad"],
+  "text": "t:event.friend_borrow.01.story",
+  "choices": [
+    {
+      "id": "a",
+      "label": "t:event.friend_borrow.01.a.label",
+      "icon": "share",
+      "effects": {
+        "wants": -100,
+        "delayed": [{ "afterWeeks": 3, "wants": 50, "text": "t:event.friend_borrow.01.a.later" }]
+      },
+      "lesson": "t:event.friend_borrow.01.a.lesson",
+      "rating": "ok"
+    },
+    {
+      "id": "b",
+      "label": "t:event.friend_borrow.01.b.label",
+      "icon": "gift",
+      "effects": { "wants": -30 },
+      "lesson": "t:event.friend_borrow.01.b.lesson",
+      "rating": "best"
+    },
+    {
+      "id": "c",
+      "label": "t:event.friend_borrow.01.c.label",
+      "icon": "wait",
+      "effects": {},
+      "lesson": "t:event.friend_borrow.01.c.lesson",
+      "rating": "ok"
+    }
+  ]
+}

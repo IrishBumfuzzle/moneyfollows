@@ -1,0 +1,55 @@
+{
+  "id": "safe.loan_app.01",
+  "pillar": "stay_safe",
+  "concept": "loan_apps",
+  "personas": [
+    "ravi",
+    "sana"
+  ],
+  "difficulty": 2,
+  "text": "t:safe.loan_app.01.story",
+  "choices": [
+    {
+      "id": "a",
+      "label": "t:safe.loan_app.01.a.label",
+      "icon": "loan",
+      "effects": {
+        "debt": 2000,
+        "delayed": [
+          {
+            "afterWeeks": 4,
+            "needs": -1200,
+            "debt": -1000,
+            "text": "t:safe.loan_app.01.a.later"
+          },
+          {
+            "afterWeeks": 8,
+            "needs": -1200,
+            "debt": -1000,
+            "text": "t:safe.loan_app.01.a.later2"
+          }
+        ]
+      },
+      "lesson": "t:safe.loan_app.01.a.lesson",
+      "rating": "risky"
+    },
+    {
+      "id": "b",
+      "label": "t:safe.loan_app.01.b.label",
+      "icon": "piggy",
+      "effects": {
+        "savings": -500
+      },
+      "lesson": "t:safe.loan_app.01.b.lesson",
+      "rating": "best"
+    },
+    {
+      "id": "c",
+      "label": "t:safe.loan_app.01.c.label",
+      "icon": "wait",
+      "effects": {},
+      "lesson": "t:safe.loan_app.01.c.lesson",
+      "rating": "ok"
+    }
+  ]
+}

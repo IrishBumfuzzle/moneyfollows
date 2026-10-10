@@ -1,0 +1,38 @@
+{
+  "id": "budget.friend_treat.01",
+  "pillar": "plan_budget",
+  "concept": "wants_budget",
+  "personas": ["ravi", "sana", "kiran", "lakshmi"],
+  "difficulty": 1,
+  "regions": ["hyderabad"],
+  "text": "t:budget.friend_treat.01.story",
+  "choices": [
+    {
+      "id": "a",
+      "label": "t:budget.friend_treat.01.a.label",
+      "icon": "food",
+      "effects": { "wants": -150 },
+      "lesson": "t:budget.friend_treat.01.a.lesson",
+      "rating": "ok"
+    },
+    {
+      "id": "b",
+      "label": "t:budget.friend_treat.01.b.label",
+      "icon": "coins",
+      "effects": { "wants": -60 },
+      "lesson": "t:budget.friend_treat.01.b.lesson",
+      "rating": "best"
+    },
+    {
+      "id": "c",
+      "label": "t:budget.friend_treat.01.c.label",
+      "icon": "loan",
+      "effects": {
+        "debt": 300,
+        "delayed": [{ "afterWeeks": 4, "wants": -350, "debt": -300, "text": "t:budget.friend_treat.01.c.later" }]
+      },
+      "lesson": "t:budget.friend_treat.01.c.lesson",
+      "rating": "risky"
+    }
+  ]
+}

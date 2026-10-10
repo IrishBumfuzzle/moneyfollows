@@ -1,0 +1,35 @@
+{
+  "id": "budget.goal.01",
+  "pillar": "plan_budget",
+  "concept": "goal_setting",
+  "personas": ["ravi", "sana", "kiran", "lakshmi"],
+  "difficulty": 2,
+  "regions": ["hyderabad"],
+  "text": "t:budget.goal.01.story",
+  "choices": [
+    {
+      "id": "a",
+      "label": "t:budget.goal.01.a.label",
+      "icon": "piggy",
+      "effects": { "wants": -100, "goals": 100 },
+      "lesson": "t:budget.goal.01.a.lesson",
+      "rating": "best"
+    },
+    {
+      "id": "b",
+      "label": "t:budget.goal.01.b.label",
+      "icon": "wait",
+      "effects": { "delayed": [{ "afterWeeks": 4, "text": "t:budget.goal.01.b.later" }] },
+      "lesson": "t:budget.goal.01.b.lesson",
+      "rating": "risky"
+    },
+    {
+      "id": "c",
+      "label": "t:budget.goal.01.c.label",
+      "icon": "coins",
+      "effects": { "wants": -30, "goals": 30 },
+      "lesson": "t:budget.goal.01.c.lesson",
+      "rating": "ok"
+    }
+  ]
+}

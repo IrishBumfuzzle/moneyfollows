@@ -1,0 +1,38 @@
+{
+  "id": "event.screen_crack.01",
+  "pillar": "save_manage",
+  "personas": ["ravi", "sana", "kiran"],
+  "levels": [1, 2, 3],
+  "weight": 3,
+  "regions": ["hyderabad"],
+  "text": "t:event.screen_crack.01.story",
+  "choices": [
+    {
+      "id": "a",
+      "label": "t:event.screen_crack.01.a.label",
+      "icon": "piggy",
+      "effects": { "savings": -800 },
+      "lesson": "t:event.screen_crack.01.a.lesson",
+      "rating": "best"
+    },
+    {
+      "id": "b",
+      "label": "t:event.screen_crack.01.b.label",
+      "icon": "wait",
+      "effects": {
+        "wants": -150,
+        "delayed": [{ "afterWeeks": 4, "savings": -900, "text": "t:event.screen_crack.01.b.later" }]
+      },
+      "lesson": "t:event.screen_crack.01.b.lesson",
+      "rating": "risky"
+    },
+    {
+      "id": "c",
+      "label": "t:event.screen_crack.01.c.label",
+      "icon": "coins",
+      "effects": { "savings": -550 },
+      "lesson": "t:event.screen_crack.01.c.lesson",
+      "rating": "best"
+    }
+  ]
+}

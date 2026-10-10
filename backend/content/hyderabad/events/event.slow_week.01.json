@@ -1,0 +1,38 @@
+{
+  "id": "event.slow_week.01",
+  "pillar": "save_manage",
+  "personas": ["kiran"],
+  "levels": [2, 3],
+  "weight": 2,
+  "regions": ["hyderabad"],
+  "text": "t:event.slow_week.01.story",
+  "choices": [
+    {
+      "id": "a",
+      "label": "t:event.slow_week.01.a.label",
+      "icon": "shield",
+      "effects": { "savings": -300 },
+      "lesson": "t:event.slow_week.01.a.lesson",
+      "rating": "best"
+    },
+    {
+      "id": "b",
+      "label": "t:event.slow_week.01.b.label",
+      "icon": "wait",
+      "effects": { "wants": -200 },
+      "lesson": "t:event.slow_week.01.b.lesson",
+      "rating": "ok"
+    },
+    {
+      "id": "c",
+      "label": "t:event.slow_week.01.c.label",
+      "icon": "loan",
+      "effects": {
+        "debt": 300,
+        "delayed": [{ "afterWeeks": 1, "needs": -300, "debt": -300, "text": "t:event.slow_week.01.c.later" }]
+      },
+      "lesson": "t:event.slow_week.01.c.lesson",
+      "rating": "risky"
+    }
+  ]
+}

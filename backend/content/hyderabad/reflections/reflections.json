@@ -1,0 +1,35 @@
+[
+  {
+    "id": "reflect.general.01",
+    "question": "t:reflect.general.01.q",
+    "options": ["t:reflect.general.01.o1", "t:reflect.general.01.o2", "t:reflect.general.01.o3"]
+  },
+  {
+    "id": "reflect.plan_budget.01",
+    "pillar": "plan_budget",
+    "question": "t:reflect.plan_budget.01.q",
+    "options": ["t:reflect.plan_budget.01.o1", "t:reflect.plan_budget.01.o2", "t:reflect.plan_budget.01.o3"]
+  },
+  {
+    "id": "reflect.save_manage.01",
+    "pillar": "save_manage",
+    "question": "t:reflect.save_manage.01.q",
+    "options": ["t:reflect.save_manage.01.o1", "t:reflect.save_manage.01.o2", "t:reflect.save_manage.01.o3"]
+  },
+  {
+    "id": "reflect.understand_investing.01",
+    "pillar": "understand_investing",
+    "question": "t:reflect.understand_investing.01.q",
+    "options": [
+      "t:reflect.understand_investing.01.o1",
+      "t:reflect.understand_investing.01.o2",
+      "t:reflect.understand_investing.01.o3"
+    ]
+  },
+  {
+    "id": "reflect.stay_safe.01",
+    "pillar": "stay_safe",
+    "question": "t:reflect.stay_safe.01.q",
+    "options": ["t:reflect.stay_safe.01.o1", "t:reflect.stay_safe.01.o2", "t:reflect.stay_safe.01.o3"]
+  }
+]

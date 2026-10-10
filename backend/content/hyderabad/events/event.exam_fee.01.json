@@ -1,0 +1,35 @@
+{
+  "id": "event.exam_fee.01",
+  "pillar": "save_manage",
+  "personas": ["ravi", "sana", "kiran"],
+  "levels": [1, 2, 3],
+  "weight": 3,
+  "regions": ["hyderabad"],
+  "text": "t:event.exam_fee.01.story",
+  "choices": [
+    {
+      "id": "a",
+      "label": "t:event.exam_fee.01.a.label",
+      "icon": "book",
+      "effects": { "savings": -500 },
+      "lesson": "t:event.exam_fee.01.a.lesson",
+      "rating": "best"
+    },
+    {
+      "id": "b",
+      "label": "t:event.exam_fee.01.b.label",
+      "icon": "piggy",
+      "effects": { "goals": -500 },
+      "lesson": "t:event.exam_fee.01.b.lesson",
+      "rating": "ok"
+    },
+    {
+      "id": "c",
+      "label": "t:event.exam_fee.01.c.label",
+      "icon": "wait",
+      "effects": { "delayed": [{ "afterWeeks": 2, "needs": -600, "text": "t:event.exam_fee.01.c.later" }] },
+      "lesson": "t:event.exam_fee.01.c.lesson",
+      "rating": "risky"
+    }
+  ]
+}

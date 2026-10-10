@@ -1,0 +1,39 @@
+{
+  "id": "budget.recharge.01",
+  "pillar": "plan_budget",
+  "concept": "needs_vs_wants",
+  "personas": ["ravi", "sana", "kiran"],
+  "difficulty": 1,
+  "regions": ["hyderabad"],
+  "text": "t:budget.recharge.01.story",
+  "choices": [
+    {
+      "id": "a",
+      "label": "t:budget.recharge.01.a.label",
+      "icon": "phone",
+      "effects": { "needs": -199 },
+      "lesson": "t:budget.recharge.01.a.lesson",
+      "rating": "best"
+    },
+    {
+      "id": "b",
+      "label": "t:budget.recharge.01.b.label",
+      "icon": "headphones",
+      "effects": {
+        "needs": -199,
+        "wants": -299,
+        "delayed": [{ "afterWeeks": 2, "wants": -150, "text": "t:budget.recharge.01.b.later" }]
+      },
+      "lesson": "t:budget.recharge.01.b.lesson",
+      "rating": "risky"
+    },
+    {
+      "id": "c",
+      "label": "t:budget.recharge.01.c.label",
+      "icon": "wait",
+      "effects": { "needs": -199, "wants": -100, "savings": 100 },
+      "lesson": "t:budget.recharge.01.c.lesson",
+      "rating": "ok"
+    }
+  ]
+}

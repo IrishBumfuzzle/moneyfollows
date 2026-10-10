@@ -1,0 +1,19 @@
+{
+  "id": "safe.otp.01",
+  "pillar": "stay_safe",
+  "concept": "never_share_otp",
+  "personas": ["ravi", "sana"],
+  "difficulty": 1,
+  "text": "t:safe.otp.01.story",
+  "choices": [
+    { "id": "a", "label": "t:safe.otp.01.a.label", "icon": "shield", "effects": {}, "lesson": "t:safe.otp.01.a.lesson", "rating": "best" },
+    {
+      "id": "b",
+      "label": "t:safe.otp.01.b.label",
+      "icon": "message",
+      "effects": { "savings": -1500, "flags": ["shared_otp"] },
+      "lesson": "t:safe.otp.01.b.lesson",
+      "rating": "risky"
+    }
+  ]
+}

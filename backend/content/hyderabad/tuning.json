@@ -1,0 +1,12 @@
+{
+  "months": 12,
+  "weeksPerMonth": 4,
+  "rewindTokensPerMonth": 3,
+  "eventChance": { "1": 0.2, "2": 0.3, "3": 0.4 },
+  "score": {
+    "savingsTarget": 0.2,
+    "weights": { "savingsRate": 0.3, "emergencyFund": 0.3, "goalProgress": 0.25, "debt": 0.15 }
+  },
+  "xp": { "decision": 10, "bestChoice": 5, "reflection": 5, "monthComplete": 20 },
+  "projection": { "bad": 0.04, "average": 0.08, "good": 0.12 }
+}

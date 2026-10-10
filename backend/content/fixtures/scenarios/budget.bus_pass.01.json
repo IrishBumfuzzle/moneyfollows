@@ -1,0 +1,19 @@
+{
+  "id": "budget.bus_pass.01",
+  "pillar": "plan_budget",
+  "concept": "planning_ahead",
+  "personas": ["ravi", "sana"],
+  "difficulty": 1,
+  "text": "t:budget.bus_pass.01.story",
+  "choices": [
+    { "id": "a", "label": "t:budget.bus_pass.01.a.label", "icon": "bus", "effects": { "needs": -400 }, "lesson": "t:budget.bus_pass.01.a.lesson", "rating": "best" },
+    {
+      "id": "b",
+      "label": "t:budget.bus_pass.01.b.label",
+      "icon": "auto",
+      "effects": { "needs": -150, "delayed": [{ "afterWeeks": 1, "needs": -350, "text": "t:budget.bus_pass.01.b.later" }] },
+      "lesson": "t:budget.bus_pass.01.b.lesson",
+      "rating": "risky"
+    }
+  ]
+}

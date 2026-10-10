@@ -6,7 +6,18 @@
   "difficulty": 1,
   "text": "t:budget.recharge.01.story",
   "choices": [
-    { "id": "a", "label": "t:recharge_basic", "effects": { "needs": -199 }, "lesson": "t:lesson.needs_first" },
-    { "id": "b", "label": "t:recharge_plus_earphones", "effects": { "needs": -199, "wants": -599 }, "lesson": "t:lesson.wants_cost" }
+    { "id": "a", "label": "t:recharge_basic", "icon": "phone", "effects": { "needs": -199 }, "lesson": "t:lesson.needs_first", "rating": "best" },
+    {
+      "id": "b",
+      "label": "t:recharge_plus_earphones",
+      "icon": "headphones",
+      "effects": {
+        "needs": -199,
+        "wants": -599,
+        "delayed": [{ "afterWeeks": 2, "wants": -150, "text": "t:budget.recharge.01.b.later" }]
+      },
+      "lesson": "t:lesson.wants_cost",
+      "rating": "risky"
+    }
   ]
 }

@@ -1,0 +1,38 @@
+{
+  "id": "event.prices_rise.01",
+  "pillar": "plan_budget",
+  "personas": ["ravi", "sana", "kiran", "lakshmi"],
+  "levels": [1, 2, 3],
+  "weight": 3,
+  "regions": ["hyderabad"],
+  "text": "t:event.prices_rise.01.story",
+  "choices": [
+    {
+      "id": "a",
+      "label": "t:event.prices_rise.01.a.label",
+      "icon": "basket",
+      "effects": { "wants": -100 },
+      "lesson": "t:event.prices_rise.01.a.lesson",
+      "rating": "best"
+    },
+    {
+      "id": "b",
+      "label": "t:event.prices_rise.01.b.label",
+      "icon": "piggy",
+      "effects": { "savings": -100 },
+      "lesson": "t:event.prices_rise.01.b.lesson",
+      "rating": "ok"
+    },
+    {
+      "id": "c",
+      "label": "t:event.prices_rise.01.c.label",
+      "icon": "loan",
+      "effects": {
+        "debt": 100,
+        "delayed": [{ "afterWeeks": 3, "needs": -120, "debt": -100, "text": "t:event.prices_rise.01.c.later" }]
+      },
+      "lesson": "t:event.prices_rise.01.c.lesson",
+      "rating": "risky"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "_readme": "Guardrail word lists for lintGuardrails. Non-developers may edit this file: add a word or phrase to a list and the content check (npm run lint:content) enforces it. Matching ignores case and works on whole words.",
+  "brands": [
+    "paytm", "phonepe", "phone pe", "gpay", "google pay", "bhim", "amazon pay", "mobikwik", "cred",
+    "sbi", "state bank", "hdfc", "icici", "axis bank", "kotak", "yes bank", "canara", "bank of baroda", "punjab national", "union bank", "indusind", "idfc", "bandhan",
+    "lic", "zerodha", "groww", "upstox", "angel one", "paisabazaar", "coin dcx", "wazirx", "binance", "bitcoin", "ethereum",
+    "sensex", "nifty", "reliance", "tata", "infosys", "adani", "vanguard",
+    "dream11", "my11circle", "mpl", "rummy circle", "winzo",
+    "kreditbee", "moneyview", "cashe", "lazypay", "simpl", "bajaj finserv",
+    "ppf", "nps", "sukanya", "atal pension", "jan dhan", "mutual fund"
+  ],
+  "promises": [
+    "guaranteed", "guarantee", "risk-free", "risk free", "no risk", "sure return", "sure returns", "sure profit", "100% safe", "double your money",
+    "can't lose", "cannot lose", "you should invest", "you should buy", "you must invest", "best investment"
+  ],
+  "shaming": ["poor people", "lazy", "stupid", "useless", "beggar", "shameful", "idiot", "worthless"],
+  "allowedLinks": ["cybercrime.gov.in"],
+  "allowedNumbers": ["1930"],
+  "fictionalAssets": ["Steady Deposit", "Mixed Basket", "Rocket Co"],
+  "lengthCaps": { "story": 220, "label": 40, "lesson": 140, "later": 140 }
+}

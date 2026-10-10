@@ -1,0 +1,39 @@
+{
+  "id": "invest.compound.01",
+  "pillar": "understand_investing",
+  "concept": "compounding",
+  "personas": ["ravi", "sana", "kiran", "lakshmi"],
+  "difficulty": 1,
+  "regions": ["hyderabad"],
+  "text": "t:invest.compound.01.story",
+  "assumption": true,
+  "choices": [
+    {
+      "id": "a",
+      "label": "t:invest.compound.01.a.label",
+      "icon": "chart",
+      "effects": { "savings": -100 },
+      "lesson": "t:invest.compound.01.a.lesson",
+      "rating": "best"
+    },
+    {
+      "id": "b",
+      "label": "t:invest.compound.01.b.label",
+      "icon": "wait",
+      "effects": {},
+      "lesson": "t:invest.compound.01.b.lesson",
+      "rating": "ok"
+    },
+    {
+      "id": "c",
+      "label": "t:invest.compound.01.c.label",
+      "icon": "rocket",
+      "effects": {
+        "savings": -100,
+        "delayed": [{ "afterWeeks": 8, "savings": 70, "text": "t:invest.compound.01.c.later" }]
+      },
+      "lesson": "t:invest.compound.01.c.lesson",
+      "rating": "risky"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "id": "budget.split.01",
+  "pillar": "plan_budget",
+  "concept": "simple_budget_split",
+  "personas": ["ravi", "sana", "kiran", "lakshmi"],
+  "difficulty": 2,
+  "regions": ["hyderabad"],
+  "text": "t:budget.split.01.story",
+  "choices": [
+    {
+      "id": "a",
+      "label": "t:budget.split.01.a.label",
+      "icon": "coins",
+      "effects": { "wants": 60, "goals": 120, "savings": 120 },
+      "lesson": "t:budget.split.01.a.lesson",
+      "rating": "best"
+    },
+    {
+      "id": "b",
+      "label": "t:budget.split.01.b.label",
+      "icon": "basket",
+      "effects": { "wants": 300, "delayed": [{ "afterWeeks": 2, "wants": -300, "text": "t:budget.split.01.b.later" }] },
+      "lesson": "t:budget.split.01.b.lesson",
+      "rating": "risky"
+    },
+    {
+      "id": "c",
+      "label": "t:budget.split.01.c.label",
+      "icon": "rocket",
+      "effects": { "goals": 300 },
+      "lesson": "t:budget.split.01.c.lesson",
+      "rating": "ok"
+    }
+  ]
+}

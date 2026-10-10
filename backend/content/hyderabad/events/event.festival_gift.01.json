@@ -1,0 +1,35 @@
+{
+  "id": "event.festival_gift.01",
+  "pillar": "plan_budget",
+  "personas": ["ravi", "sana", "kiran", "lakshmi"],
+  "levels": [1, 2, 3],
+  "weight": 2,
+  "regions": ["hyderabad"],
+  "text": "t:event.festival_gift.01.story",
+  "choices": [
+    {
+      "id": "a",
+      "label": "t:event.festival_gift.01.a.label",
+      "icon": "gift",
+      "effects": { "wants": 150, "savings": 150 },
+      "lesson": "t:event.festival_gift.01.a.lesson",
+      "rating": "best"
+    },
+    {
+      "id": "b",
+      "label": "t:event.festival_gift.01.b.label",
+      "icon": "festival",
+      "effects": { "wants": 300 },
+      "lesson": "t:event.festival_gift.01.b.lesson",
+      "rating": "ok"
+    },
+    {
+      "id": "c",
+      "label": "t:event.festival_gift.01.c.label",
+      "icon": "piggy",
+      "effects": { "goals": 300 },
+      "lesson": "t:event.festival_gift.01.c.lesson",
+      "rating": "ok"
+    }
+  ]
+}

@@ -37,3 +37,39 @@ export const SyncBatch = z.strictObject({
   events: z.array(SyncEvent).min(1).max(500),
 });
 export type SyncBatch = z.infer<typeof SyncBatch>;
+
+/** The response lists every event the server now holds (new or duplicate), plus any it refused. */
+export const SyncResult = z.strictObject({
+  accepted: z.array(z.uuid()),
+  /** Events for a profile the token does not cover. (v0.2) */
+  rejected: z.array(z.uuid()),
+});
+export type SyncResult = z.infer<typeof SyncResult>;
+
+/**
+ * Payload shapes the server reads for analytics (v0.2). Other types and extra
+ * fields are stored as-is; a payload that does not match is stored but not projected.
+ */
+export const DecisionMadePayload = z.object({
+  scenarioId: z.string(),
+  choiceId: z.string(),
+  pillar: z.string().optional(),
+  cardKind: z.enum(['decision', 'event']).optional(),
+  month: z.int().optional(),
+  week: z.int().optional(),
+  rating: z.string().optional(),
+});
+export type DecisionMadePayload = z.infer<typeof DecisionMadePayload>;
+
+export const RewindUsedPayload = z.object({ scenarioId: z.string(), choiceId: z.string() });
+export type RewindUsedPayload = z.infer<typeof RewindUsedPayload>;
+
+export const ModuleCompletePayload = z.object({ pillar: z.string(), level: z.int().optional() });
+export type ModuleCompletePayload = z.infer<typeof ModuleCompletePayload>;
+
+export const MinigameCompletePayload = z.object({
+  game: z.enum(['scam_or_safe', 'message_inspector', 'time_machine', 'jar_splitter', 'basket_builder', 'life_happens']),
+  correct: z.int().optional(),
+  total: z.int().optional(),
+});
+export type MinigameCompletePayload = z.infer<typeof MinigameCompletePayload>;
