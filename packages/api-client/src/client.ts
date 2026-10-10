@@ -9,6 +9,7 @@ import {
 } from '@paisa/shared';
 import { ApiError, toApiError } from './errors';
 import type { PushEventsResponse } from './sync-queue';
+import type { ClassroomQuizSummaryRow, ClassWellbeingRow } from '@paisa/shared';
 
 export interface ClassRow {
   id: string;
@@ -138,6 +139,18 @@ export function createApiClient(options: ApiClientOptions) {
         baseline_avg: r.baseline_avg === null ? null : Number(r.baseline_avg),
         endline_avg: r.endline_avg === null ? null : Number(r.endline_avg),
       }));
+    },
+
+    /** One row per classroom question the class answered: where the class is struggling. */
+    async classroomQuizSummary(classId: string): Promise<ClassroomQuizSummaryRow[]> {
+      const rows = await rpc<ClassroomQuizSummaryRow[]>('classroom_quiz_summary', { class_id: classId });
+      // numeric columns arrive as strings from PostgREST.
+      return rows.map((r) => ({ ...r, correct_pct: Number(r.correct_pct) }));
+    },
+
+    /** Store purchases, want spending, work shifts and school days per student (life events). */
+    classWellbeing(classId: string): Promise<ClassWellbeingRow[]> {
+      return rpc<ClassWellbeingRow[]>('class_wellbeing', { class_id: classId });
     },
   };
 }
