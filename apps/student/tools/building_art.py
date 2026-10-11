@@ -171,4 +171,39 @@ def hospital():
     return im
 
 
+def shop():
+    """A corner shop (flat set): a sign board with a shopping-bag symbol, a striped awning wider than
+    the walls, big windows with fruit and veg crates, and an open door."""
+    im = canvas(); d = ImageDraw.Draw(im)
+    box(d, 6, 30, 73, 95, TAN)                            # walls
+    rect(d, 7, 31, 72, 33, TAN_2)
+    box(d, 14, 6, 65, 28, NAVY)                           # sign board on posts
+    rect(d, 15, 7, 64, 9, (90, 112, 180, 255))
+    box(d, 20, 28, 22, 31, GREY_3); box(d, 57, 28, 59, 31, GREY_3)
+    # the shopping-bag symbol (no words on images, CLAUDE.md 5.7)
+    box(d, 33, 15, 46, 25, GOLD)
+    rect(d, 34, 16, 45, 17, (255, 226, 120, 255))
+    d.arc([36 + PAD, 10 + PAD, 43 + PAD, 19 + PAD], 180, 360, fill=OUT)
+    # awning: green and white stripes, wider than the walls, with a scalloped edge
+    poly(d, [(0, 36), (79, 36), (79, 46), (0, 46)], WHITE)
+    for x in range(0, 80, 10):
+        rect(d, x + 1, 37, min(x + 5, 78), 45, GREEN)
+    for x in range(0, 80, 5):
+        d.pieslice([x + PAD, 42 + PAD, x + 5 + PAD, 50 + PAD], 0, 180, fill=GREEN if (x // 5) % 2 == 0 else WHITE, outline=OUT)
+    # shop windows with crates of fruit and veg, and the door
+    for x in (10, 50):
+        box(d, x, 54, x + 19, 81, GLASS)
+        rect(d, x + 1, 55, x + 18, 57, WHITE)
+        box(d, x + 1, 74, x + 18, 80, WOOD)
+        for i, c in enumerate(((214, 64, 64, 255), (242, 194, 48, 255), (61, 168, 92, 255), (240, 140, 50, 255))):
+            rect(d, x + 2 + i * 4, 72, x + 4 + i * 4, 73, c)
+    door(d, 32, 56, 16, 40, GLASS)
+    box(d, 8, 88, 27, 95, WOOD); box(d, 52, 88, 71, 95, WOOD)   # crates outside
+    for x, c in ((10, (214, 64, 64, 255)), (14, (242, 194, 48, 255)), (18, (61, 168, 92, 255)), (22, (214, 64, 64, 255)),
+                 (54, (61, 168, 92, 255)), (58, (240, 140, 50, 255)), (62, (61, 168, 92, 255)), (66, (242, 194, 48, 255))):
+        box(d, x, 85, x + 3, 88, c)
+    return im
+
+
 ART = {'school': school, 'home': home, 'bank': bank, 'hospital': hospital}
+FLAT = {'home': home, 'school': school, 'convenience': shop, 'bank': bank, 'hospital': hospital}
