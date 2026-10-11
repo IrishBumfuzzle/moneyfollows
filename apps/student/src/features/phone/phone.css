@@ -66,6 +66,7 @@
 .ph-icon.is-vanguard { background: #8b1e2d; }
 .ph-icon.is-snake { background: #4a3a7a; }
 .ph-icon.is-scams { background: #c0392b; }
+.ph-inspect { align-self: flex-end; justify-content: center; min-width: 48px; font-size: 16px; }
 .ph-badge {
   position: absolute;
   top: -10px;

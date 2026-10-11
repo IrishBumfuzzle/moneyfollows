@@ -55,5 +55,7 @@
   "phone.snake.left": "Left",
   "phone.snake.right": "Right",
   "phone.snake.pause": "Pause",
-  "phone.snake.resume": "Resume"
+  "phone.snake.resume": "Resume",
+  "phone.inspect.open": "Inspect the message",
+  "phone.inspect.close": "Back to the chat"
 }

@@ -55,5 +55,7 @@
   "phone.snake.left": "बाएँ",
   "phone.snake.right": "दाएँ",
   "phone.snake.pause": "रोको",
-  "phone.snake.resume": "चालू करो"
+  "phone.snake.resume": "चालू करो",
+  "phone.inspect.open": "मैसेज जाँचो",
+  "phone.inspect.close": "चैट पर वापस"
 }
