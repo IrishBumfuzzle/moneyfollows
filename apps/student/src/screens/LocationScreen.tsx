@@ -3,6 +3,7 @@ import type { Lang } from '@paisa/shared';
 import { t } from '../features/decisions/content';
 import '../features/decisions/decisions.css';
 import { PixelText } from '../PixelText';
+import { LeafGust, WorldLife } from './WorldLife';
 
 // Backdrop: public/assets/world.png (1920x1280, a 16px-tile town from the Kenney RPG Urban Kit, built by
 // tools/build-world.py) is pure scenery; the five buildings are drawn over it at fixed pixel positions. The camera only ever scales
@@ -69,6 +70,7 @@ export function LocationScreen({ lang, pinned = [], guide, onSelect }: {
         className="world"
         style={{ width: WORLD.w, height: WORLD.h, transform: `translate(${cam.x}px, ${cam.y}px) scale(${cam.zoom})` }}
       >
+        <WorldLife />
         {LOCATIONS.map((l) => (
           <button
             key={l.id}
@@ -89,6 +91,7 @@ export function LocationScreen({ lang, pinned = [], guide, onSelect }: {
           </button>
         ))}
       </div>
+      <LeafGust />
     </div>
   );
 }

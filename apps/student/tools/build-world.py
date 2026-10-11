@@ -26,8 +26,18 @@ def put(img, col, row):
     world.alpha_composite(img, (col * T, row * T))
 
 
+LIVING = {}      # id(parts) -> sprite name, for trees and bushes the map animates (filled below)
+ALIVE = []       # [name, x, y] in world px: drawn by src/screens/WorldLife.tsx, not baked in
+# Trees this close to the play area sway on screen; farther ones are baked into the backdrop.
+LIFE_BOX = (OX - 560, OY - 400, OX + SW + 560, OY + SH + 400)
+
+
 def sprite(parts, col, row):
     """parts: [(dc, dr, sheet_col, sheet_row)] placed relative to (col, row)."""
+    x, y = col * T, row * T
+    if id(parts) in LIVING and LIFE_BOX[0] <= x < LIFE_BOX[2] and LIFE_BOX[1] <= y < LIFE_BOX[3]:
+        ALIVE.append([LIVING[id(parts)], x, y])
+        return
     for dc, dr, c, r in parts:
         put(tile(c, r), col + dc, row + dr)
 
@@ -58,6 +68,8 @@ SHRUB = [(0, 0, 22, 9)]
 LAMP = [(0, 0, 3, 6), (0, 1, 3, 7)]
 BENCH = [(0, 0, 0, 10)]
 BIN = [(0, 0, 9, 10)]
+LIVING.update({id(TREE_TALL): 'tree-tall', id(TREE_ROUND): 'tree-round', id(TREE_SMALL): 'tree-small',
+               id(BUSH): 'bush', id(SHRUB): 'shrub'})
 CAR_DOWN = [[(0, 0, 17, 14), (0, 1, 17, 15)], [(0, 0, 17, 16), (0, 1, 17, 17)], [(0, 0, 20, 14), (0, 1, 20, 15)]]
 PARK_BAY = tile(2, 16)
 
@@ -235,6 +247,50 @@ sprite(CAR_DOWN[0], 47, 31)
 sprite(CAR_DOWN[1], 73, 42)
 
 world.convert('RGB').save('public/assets/world.png')
+
+# ---- the living layer (src/screens/WorldLife.tsx): tree sprites, cars and leaves ------------
+import json, os
+LIFE = 'public/assets/life'
+os.makedirs(LIFE, exist_ok=True)
+for name, parts in (('tree-tall', TREE_TALL), ('tree-round', TREE_ROUND), ('tree-small', TREE_SMALL),
+                    ('bush', BUSH), ('shrub', SHRUB)):
+    h = max(p[1] for p in parts) + 1
+    im = Image.new('RGBA', (T, h * T))
+    for dc, dr, c, rr in parts:
+        im.alpha_composite(tile(c, rr), (dc * T, dr * T))
+    im.save(f'{LIFE}/{name}.png')
+# Cars: the kit draws them heading down the screen (south); the other three directions are turns.
+CARS = [(17, 14), (17, 16), (20, 14), (20, 16), (21, 14)]
+for i, (c, rr) in enumerate(CARS):
+    south = Image.new('RGBA', (T, 2 * T))
+    south.alpha_composite(tile(c, rr), (0, 0)); south.alpha_composite(tile(c, rr + 1), (0, T))
+    south.save(f'{LIFE}/car-{i}-s.png')
+    south.rotate(180).save(f'{LIFE}/car-{i}-n.png')
+    south.rotate(90, expand=True).save(f'{LIFE}/car-{i}-e.png')
+    south.rotate(-90, expand=True).save(f'{LIFE}/car-{i}-w.png')
+for name, px in (('leaf-green', (61, 168, 92, 255)), ('leaf-gold', (233, 170, 46, 255))):
+    leaf = Image.new('RGBA', (5, 4))
+    for (x, y) in ((1, 0), (2, 0), (0, 1), (1, 1), (2, 1), (3, 1), (1, 2), (2, 2), (3, 2), (4, 3)):
+        leaf.putpixel((x, y), px)
+    leaf.putpixel((2, 1), (255, 255, 255, 120))
+    leaf.save(f'{LIFE}/{name}.png')
+
+# Cars keep left (India): heading south on a street's east lane, north on its west lane, east on
+# the north lane, west on the south lane. One car per lane on the streets around the play area.
+crng = random.Random(11)
+cars = []
+for start in (46, 72):
+    for lane, d in ((start + 2, 's'), (start, 'n')):
+        cars.append({'dir': d, 'pos': lane * T, 'car': crng.randrange(len(CARS)),
+                     'secs': crng.randint(16, 26), 'delay': -crng.randint(0, 20)})
+for start in (25, 36, 47):
+    for lane, d in ((start, 'e'), (start + 2, 'w')):
+        cars.append({'dir': d, 'pos': lane * T, 'car': crng.randrange(len(CARS)),
+                     'secs': crng.randint(18, 30), 'delay': -crng.randint(0, 24)})
+with open('src/screens/worldLife.json', 'w') as f:
+    json.dump({'world': [WW, WH], 'trees': ALIVE, 'cars': cars}, f, separators=(',', ':'))
+    f.write('\n')
+print('living trees', len(ALIVE), 'cars', len(cars))
 print('world', world.size, 'stage origin', (OX, OY))
 for k, (c, r) in LOTS.items():
     print(f"  {k}: x {c * T - OX}, y {r * T - OY}")
