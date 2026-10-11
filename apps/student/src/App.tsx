@@ -30,21 +30,23 @@ import type { Profile } from './features/onboarding';
 import { useStoresHydrated } from './game/hydration';
 import { useGame } from './game/useGame';
 import type { LifeDelta } from './features/life/types';
+import { BankSheet, TimeMachine } from './features/bank';
+import { ScamOrSafe } from './features/scams';
 import { LocationScreen } from './screens/LocationScreen';
 import './design/kenney.css';
 
 type Screen =
   | 'main' | 'map' | 'classroom' | 'home' | 'rest' | 'store' | 'kirana' | 'counter'
-  | 'hospital' | 'cover' | 'claims' | 'news' | 'phone' | 'learn';
+  | 'hospital' | 'cover' | 'claims' | 'news' | 'phone' | 'learn' | 'bank' | 'timemachine' | 'scams';
 const SCREENS: Screen[] = [
   'main', 'map', 'classroom', 'home', 'rest', 'store', 'kirana', 'counter',
-  'hospital', 'cover', 'claims', 'news', 'phone', 'learn',
+  'hospital', 'cover', 'claims', 'news', 'phone', 'learn', 'bank', 'timemachine', 'scams',
 ];
 /** Sheets drawn over the map: closing one shows the map again without a new map_opened. */
-const MAP_SHEETS: (Screen | null)[] = ['store', 'home', 'hospital'];
+const MAP_SHEETS: (Screen | null)[] = ['store', 'home', 'hospital', 'bank'];
 
 // No router or language picker yet: ?lang=hi switches language,
-// ?screen=map|classroom|home|store|kirana|counter|hospital|cover|claims|news|phone
+// ?screen=map|classroom|home|store|kirana|counter|hospital|cover|claims|news|phone|bank|timemachine|scams
 // opens that screen directly, ?seed=N fixes the quiz, ?event=<id> fires an event (demo / tests).
 // Learn (guides, progress, Notebook) loads when first opened; its store and recording stay eager.
 const LearnScreen = lazy(() => import('./features/learn/LearnScreen').then((m) => ({ default: m.LearnScreen })));
@@ -133,7 +135,9 @@ function Game({
       ? 'store'
       : s === 'cover' || s === 'claims'
         ? 'hospital'
-        : s === 'store' || s === 'hospital' || s === 'classroom' || s === 'home' || s === 'rest'
+        : s === 'timemachine' || s === 'scams'
+          ? 'bank'
+        : s === 'store' || s === 'hospital' || s === 'bank' || s === 'classroom' || s === 'home' || s === 'rest'
           ? 'map'
           : 'main';
   const back = useCallback(() => {
@@ -233,6 +237,20 @@ function Game({
         />
         {eventLayer('main')}
       </>
+    );
+  }
+  // Bank practice tools: never touch the wallet; a finished round is a minigame_complete.
+  if (screen === 'timemachine') {
+    return <TimeMachine lang={lang} onFinish={(r) => track('minigame_complete', { game: 'time_machine', ...r })} onExit={back} />;
+  }
+  if (screen === 'scams') {
+    return (
+      <ScamOrSafe
+        lang={lang}
+        seed={SEED}
+        onFinish={(r) => track('minigame_complete', { game: 'scam_or_safe', correct: r.correct, total: r.total, score: r.score })}
+        onExit={back}
+      />
     );
   }
   if (screen === 'news') return <PaisaTimes lang={lang} onExit={back} />;
@@ -365,6 +383,7 @@ function Game({
           else if (id === 'convenience') open('store');
           else if (id === 'home') open('home');
           else if (id === 'hospital') open('hospital');
+          else if (id === 'bank') open('bank');
           else console.log('go to', id);
         }}
       />
@@ -380,6 +399,9 @@ function Game({
           onWork={() => open('counter')}
           onClose={back}
         />
+      )}
+      {screen === 'bank' && (
+        <BankSheet lang={lang} onTimeMachine={() => open('timemachine')} onScams={() => open('scams')} onClose={back} />
       )}
       {screen === 'hospital' && (
         <HospitalSheet lang={lang} onCover={() => open('cover')} onClaims={() => open('claims')} onClose={back} />
