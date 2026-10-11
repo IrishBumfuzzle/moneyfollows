@@ -97,6 +97,15 @@ for x in (0, 1, 3, 4): put(im, tile(*PILLAR[0]), x, 4); put(im, tile(*PILLAR[1])
 put(im, tile(*WIN), 2, 4); put(im, tile(*DOOR_W), 2, 5); tint_roof(im, (120, 150, 230), 0.85); coin(im); B['bank'] = im
 
 
+# Home, School, Hospital and Bank are hand-drawn with their own silhouettes (tools/building_art.py);
+# the Shop stays the square tile-built block above.
+import sys, os
+sys.path.insert(0, os.path.dirname(__file__))
+from building_art import ART
+for name, draw in ART.items():
+    B[name] = draw()
+
+
 def halo(spr, colors):
     a = spr.getchannel('A').point(lambda v: 255 if v > 0 else 0)
     out = Image.new('RGBA', spr.size)
