@@ -1,0 +1,50 @@
+/* The map's living layer (WorldLife.tsx). Everything moves with transforms only, and nothing moves
+   for reduced motion or data saver: cars and leaves are hidden, trees stand still. */
+.wl { position: absolute; inset: 0; pointer-events: none; }
+.wl img { position: absolute; display: block; image-rendering: pixelated; }
+.wl-tree { transform-origin: 50% 100%; }
+.wl .wl-car { display: none; }
+.wl-gust { position: fixed; inset: 0; z-index: 2; overflow: hidden; pointer-events: none; }
+.wl-leaf { position: absolute; left: 0; display: none; }
+.wl-leaf img { display: block; width: 15px; height: 12px; image-rendering: pixelated; }
+
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-saver]) .wl-tree { animation: wl-sway 2.6s ease-in-out infinite alternate; }
+  :root:not([data-saver]) .wl-tree.is-bush,
+  :root:not([data-saver]) .wl-tree.is-shrub { animation-name: wl-breathe; animation-duration: 3.4s; }
+
+  /* A car crosses the whole world, then comes round again; --wl-span is the street's length. */
+  :root:not([data-saver]) .wl-car { display: block; will-change: transform; animation: wl-drive linear infinite; }
+  :root:not([data-saver]) .wl-car.is-s { animation-name: wl-south; }
+  :root:not([data-saver]) .wl-car.is-n { animation-name: wl-north; }
+  :root:not([data-saver]) .wl-car.is-e { animation-name: wl-east; }
+  :root:not([data-saver]) .wl-car.is-w { animation-name: wl-west; }
+
+  /* The gust: six leaves blow across in the first few seconds of a 16 s cycle, then calm. */
+  :root:not([data-saver]) .wl-leaf { display: block; animation: wl-blow 16s linear infinite; }
+  :root:not([data-saver]) .wl-leaf img { animation: wl-flutter 0.9s ease-in-out infinite alternate; }
+}
+
+@keyframes wl-sway {
+  from { transform: skewX(-2.5deg); }
+  to { transform: skewX(2.5deg); }
+}
+@keyframes wl-breathe {
+  from { transform: scale(1, 1); }
+  to { transform: scale(1.04, 0.95); }
+}
+@keyframes wl-south { from { transform: translateY(-48px); } to { transform: translateY(var(--wl-span)); } }
+@keyframes wl-north { from { transform: translateY(var(--wl-span)); } to { transform: translateY(-48px); } }
+@keyframes wl-east { from { transform: translateX(-48px); } to { transform: translateX(var(--wl-span)); } }
+@keyframes wl-west { from { transform: translateX(var(--wl-span)); } to { transform: translateX(-48px); } }
+@keyframes wl-blow {
+  0% { transform: translate(-24px, 0); opacity: 0; }
+  2% { opacity: 1; }
+  12% { transform: translate(calc(50vw - 12px), 36px); }
+  24% { transform: translate(calc(100vw + 24px), 12px); opacity: 1; }
+  25%, 100% { transform: translate(calc(100vw + 24px), 12px); opacity: 0; }
+}
+@keyframes wl-flutter {
+  from { transform: rotate(-35deg) translateY(-3px); }
+  to { transform: rotate(40deg) translateY(4px); }
+}

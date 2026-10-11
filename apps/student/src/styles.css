@@ -13,6 +13,8 @@ body { margin: 0; background: #38cbab; }
 .stack > img:last-child { position: relative; z-index: 1; }
 .stack img { display: block; width: 100%; image-rendering: pixelated; }
 .stack .halo { position: absolute; inset: 0; opacity: 0; }
+/* The five places always wear an outline and a hard pixel shadow, so they stand out from the town. */
+.stack .halo-outline { opacity: 1; filter: drop-shadow(0 4px 0 rgba(20, 12, 30, 0.45)); }
 .loc:hover .halo-hover, .loc:focus-visible .halo-hover { opacity: 1; }
 .loc:active .halo-hover { opacity: 0; }
 .loc:active .halo-active { opacity: 1; }
