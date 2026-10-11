@@ -1,14 +1,14 @@
 /* Data saver (CLAUDE.md 6): the same as prefers-reduced-motion, for every screen. */
-html.data-saver *,
-html.data-saver *::before,
-html.data-saver *::after {
+html[data-saver] *,
+html[data-saver] *::before,
+html[data-saver] *::after {
   animation: none !important;
   transition: none !important;
   scroll-behavior: auto !important;
 }
 /* Without animation the pops just show the last change (life.css, news.css do the same). */
-html.data-saver .lf-pop,
-html.data-saver .nt-chip-pop { opacity: 1; }
+html[data-saver] .lf-pop,
+html[data-saver] .nt-chip-pop { opacity: 1; }
 
 .st-list { display: flex; flex-direction: column; gap: 16px; margin: 0; padding: 0; border: 0; }
 .st-group { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; border: 0; }

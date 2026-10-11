@@ -31,14 +31,12 @@ describe('language picker', () => {
 });
 
 describe('data saver', () => {
-  it('toggles the data-saver class on the root element', () => {
-    const classes = new Set<string>();
-    const root = {
-      classList: { toggle: (c: string, on: boolean) => (on ? classes.add(c) : classes.delete(c), on) } as unknown as DOMTokenList,
-    };
+  it('toggles the data-saver attribute on the root element', () => {
+    const attrs = new Set<string>();
+    const root = { toggleAttribute: (a: string, on?: boolean) => (on ? attrs.add(a) : attrs.delete(a), !!on) };
     applyDataSaver(true, root);
-    expect(classes.has('data-saver')).toBe(true);
+    expect(attrs.has('data-saver')).toBe(true);
     applyDataSaver(false, root);
-    expect(classes.has('data-saver')).toBe(false);
+    expect(attrs.has('data-saver')).toBe(false);
   });
 });

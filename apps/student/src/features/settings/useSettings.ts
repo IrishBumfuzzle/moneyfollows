@@ -28,9 +28,13 @@ export const useSettings = create<SettingsStore>()(
   ),
 );
 
-/** The class on <html> follows the setting, from the saved value on. */
-export function applyDataSaver(on: boolean, root: { classList: DOMTokenList } = document.documentElement): void {
-  root.classList.toggle('data-saver', on);
+/** The `data-saver` attribute on <html> follows the setting, from the saved value on. The other
+ * screens' CSS and RestScene key off the attribute (`html[data-saver]`), not a class. */
+export function applyDataSaver(
+  on: boolean,
+  root: Pick<Element, 'toggleAttribute'> = document.documentElement,
+): void {
+  root.toggleAttribute('data-saver', on);
 }
 
 if (typeof document !== 'undefined') {

@@ -133,14 +133,14 @@ await home();
 await p.getByRole('button', { name: 'Settings' }).click();
 await p.getByRole('dialog', { name: 'Settings' }).waitFor();
 await p.getByRole('switch', { name: /Data saver/ }).click();
-check(await p.evaluate(() => document.documentElement.classList.contains('data-saver')), 'settings: data saver sets html.data-saver');
+check(await p.evaluate(() => document.documentElement.hasAttribute('data-saver')), 'settings: data saver sets html[data-saver]');
 await p.getByRole('radio', { name: /Hindi/ }).click();
 await p.getByRole('dialog', { name: 'सेटिंग्स' }).waitFor();
 check(true, 'settings: switching to Hindi redraws in Hindi');
 await p.screenshot({ path: `${OUT}pwa-settings-hi.png` });
 await p.reload();
 await p.locator('.ms-play').waitFor();
-check(await p.evaluate(() => document.documentElement.classList.contains('data-saver')), 'settings: data saver survives a reload');
+check(await p.evaluate(() => document.documentElement.hasAttribute('data-saver')), 'settings: data saver survives a reload');
 check((await p.locator('.ms-play').innerText()).trim() !== 'Play', 'settings: Hindi survives a reload');
 
 for (let i = 0; i < 3; i++) await p.locator('.ms-chip').nth(1).click();

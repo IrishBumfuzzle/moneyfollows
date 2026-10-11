@@ -25,8 +25,10 @@ export class ErrorBoundary extends Component<{ children: ReactNode; lang: 'en' |
         <button
           className="k-btn is-primary"
           onClick={() => {
-            // Start again from the main screen; saved progress is kept.
-            window.history.replaceState(null, '', window.location.pathname);
+            // Start again from the main screen; saved progress is kept. A demo stays a demo (its
+            // own save), but without reset=1 or the other one-off params.
+            const demo = new URLSearchParams(window.location.search).get('demo') === '1';
+            window.history.replaceState(null, '', window.location.pathname + (demo ? '?demo=1' : ''));
             window.location.reload();
           }}
         >
