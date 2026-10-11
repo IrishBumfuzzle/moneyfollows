@@ -1,0 +1,16 @@
+{
+  "settings.open": "सेटिंग्स",
+  "settings.title": "सेटिंग्स",
+  "settings.close": "सेटिंग्स बंद करो",
+  "settings.language": "भाषा",
+  "settings.lang.en": "English (अंग्रेज़ी)",
+  "settings.lang.hi": "हिंदी",
+  "settings.lang.te": "తెలుగు (तेलुगु)",
+  "settings.draft": "ड्राफ़्ट — अभी जाँच बाकी है",
+  "settings.data_saver": "डेटा सेवर",
+  "settings.data_saver.hint": "एनिमेशन बंद। पुराने फ़ोन की बैटरी बचती है।",
+  "settings.voice": "पढ़कर सुनाओ",
+  "settings.voice.hint": "शब्दों और खबरों पर स्पीकर बटन दिखाता है।",
+  "settings.on": "चालू",
+  "settings.off": "बंद"
+}

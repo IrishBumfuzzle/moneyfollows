@@ -1,6 +1,7 @@
 // Voice-over through the browser's speechSynthesis (CLAUDE.md 2 "Should"). The speaker button
 // hides itself when the phone has no voice for the current language.
 import { useEffect, useState } from 'react';
+import { useSettings } from '../settings/useSettings';
 import type { Lang } from './types';
 
 const BCP47: Partial<Record<Lang, string>> = { en: 'en-IN', hi: 'hi-IN' };
@@ -19,8 +20,15 @@ function pickVoice(lang: Lang): SpeechSynthesisVoice | null {
   );
 }
 
-/** The voice for `lang`, or null; updates when the browser finishes loading its voices. */
+/** The voice for `lang`, or null when there is none or Settings has voice-over off. */
 export function useVoice(lang: Lang): SpeechSynthesisVoice | null {
+  const voice = useAvailableVoice(lang);
+  const on = useSettings((s) => s.voice);
+  return on ? voice : null;
+}
+
+/** The phone's voice for `lang`, or null; updates when the browser finishes loading its voices. */
+export function useAvailableVoice(lang: Lang): SpeechSynthesisVoice | null {
   const [voice, setVoice] = useState(() => pickVoice(lang));
   useEffect(() => {
     setVoice(pickVoice(lang));

@@ -15,6 +15,7 @@ import {
   type TrackerContext,
 } from '@paisa/api-client';
 import { CONTENT_VERSION as PACK_VERSION } from '@paisa/content';
+import { saveStore } from '../features/demo/slot';
 import { api } from './client';
 
 /** Stamped on every event: the content pack the app plays (packages/content/manifest.json). */
@@ -28,8 +29,13 @@ export function loadApi(): Promise<ApiClient | null> {
   return Promise.resolve(api);
 }
 
-/** The browser's own idea of being online (true when it can't tell, e.g. in node). */
-export const isOnline = () => typeof navigator === 'undefined' || navigator.onLine !== false;
+let simulatedOffline = false;
+
+/**
+ * The browser's own idea of being online (true when it can't tell, e.g. in node), unless the demo
+ * panel is simulating offline.
+ */
+export const isOnline = () => !simulatedOffline && (typeof navigator === 'undefined' || navigator.onLine !== false);
 
 /** What the offline / sync banner shows (CLAUDE.md 6: status as a banner, not a screen). */
 export interface SyncStatus {
@@ -51,8 +57,8 @@ export const useSync = create<SyncStatus>(() => ({
   lastSyncedAt: null,
 }));
 
-/** idb-keyval fits QueueStorage as-is; all keys share the default store with the game saves. */
-const idbStorage: QueueStorage = { get, set };
+/** idb-keyval fits QueueStorage; the queue shares the game saves' store (the demo database in demo mode). */
+const idbStorage: QueueStorage = { get: (key) => get(key, saveStore), set: (key, value) => set(key, value, saveStore) };
 
 /** Builds the queue + tracker pair. Exported for tests, which pass in-memory storage and a fake push. */
 export function createBackend(options: {
@@ -157,7 +163,7 @@ export function startSync(): () => void {
   if (started || typeof window === 'undefined') return () => {};
   started = true;
   const online = () => {
-    useSync.setState({ online: true });
+    useSync.setState({ online: isOnline() });
     void syncNow();
   };
   const offline = () => useSync.setState({ online: false });
@@ -177,6 +183,18 @@ export function startSync(): () => void {
     clearInterval(timer);
   };
 }
+
+/**
+ * Demo panel (CLAUDE.md 9): pretend the phone is offline. Sends pause and the banner shows, while
+ * the real network stays up for the projector. Turning it off flushes the queue as a reconnect would.
+ */
+export function simulateOffline(on: boolean): void {
+  simulatedOffline = on;
+  useSync.setState({ online: isOnline() });
+  if (!on) void syncNow();
+}
+
+export const isSimulatingOffline = () => simulatedOffline;
 
 /** Called by track() after every event: counts it for the banner and schedules a send. */
 export function afterTrack(): void {

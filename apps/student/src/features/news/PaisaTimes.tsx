@@ -30,9 +30,11 @@ const navOf = (s: unknown): NewsNav => {
   return n?.screen === 'news' ? (n as NewsNav) : { screen: 'news' };
 };
 
-const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+const reducedMotion = () =>
+  (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false) ||
+  document.documentElement.hasAttribute('data-saver');
 
-/** Coins fly from the answer to the wallet chip. Skipped with reduced motion. */
+/** Coins fly from the answer to the wallet chip. Skipped with reduced motion or data saver. */
 function flyCoins(from: HTMLElement | null, to: HTMLElement | null) {
   if (!from || !to || reducedMotion() || !('animate' in HTMLElement.prototype)) return;
   const a = from.getBoundingClientRect(), b = to.getBoundingClientRect();

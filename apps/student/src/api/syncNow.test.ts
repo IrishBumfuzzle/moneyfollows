@@ -43,6 +43,23 @@ afterEach(() => {
 });
 
 describe('syncNow', () => {
+  it('demo panel: simulated offline pauses sends and shows offline; back online flushes', async () => {
+    api.pushEvents.mockImplementation((events: unknown[]) => Promise.resolve({ accepted: events.length }));
+    const { tracker, syncNow, simulateOffline, isSimulatingOffline, useSync } = await load();
+    simulateOffline(true);
+    expect(isSimulatingOffline()).toBe(true);
+    expect(useSync.getState().online).toBe(false);
+    tracker.track('app_open');
+    await tracker.settled();
+    expect(await syncNow()).toBeNull();
+    expect(api.pushEvents).not.toHaveBeenCalled();
+
+    simulateOffline(false);
+    expect(useSync.getState().online).toBe(true);
+    await vi.waitFor(() => expect(useSync.getState()).toMatchObject({ pending: 0, syncing: false }));
+    expect(api.pushEvents).toHaveBeenCalledOnce();
+  });
+
   it('sends what was tracked and tells the banner it is done', async () => {
     api.pushEvents.mockImplementation((events: unknown[]) => Promise.resolve({ accepted: events.length }));
     const { tracker, syncNow, useSync } = await load();

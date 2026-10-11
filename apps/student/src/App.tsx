@@ -10,6 +10,8 @@ import { ClassroomScreen } from './features/classroom/ClassroomScreen';
 import { loadClassroomConfig } from './features/classroom/config';
 import type { ClassroomConfig } from './features/classroom/config';
 import { PhoneLayer, SuddenEventSheet, triggerEvent, useEvents } from './features/events';
+import { DemoPanel } from './features/demo/DemoPanel';
+import { DEMO } from './features/demo/slot';
 import { ClaimDesk, CoverOrCash, HospitalSheet } from './features/hospital';
 import { IncomingCall, PhoneScreen } from './features/phone';
 import type { PhoneNav } from './features/phone';
@@ -29,6 +31,7 @@ import { PaisaTimes } from './features/news';
 import { Onboarding, loadProfile } from './features/onboarding';
 import { CounterShift, KiranaRun } from './features/store';
 import type { Receipt } from './features/store';
+import { SettingsSheet } from './features/settings/SettingsSheet';
 import { OfflineBanner } from './features/sync/OfflineBanner';
 import type { Profile } from './features/onboarding';
 import { useStoresHydrated } from './game/hydration';
@@ -60,6 +63,8 @@ const DecisionScene = lazy(() => import('./features/decisions/DecisionScene').th
 const MonthRecap = lazy(() => import('./features/home/MonthRecap').then((m) => ({ default: m.MonthRecap })));
 
 const params = new URLSearchParams(window.location.search);
+// Demo mode plays a fixed plan (CLAUDE.md 9): for Sana, week 1 pins School, the phone shop and Home.
+const DEMO_PLAN_SEED = 42;
 const LANG: Lang = params.get('lang') === 'hi' ? 'hi' : 'en';
 const SEED = Number(params.get('seed')) || Math.floor(Math.random() * 2 ** 31);
 
@@ -114,8 +119,10 @@ function Game({
 
   // The money plan starts the first time the map opens (?seed= fixes it for demos and tests).
   useEffect(() => {
-    if (screen === 'map' && profile) useGame.getState().ensurePlan(profile.persona, params.has('seed') ? SEED : undefined);
+    if (screen === 'map' && profile) useGame.getState().ensurePlan(profile.persona, params.has('seed') ? SEED : DEMO ? DEMO_PLAN_SEED : undefined);
   }, [screen, profile]);
+  // Main screen sheets: the gear's settings, and the hidden demo panel (demo mode and dev only).
+  const [sheet, setSheet] = useState<'settings' | 'demo' | null>(null);
 
   // map_opened each time the map is shown (CLAUDE.md 5.5); closing a sheet over it doesn't count.
   const prevScreen = useRef<Screen | null>(null);
@@ -261,8 +268,16 @@ function Game({
           }}
           onOpenNews={() => open('news')}
           onOpenLearn={() => open('learn')}
+          onSettings={() => setSheet('settings')}
+          onSecret={DEMO || import.meta.env.DEV ? () => setSheet('demo') : undefined}
         />
         {eventLayer('main')}
+        {sheet === 'settings' && (
+          <SettingsSheet profile={profile} lang={lang} setProfile={setProfile} onClose={() => setSheet(null)} />
+        )}
+        {sheet === 'demo' && (
+          <DemoPanel ctx={{ go: open, profile, setProfile }} onClose={() => setSheet(null)} />
+        )}
       </>
     );
   }
