@@ -13,7 +13,11 @@ import { PhoneLayer, SuddenEventSheet, triggerEvent, useEvents } from './feature
 import { ClaimDesk, CoverOrCash, HospitalSheet } from './features/hospital';
 import { IncomingCall, PhoneScreen } from './features/phone';
 import type { PhoneNav } from './features/phone';
-import { HomeSheet, RestScene } from './features/home';
+import { HomeSheet, OvernightSheet, RestScene } from './features/home';
+import { TodoSheet } from './features/decisions/TodoSheet';
+import { cardAt, planPins, recapDue } from './features/decisions/plan';
+import type { PlanPin, PlayCard } from './features/decisions/plan';
+import { DAYS_PER_WEEK } from './features/life/config';
 import { lifeApi, schoolToday, workedToday } from './features/life/life';
 import { MetersBar } from './features/life/MetersBar';
 import { StoreSheet } from './features/life/StoreSheet';
@@ -35,19 +39,22 @@ import './design/kenney.css';
 
 type Screen =
   | 'main' | 'map' | 'classroom' | 'home' | 'rest' | 'store' | 'kirana' | 'counter'
-  | 'hospital' | 'cover' | 'claims' | 'news' | 'phone' | 'learn';
+  | 'hospital' | 'cover' | 'claims' | 'news' | 'phone' | 'learn' | 'scene';
 const SCREENS: Screen[] = [
   'main', 'map', 'classroom', 'home', 'rest', 'store', 'kirana', 'counter',
-  'hospital', 'cover', 'claims', 'news', 'phone', 'learn',
+  'hospital', 'cover', 'claims', 'news', 'phone', 'learn', 'scene',
 ];
 /** Sheets drawn over the map: closing one shows the map again without a new map_opened. */
-const MAP_SHEETS: (Screen | null)[] = ['store', 'home', 'hospital'];
+const MAP_SHEETS: (Screen | null)[] = ['store', 'home', 'hospital', 'scene'];
 
 // No router or language picker yet: ?lang=hi switches language,
 // ?screen=map|classroom|home|store|kirana|counter|hospital|cover|claims|news|phone
 // opens that screen directly, ?seed=N fixes the quiz, ?event=<id> fires an event (demo / tests).
 // Learn (guides, progress, Notebook) loads when first opened; its store and recording stay eager.
 const LearnScreen = lazy(() => import('./features/learn/LearnScreen').then((m) => ({ default: m.LearnScreen })));
+// A pinned decision (dialogue scene or phone chat) and the Month Recap load when first needed.
+const DecisionScene = lazy(() => import('./features/decisions/DecisionScene').then((m) => ({ default: m.DecisionScene })));
+const MonthRecap = lazy(() => import('./features/home/MonthRecap').then((m) => ({ default: m.MonthRecap })));
 
 const params = new URLSearchParams(window.location.search);
 const LANG: Lang = params.get('lang') === 'hi' ? 'hi' : 'en';
@@ -95,6 +102,17 @@ function Game({
   const tick = useEvents((s) => s.tick);
   const hydrated = useStoresHydrated();
   const endlineOpen = useClassStatus((s) => s.endlineOpen);
+  const plan = useGame((s) => s.plan);
+  const overnight = useGame((s) => s.overnight);
+  // The pinned card being played, kept here so the consequence still shows once its pin is played.
+  const [scene, setScene] = useState<{ card: PlayCard; place: string } | null>(null);
+  // Day 7's rest is blocked while pins remain: Home shows what's still to do instead.
+  const [todo, setTodo] = useState<PlanPin[] | null>(null);
+
+  // The money plan starts the first time the map opens (?seed= fixes it for demos and tests).
+  useEffect(() => {
+    if (screen === 'map' && profile) useGame.getState().ensurePlan(profile.persona, params.has('seed') ? SEED : undefined);
+  }, [screen, profile]);
 
   // map_opened each time the map is shown (CLAUDE.md 5.5); closing a sheet over it doesn't count.
   const prevScreen = useRef<Screen | null>(null);
@@ -161,6 +179,12 @@ function Game({
   /** Sleep until tomorrow: the rest scene replaces the Home sheet, so waking goes back to the map. */
   const rest = () => {
     const before = useGame.getState().life;
+    // Day 7 ends the week: the plan's week moves with it, and waits while pins remain.
+    // A month-end recap still open is read on the map first (it starts the next month).
+    if (before.day === DAYS_PER_WEEK && !recapDue(useGame.getState().plan)) {
+      const night = useGame.getState().sleepPlan();
+      if (night?.kind === 'blocked') return setTodo(night.pins);
+    }
     const out = lifeApi.rest(before);
     trackLife({ kind: 'rest' }, before, out);
     apply(out);
@@ -355,22 +379,86 @@ function Game({
       />
     );
   }
+  /** A place's usual screen or sheet. */
+  const placeScreen = (id: string): Screen | null =>
+    id === 'school' ? 'classroom' : id === 'convenience' ? 'store' : id === 'home' ? 'home' : id === 'hospital' ? 'hospital' : null;
+  const goTo = (id: string) => {
+    const to = placeScreen(id);
+    if (to) open(to);
+    else console.log('go to', id);
+  };
+  /** Plays a pinned card. `replace` swaps the current entry (Home's "still to do" list) for the scene. */
+  const playPin = (card: PlayCard, place: string, replace = false) => {
+    setScene({ card, place });
+    if (!replace) return open('scene');
+    window.history.replaceState({ ...(window.history.state as object | null), screen: 'scene' }, '');
+    setScreen('scene');
+  };
+  if (screen === 'scene' && scene) {
+    return (
+      <Suspense fallback={<div className="dc-screen" aria-busy="true" />}>
+        <DecisionScene
+          lang={lang}
+          name={name}
+          card={scene.card}
+          onDone={() => {
+            // Then the place's usual sheet, in place of the scene, so back goes to the map.
+            const to = placeScreen(scene.place);
+            setScene(null);
+            if (!to) return back();
+            window.history.replaceState({ ...(window.history.state as object | null), screen: to }, '');
+            setScreen(to);
+          }}
+        />
+      </Suspense>
+    );
+  }
+  // A 'scene' entry with no scene in memory (a reload, or forward) is just the map.
+  const onMap = screen === 'map' || screen === 'scene';
+  const pins = planPins(plan);
+  // First-time player: a guide arrow at the first pin, until the first decision is made.
+  const guide = plan && plan.seen.length === 0 ? pins[0]?.location : undefined;
   return (
     <>
       <LocationScreen
+        lang={lang}
+        pinned={pins.map((p) => p.location)}
+        guide={guide}
         onSelect={(id) => {
           track('location_selected', { location_id: id });
           tick();
-          if (id === 'school') open('classroom');
-          else if (id === 'convenience') open('store');
-          else if (id === 'home') open('home');
-          else if (id === 'hospital') open('hospital');
-          else console.log('go to', id);
+          // This week's pinned card plays first; the place's usual sheet opens after it.
+          const card = cardAt(plan, id);
+          if (card) playPin(card, id);
+          else goTo(id);
         }}
       />
       <MetersBar lang={lang} state={life} pop={last} />
-      {screen === 'map' && eventLayer('map')}
-      {screen === 'home' && <HomeSheet lang={lang} state={life} onMenu={toMain} onRest={rest} onClose={back} />}
+      {onMap && eventLayer('map')}
+      {onMap && plan && recapDue(plan) && (
+        <Suspense fallback={null}>
+          <MonthRecap lang={lang} plan={plan} onContinue={() => useGame.getState().continueMonth()} />
+        </Suspense>
+      )}
+      {onMap && overnight && !recapDue(plan) && (
+        <OvernightSheet lang={lang} name={name} overnight={overnight} onClose={() => useGame.getState().clearOvernight()} />
+      )}
+      {screen === 'home' && todo && (
+        <TodoSheet
+          lang={lang}
+          pins={todo}
+          onPlay={(pin) => {
+            setTodo(null);
+            const card = cardAt(plan, pin.location, pin.sublocation);
+            if (card) playPin(card, pin.location, true);
+          }}
+          onClose={() => {
+            setTodo(null);
+            back();
+          }}
+        />
+      )}
+      {screen === 'home' && !todo && <HomeSheet lang={lang} state={life} onMenu={toMain} onRest={rest} onClose={back} />}
       {screen === 'store' && (
         <StoreSheet
           lang={lang}
