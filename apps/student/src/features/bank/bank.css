@@ -68,3 +68,27 @@
   :root:not([data-saver]) .bk-feedback { animation: bk-rise 180ms ease-out; }
 }
 @keyframes bk-rise { from { transform: translateY(16px); opacity: 0; } }
+
+/* ---- Jar Splitter: one slider per jar, each with its jar colour, icon and label ---- */
+.bk-body .bk-round { font-size: 16px; color: #7a4a2a; }
+.bk-income { font-size: 18px; }
+.js-jars { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.js-jar { display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-left: 6px solid; background: #fffaf0; }
+.js-jar .tm-slider { flex: 1; min-width: 0; }
+.js-jar .tm-slider-label { font-size: 16px; }
+.js-jar.is-needs { border-color: #1f8a8a; }
+.js-jar.is-needs input { accent-color: #1f8a8a; }
+.js-jar.is-wants { border-color: #b36b00; }
+.js-jar.is-wants input { accent-color: #b36b00; }
+.js-jar.is-goals { border-color: #6a4bb5; }
+.js-jar.is-goals input { accent-color: #6a4bb5; }
+.js-jar.is-savings { border-color: #2f7a2a; }
+.js-jar.is-savings input { accent-color: #2f7a2a; }
+.bk-left { font-size: 18px; color: #8a4b12; }
+.bk-left.is-done { color: #2f7a2a; }
+.bk-main:disabled { opacity: 0.6; }
+.js-checks { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.js-checks li { display: flex; align-items: flex-start; gap: 6px; }
+.js-checks li.is-ok { color: #2f5a2a; }
+.js-checks li.is-fix { color: #8a1f17; }
+.js-checks .lf-px { flex: none; margin-top: 2px; }

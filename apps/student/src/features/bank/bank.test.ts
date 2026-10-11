@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { projectGrowth } from '@paisa/engine';
 import { GROWTH_RATES } from '@paisa/shared';
 import { STRINGS } from './content';
+import { JAR_ORDER, emptySplit, roundsFor, scoreGame, scoreJarSplit, setJar } from './jars';
 import { CHALLENGES, MONTHLY, YEARS, answer, rangeAt, scoreRound } from './timeMachine';
 
 describe('Time Machine range (CLAUDE.md 5.4)', () => {
@@ -52,5 +53,40 @@ describe('bank strings (CLAUDE.md 7.2: every key in en and hi)', () => {
     const all = Object.values(STRINGS.en!).join(' ');
     expect(all).not.toMatch(/guarantee|risk-free|sure returns|you should invest/i);
     expect(STRINGS.en!['tm.assumption']).toMatch(/not promises/);
+  });
+});
+
+describe('Jar Splitter (practice)', () => {
+  it('every persona gets rounds, and each round can pass every check', () => {
+    for (const persona of ['sana', 'ravi'] as const) {
+      const rounds = roundsFor(persona);
+      expect(rounds.length, persona).toBeGreaterThan(0);
+      for (const r of rounds) {
+        // A sensible split: needs first, then the saving share, the rest to wants.
+        let s = setJar(r, emptySplit(), 'needs', Math.ceil(r.income / 2 / r.step) * r.step);
+        s = setJar(r, s, 'savings', Math.ceil((r.income * 0.25) / r.step) * r.step);
+        s = setJar(r, s, 'wants', r.income);
+        const res = scoreJarSplit(r, s);
+        expect(res.complete, r.id).toBe(true);
+        expect(res.allPassed, r.id).toBe(true);
+      }
+    }
+  });
+
+  it('setJar snaps to the step, never goes below 0 or past the income, never mutates', () => {
+    const r = { income: 1000, step: 100 };
+    const s = emptySplit();
+    expect(setJar(r, s, 'needs', 449).needs).toBe(400);
+    expect(setJar(r, s, 'needs', -50).needs).toBe(0);
+    const full = setJar(r, setJar(r, s, 'needs', 700), 'wants', 900);
+    expect(full.wants).toBe(300);
+    expect(JAR_ORDER.reduce((n, j) => n + full[j], 0)).toBe(1000);
+    expect(s).toEqual(emptySplit());
+  });
+
+  it('scores a game as checks met of all checks', () => {
+    const r = roundsFor('sana')[0]!;
+    const res = scoreJarSplit(r, setJar(r, emptySplit(), 'wants', r.income));
+    expect(scoreGame([res])).toEqual({ correct: res.passed, total: res.checks.length, score: Math.round((100 * res.passed) / res.checks.length) });
   });
 });

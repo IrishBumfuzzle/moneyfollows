@@ -7,12 +7,14 @@ import '../life/life.css';
 import './bank.css';
 
 /**
- * The Bank on the map: a bottom sheet with its practice tools (Time Machine, Scam or Safe?).
+ * The Bank on the map: a bottom sheet with its practice tools (Time Machine, Jar Splitter,
+ * Scam or Safe?).
  * They never touch the wallet. The Bank's weekly decisions are run elsewhere (the map's pins).
  */
-export function BankSheet({ lang, onTimeMachine, onScams, onClose }: {
+export function BankSheet({ lang, onTimeMachine, onJars, onScams, onClose }: {
   lang: Lang;
   onTimeMachine: () => void;
+  onJars: () => void;
   onScams: () => void;
   onClose: () => void;
 }) {
@@ -50,6 +52,13 @@ export function BankSheet({ lang, onTimeMachine, onScams, onClose }: {
             <span className="lf-offer-body">
               <span className="lf-offer-label">{tr('bank.tm.label')}</span>
               <span className="lf-offer-hint">{tr('bank.tm.hint')}</span>
+            </span>
+          </button>
+          <button className="k-btn lf-offer" onClick={onJars}>
+            <span className="lf-offer-icon"><PixelIcon id="sack" size={32} /></span>
+            <span className="lf-offer-body">
+              <span className="lf-offer-label">{tr('bank.jars.label')}</span>
+              <span className="lf-offer-hint">{tr('bank.jars.hint')}</span>
             </span>
           </button>
           <button className="k-btn lf-offer" onClick={onScams}>
