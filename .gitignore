@@ -10,3 +10,4 @@ coverage/
 .claude/
 apps/student/assets-src/schwarnhild/
 apps/student/tests/e2e-output/
+__pycache__/
