@@ -1,5 +1,6 @@
 // Import first: captures a failed invite link in the URL hash before supabase-js clears it.
 import { AUTH_LINK_ERROR } from './shell/initialHash';
+import { RESET_TOKEN } from './shell/resetLink';
 import { Suspense, lazy, useCallback, useEffect, useState } from 'react';
 import type { DashboardApi } from './types';
 import { api } from './api';
@@ -8,7 +9,9 @@ import { saveLang, savedLang, type Lang } from './i18n';
 import { ProgressScreen } from './screens/progress/ProgressScreen';
 import { ClassesScreen } from './screens/classes/ClassesScreen';
 import { SettingsScreen } from './screens/classes/SettingsScreen';
+import { ResetPassword } from './screens/signin/ResetPassword';
 import { SignIn } from './screens/signin/SignIn';
+import type { Mode as SignInMode } from './screens/signin/signin';
 import { ClassLayout } from './shell/ClassLayout';
 import { ErrorBoundary } from './shell/ErrorBoundary';
 import { SAMPLE_MODE } from './mode';
@@ -46,16 +49,22 @@ export function App() {
   return <Gate api={api} lang={lang} onLang={setLang} />;
 }
 
-/** Sign-in state: loading, signed out, signed in but not staff, or the workspace. */
+/**
+ * Sign-in state: loading, signed out, signed in but not staff, or the workspace. A password-reset
+ * link (?reset=) comes first: checking it signs the person in, but they still need a new password.
+ */
 function Gate({ api, lang, onLang }: { api: DashboardApi; lang: Lang; onLang: (lang: Lang) => void }) {
   const { state, refresh, recheck } = useAuth(api);
   const [signOutFailed, setSignOutFailed] = useState(false);
   const [linkError, setLinkError] = useState(AUTH_LINK_ERROR);
+  // Sample mode has no emails, so no reset links.
+  const [resetToken, setResetToken] = useState(SAMPLE_MODE ? null : RESET_TOKEN);
+  const [signInMode, setSignInMode] = useState<SignInMode>('signin');
   const email = 'email' in state ? state.email : undefined;
 
   // The workspace moves focus itself once its classes have loaded.
   const waiting = state.status === 'loading' || state.status === 'checking';
-  useFocusHeading(state.status, !waiting && state.status !== 'staff');
+  useFocusHeading(resetToken ? 'reset' : state.status, resetToken !== null || (!waiting && state.status !== 'staff'));
 
   const signOut = useCallback(async () => {
     setSignOutFailed(false);
@@ -79,24 +88,44 @@ function Gate({ api, lang, onLang }: { api: DashboardApi; lang: Lang; onLang: (l
             <span>{t(lang, 'topbar.sign_out_failed')}</span>
           </div>
         )}
-        {state.status === 'loading' && <Loading text={t(lang, 'loading.session')} />}
-        {state.status === 'out' && (
+        {resetToken && (
+          <ResetPassword
+            api={api}
+            lang={lang}
+            tokenHash={resetToken}
+            onDone={() => {
+              setResetToken(null);
+              setLinkError(false);
+              refresh();
+            }}
+            onNewLink={() => {
+              setResetToken(null);
+              setSignInMode('forgot');
+            }}
+          />
+        )}
+        {!resetToken && state.status === 'loading' && <Loading text={t(lang, 'loading.session')} />}
+        {!resetToken && state.status === 'out' && (
           <SignIn
             api={api}
             lang={lang}
             linkError={linkError}
+            initialMode={signInMode}
             onSignedIn={() => {
               setLinkError(false);
+              setSignInMode('signin');
               refresh();
             }}
           />
         )}
-        {state.status === 'checking' && <Loading text={t(lang, 'loading.staff')} />}
-        {state.status === 'failed' && (
+        {!resetToken && state.status === 'checking' && <Loading text={t(lang, 'loading.staff')} />}
+        {!resetToken && state.status === 'failed' && (
           <Failed text={t(lang, 'staffcheck.failed')} retryLabel={t(lang, 'classes.retry')} onRetry={recheck} />
         )}
-        {state.status === 'not_staff' && <NotStaff email={state.email} lang={lang} onRecheck={recheck} />}
-        {state.status === 'staff' && (
+        {!resetToken && state.status === 'not_staff' && (
+          <NotStaff email={state.email} lang={lang} onRecheck={recheck} />
+        )}
+        {!resetToken && state.status === 'staff' && (
           <ErrorBoundary text={t(lang, 'app.crash')} reloadLabel={t(lang, 'app.reload')}>
             <Workspace api={api} lang={lang} />
           </ErrorBoundary>

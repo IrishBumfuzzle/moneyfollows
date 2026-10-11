@@ -2,7 +2,7 @@
 //   pnpm seed -- --write-only          only regenerate the file (supabase db reset loads it)
 //   pnpm seed -- --allow-remote-demo   also allow a non-local database (not recommended)
 //   pnpm seed -- --hosted-demo <email> load the demo class into a hosted database, owned by
-//                                      that invited staff account; no known-password user
+//                                      that staff account; no known-password user
 //                                      is created and supabase/seed.sql is left alone
 import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -53,7 +53,7 @@ try {
 async function loadHostedDemo(email: string | undefined): Promise<never> {
   const target = process.env.SUPABASE_DB_URL;
   if (!email || email.startsWith('--') || !STAFF_EMAIL_RE.test(email)) {
-    console.error('Usage: pnpm seed -- --hosted-demo <invited staff email>   (with SUPABASE_DB_URL set)');
+    console.error('Usage: pnpm seed -- --hosted-demo <staff email that has an account>   (with SUPABASE_DB_URL set)');
     process.exit(1);
   }
   if (!target) {

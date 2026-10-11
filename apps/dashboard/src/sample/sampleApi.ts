@@ -1,5 +1,5 @@
-// The dashboard API on sample data, in memory (sample mode, src/mode.ts). Any email and any 6-digit
-// code sign in. Changes last until the tab reloads; nothing leaves the browser.
+// The dashboard API on sample data, in memory (sample mode, src/mode.ts). Any email and any
+// password sign in. Changes last until the tab reloads; nothing leaves the browser.
 import { ApiError, type ClassRow } from '@paisa/api-client';
 import type { Lang } from '@paisa/shared';
 import type { DashboardApi } from '../types';
@@ -77,18 +77,26 @@ export function createSampleApi({ now = new Date(), delayMs = 250, storage }: Sa
     });
 
   return {
-    signInWithEmail: () => pause(undefined),
-
-    async verifyEmailCode(address: string, token: string) {
+    async signInWithPassword(address: string) {
       await pause(undefined);
-      if (!/^\d{6}$/.test(token)) throw new ApiError('auth_code_invalid');
-      setEmail(address.trim().toLowerCase());
+      setEmail(address.trim().toLowerCase() || SAMPLE_EMAIL);
     },
 
-    async signInWithPassword() {
+    async signUpWithPassword(address: string) {
       await pause(undefined);
-      setEmail(SAMPLE_EMAIL);
+      setEmail(address.trim().toLowerCase() || SAMPLE_EMAIL);
+      return { signedIn: true };
     },
+
+    /** No email leaves sample mode, so there is never a link to open. */
+    sendPasswordReset: () => pause(undefined),
+
+    async verifyPasswordReset() {
+      await pause(undefined);
+      throw new ApiError('auth_link_invalid');
+    },
+
+    setPassword: () => call(() => undefined),
 
     async signOut() {
       setEmail(null);

@@ -9,8 +9,10 @@ function fakeAuth(result: AuthResult, session: { user: { email: string } } | nul
   const unsubscribe = vi.fn();
   let listener: ((event: string, s: typeof session) => void) | undefined;
   const auth = {
-    signInWithOtp: vi.fn(async () => result),
+    signUp: vi.fn(async () => result),
+    resetPasswordForEmail: vi.fn(async () => result),
     verifyOtp: vi.fn(async () => result),
+    updateUser: vi.fn(async () => result),
     signInWithPassword: vi.fn(async () => result),
     signOut: vi.fn(async () => ({ error: null })),
     getSession: vi.fn(async () => ({ data: { session }, error: null })),
@@ -27,40 +29,74 @@ function fakeAuth(result: AuthResult, session: { user: { email: string } } | nul
 }
 
 describe('staff sign-in', () => {
-  it('sends a code only to existing accounts and verifies it as an email OTP', async () => {
-    const { sb } = fakeAuth({ error: null });
-    const api = createApiClient({ url: 'http://x', anonKey: 'k', supabase: sb });
-    await api.signInWithEmail('t@ngo.org');
-    expect(sb.auth.signInWithOtp).toHaveBeenCalledWith({ email: 't@ngo.org', options: { shouldCreateUser: false } });
-    await api.verifyEmailCode('t@ngo.org', '123456');
-    expect(sb.auth.verifyOtp).toHaveBeenCalledWith({ email: 't@ngo.org', token: '123456', type: 'email' });
+  const client = (result: AuthResult) => {
+    const { sb } = fakeAuth(result);
+    return { sb, api: createApiClient({ url: 'http://x', anonKey: 'k', supabase: sb }) };
+  };
+
+  it('signs in with email and password', async () => {
+    const { sb, api } = client({ error: null });
+    await api.signInWithPassword('t@ngo.org', 'pw-12345');
+    expect(sb.auth.signInWithPassword).toHaveBeenCalledWith({ email: 't@ngo.org', password: 'pw-12345' });
+  });
+
+  it('creates an account and says whether it is signed in', async () => {
+    const { sb, api } = client({ data: { session: { access_token: 'a' }, user: {} }, error: null });
+    expect(await api.signUpWithPassword('t@ngo.org', 'pw-12345')).toEqual({ signedIn: true });
+    expect(sb.auth.signUp).toHaveBeenCalledWith({ email: 't@ngo.org', password: 'pw-12345' });
+    // With email confirmation on, GoTrue answers with a user and no session.
+    expect(await client({ data: { session: null, user: {} }, error: null }).api.signUpWithPassword('t@ngo.org', 'pw-12345')).toEqual({
+      signedIn: false,
+    });
+  });
+
+  it('sends a reset link to the given page, checks its token hash, and sets the new password', async () => {
+    const { sb, api } = client({ error: null });
+    await api.sendPasswordReset('t@ngo.org', 'https://dash.example.org/');
+    expect(sb.auth.resetPasswordForEmail).toHaveBeenCalledWith('t@ngo.org', { redirectTo: 'https://dash.example.org/' });
+    await api.verifyPasswordReset('hash123');
+    expect(sb.auth.verifyOtp).toHaveBeenCalledWith({ token_hash: 'hash123', type: 'recovery' });
+    await api.setPassword('new-pass-1');
+    expect(sb.auth.updateUser).toHaveBeenCalledWith({ password: 'new-pass-1' });
+    expect(sb.auth.signOut).toHaveBeenCalledWith({ scope: 'others' });
+  });
+
+  it('keeps the other sessions when the new password was refused', async () => {
+    const { sb, api } = client({ error: { message: 'Password should be at least 8 characters.', code: 'weak_password', status: 422 } });
+    await expect(api.setPassword('short')).rejects.toMatchObject({ code: 'auth_weak_password' });
+    expect(sb.auth.signOut).not.toHaveBeenCalled();
   });
 
   it('maps GoTrue errors to codes the dashboard can explain', async () => {
-    const cases: [AuthResult['error'], string][] = [
-      [{ message: 'Signups not allowed for otp', code: 'otp_disabled', status: 422 }, 'auth_not_invited'],
+    const cases: [NonNullable<AuthResult['error']>, string][] = [
+      [{ message: 'staff_not_invited', status: 403 }, 'auth_not_invited'],
+      [{ message: 'staff_not_invited', code: 'unexpected_failure', status: 403 }, 'auth_not_invited'],
       [{ message: 'Signups not allowed for this instance', code: 'signup_disabled', status: 422 }, 'auth_not_invited'],
-      [{ message: 'Token has expired or is invalid', code: 'otp_expired', status: 403 }, 'auth_code_invalid'],
-      [{ message: 'Token has expired or is invalid', status: 403 }, 'auth_code_invalid'],
-      [{ message: 'Invalid login credentials', code: 'invalid_credentials', status: 400 }, 'auth_code_invalid'],
+      [{ message: 'Invalid login credentials', code: 'invalid_credentials', status: 400 }, 'auth_wrong_password'],
+      [{ message: 'Invalid login credentials', status: 400 }, 'auth_wrong_password'],
+      [{ message: 'Email not confirmed', code: 'email_not_confirmed', status: 400 }, 'auth_wrong_password'],
+      [{ message: 'Email link is invalid or has expired', code: 'otp_expired', status: 403 }, 'auth_link_invalid'],
+      [{ message: 'Token has expired or is invalid', status: 403 }, 'auth_link_invalid'],
+      [{ message: 'User already registered', code: 'user_already_exists', status: 422 }, 'auth_account_exists'],
+      [{ message: 'Password should be at least 8 characters.', code: 'weak_password', status: 422 }, 'auth_weak_password'],
+      [
+        { message: 'New password should be different from the old password.', code: 'same_password', status: 422 },
+        'auth_same_password',
+      ],
+      [{ message: 'New password should be different from the old password.', status: 422 }, 'auth_same_password'],
+      [{ message: 'Email address "x@y" is invalid', code: 'email_address_invalid', status: 400 }, 'auth_email_invalid'],
       [{ message: 'email rate limit exceeded', code: 'over_email_send_rate_limit', status: 429 }, 'auth_rate_limited'],
       [{ message: 'For security purposes, you can only request this after 52 seconds.', status: 429 }, 'auth_rate_limited'],
       [{ message: 'Failed to fetch' }, 'network'],
-      [{ message: 'Database error', status: 500 }, 'unknown'],
+      [{ message: 'Error sending recovery email', status: 500 }, 'unknown'],
     ];
     for (const [error, code] of cases) {
-      const { sb } = fakeAuth({ error });
-      const api = createApiClient({ url: 'http://x', anonKey: 'k', supabase: sb });
-      await expect(api.signInWithEmail('t@ngo.org'), error!.message).rejects.toMatchObject({ code });
-      await expect(api.verifyEmailCode('t@ngo.org', '000000')).rejects.toBeInstanceOf(ApiError);
+      const { api } = client({ error });
+      await expect(api.signInWithPassword('t@ngo.org', 'pw'), error.message).rejects.toMatchObject({ code });
+      await expect(api.signUpWithPassword('t@ngo.org', 'pw')).rejects.toBeInstanceOf(ApiError);
+      await expect(api.sendPasswordReset('t@ngo.org', 'http://x/')).rejects.toBeInstanceOf(ApiError);
+      await expect(api.verifyPasswordReset('h')).rejects.toBeInstanceOf(ApiError);
     }
-  });
-
-  it('signs the local demo facilitator in with a password', async () => {
-    const { sb } = fakeAuth({ error: null });
-    const api = createApiClient({ url: 'http://x', anonKey: 'k', supabase: sb });
-    await api.signInWithPassword('demo.facilitator@example.org', 'pw');
-    expect(sb.auth.signInWithPassword).toHaveBeenCalledWith({ email: 'demo.facilitator@example.org', password: 'pw' });
   });
 
   it('reports the signed-in email and its changes, and whether they are staff', async () => {

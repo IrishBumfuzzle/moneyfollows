@@ -174,10 +174,10 @@ enable_refresh_token_rotation = true
 # Requires enable_refresh_token_rotation = true.
 refresh_token_reuse_interval = 10
 # Allow/disallow new user signups to your project.
-# Off: students never have accounts, and staff are invited by an admin (Studio ->
-# Authentication -> Invite user, or auth.admin.inviteUserByEmail with the service key)
-# and added to public.staff. Nobody can self-register as a facilitator.
-enable_signup = false
+# On, but only for staff: the admin adds an email to public.staff (pnpm staff:invite), then that
+# person taps "Create account" on the dashboard and picks a password. Every other email is refused
+# by the [auth.hook.before_user_created] function below. Students never have accounts.
+enable_signup = true
 # Allow/disallow anonymous sign-ins to your project.
 enable_anonymous_sign_ins = false
 # Allow/disallow testing manual linking of accounts
@@ -200,7 +200,8 @@ password_requirements = ""
 
 [auth.rate_limit]
 # Number of emails that can be sent per hour. Requires auth.email.smtp to be enabled.
-email_sent = 2
+# Emails are only password-reset links now; Gmail allows ~500 a day.
+email_sent = 60
 # Number of SMS messages that can be sent per hour. Requires auth.sms to be enabled.
 sms_sent = 30
 # Number of anonymous sign-ins that can be made per hour per IP address. Requires enable_anonymous_sign_ins = true.
@@ -222,31 +223,31 @@ web3 = 30
 
 [auth.email]
 # Must stay true. Despite its name, this switches the whole email provider on or off
-# (GOTRUE_EXTERNAL_EMAIL_ENABLED): false means nobody, invited staff included, can sign
-# in by email. Self-registration is blocked by [auth] enable_signup = false above.
-# Staff sign in with an emailed one-time code (signInWithOtp, shouldCreateUser: false).
-# Password sign-in cannot be switched off separately for the email provider; invited
-# staff never set a password, so only the local demo facilitator has one (pnpm seed).
+# (GOTRUE_EXTERNAL_EMAIL_ENABLED): false means nobody can sign in with email + password.
+# Who may create an account is decided by the staff allowlist hook below.
 enable_signup = true
 # If enabled, a user will be required to confirm any email change on both the old, and new email
 # addresses. If disabled, only the new email is required to confirm.
 double_confirm_changes = true
 # If enabled, users need to confirm their email address before signing in.
-enable_confirmations = true
+# Off: a new staff account is signed in straight away (the admin already vouched for the email by
+# adding it to public.staff). A lost password is reset through a link sent to that inbox.
+enable_confirmations = false
 # If enabled, users will need to reauthenticate or have logged in recently to change their password.
 secure_password_change = false
 # Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
 max_frequency = "1s"
 # Number of characters used in the email OTP.
 otp_length = 6
-# Number of seconds before the email OTP expires (defaults to 1 hour).
-otp_expiry = 600
+# Number of seconds before the email OTP expires (defaults to 1 hour). Also how long a
+# password-reset link works.
+otp_expiry = 3600
 
-# Production SMTP for sign-in codes. Locally, emails go to Inbucket ([local_smtp]), so this
-# stays disabled here; set enabled = true for the hosted project (`supabase config push`)
-# with the SMTP_* variables from .env.example set in the shell.
+# Real email (Gmail) for password-reset links, locally too, so a staff member's own inbox gets
+# them. The CLI reads SMTP_* from the repo's .env on `supabase start` / `config push` (see
+# .env.example). Without them, sign-up and sign-in still work; only reset emails fail.
 [auth.email.smtp]
-enabled = false
+enabled = true
 host = "env(SMTP_HOST)"
 port = 587
 user = "env(SMTP_USER)"
@@ -254,17 +255,18 @@ pass = "env(SMTP_PASS)"
 admin_email = "env(SMTP_FROM)"
 sender_name = "MoneyFollows"
 
-# Staff accept the invite link once (it confirms the account), then sign in with a code.
-# An OTP request before the invite is accepted fails with signup_disabled.
+# Only for an invite sent from Studio (Authentication -> Invite user). pnpm staff:invite sends no
+# email: the person creates their own account on the dashboard.
 [auth.email.template.invite]
 subject = "You have been invited to MoneyFollows"
 content_path = "./supabase/templates/invite.html"
 
-# The default sign-in email has only a link; the dashboard asks for the 6-digit code
-# (api-client verifyEmailCode), so the template must include {{ .Token }}.
-[auth.email.template.magic_link]
-subject = "Your MoneyFollows sign-in code"
-content_path = "./supabase/templates/magic_link.html"
+# "Forgot password?" on the dashboard. The link goes straight to the dashboard with the token hash
+# (?reset=...), which checks it itself (api-client verifyPasswordReset). The default template's
+# link goes through the auth server's own URL, which on a local stack is 127.0.0.1:54321.
+[auth.email.template.recovery]
+subject = "Reset your MoneyFollows password"
+content_path = "./supabase/templates/recovery.html"
 
 # Uncomment to customize notification email template
 # [auth.email.notification.password_changed]
@@ -294,9 +296,10 @@ max_frequency = "5s"
 # inactivity_timeout = "8h"
 
 # This hook runs before a new user is created and allows developers to reject the request based on the incoming user object.
-# [auth.hook.before_user_created]
-# enabled = true
-# uri = "pg-functions://postgres/auth/before-user-created-hook"
+# Only emails on the staff allowlist may create an account (migration 20261011160000_staff_signup_gate.sql).
+[auth.hook.before_user_created]
+enabled = true
+uri = "pg-functions://postgres/public/staff_signup_gate"
 
 # This hook runs before a token is issued and allows you to add additional claims based on the authentication method used.
 # [auth.hook.custom_access_token]
@@ -452,14 +455,10 @@ additional_redirect_urls = ["env(DASHBOARD_URL)"]
 [remotes.production.db.seed]
 enabled = false
 
-# One sign-in code per minute per address (local dev keeps 1s), so nobody can burn the
+# One reset email per minute per address (local dev keeps 1s), so nobody can burn the
 # project's hourly email quota or the SMTP account's daily limit by spamming a staff email.
 [remotes.production.auth.email]
 max_frequency = "60s"
-
-# The local default (2 emails an hour) is too low for inviting staff. Gmail allows ~500 a day.
-[remotes.production.auth.rate_limit]
-email_sent = 60
 
 [remotes.production.auth.email.smtp]
 enabled = true

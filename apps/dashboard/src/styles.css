@@ -180,7 +180,10 @@ table.data th button.sort:focus-visible { outline: 3px solid var(--focus); outli
 .btn-row { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
 .form-row { display: flex; flex-wrap: wrap; gap: var(--gap); align-items: flex-start; }
 .field.grow { flex: 1 1 260px; }
-.code-input { font-size: 1.75rem; letter-spacing: 0.4em; text-align: center; font-variant-numeric: tabular-nums; }
+.password-row { display: flex; gap: 8px; }
+.password-row .input { flex: 1 1 auto; min-width: 0; }
+.signin-first { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line); }
+.signin-first h2 { font-size: 1.125rem; }
 .dev-box { margin-top: 24px; padding-top: 16px; border-top: 1px dashed var(--line); }
 .sample-offer { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line); }
 .sample-offer h2 { font-size: 1.125rem; }

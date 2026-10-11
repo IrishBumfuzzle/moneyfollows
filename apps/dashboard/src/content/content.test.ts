@@ -17,7 +17,7 @@ describe('dashboard shell content', () => {
   });
 
   it('fills variables', () => {
-    expect(t('en', 'signin.resend_wait', { s: 42 })).toBe('Send a new code in 42s');
+    expect(t('en', 'signin.forgot.sent', { email: 'a@gmail.com' })).toContain('If a@gmail.com has a staff account');
     expect(t('hi', 'settings.code.changed', { code: 'ABCD 2345' })).toContain('ABCD 2345');
   });
 

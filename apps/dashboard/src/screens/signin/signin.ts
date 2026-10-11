@@ -1,36 +1,53 @@
 import { apiCode, isNetworkError } from '../../shell/errors';
 
-export const CODE_LENGTH = 6;
-/** The code box takes a little more than the code, so a pasted "123 456" reaches cleanOtp whole instead of being cut at 6. */
-export const CODE_INPUT_MAX = CODE_LENGTH + 2;
-/** The backend allows one code email a minute (supabase/config.toml), so the resend button waits too. */
-export const RESEND_SECONDS = 60;
+/** What the sign-in card is doing: sign in, create an account once, or ask for a reset link. */
+export type Mode = 'signin' | 'signup' | 'forgot';
+
+/** minimum_password_length in supabase/config.toml, so the form never allows what the server refuses. */
+export const PASSWORD_MIN = 8;
+/** bcrypt reads at most 72 bytes; longer passwords are refused by the server. */
+export const PASSWORD_MAX = 72;
 
 export const normalizeEmail = (raw: string) => raw.trim().toLowerCase();
 
-/** Deliberately loose: the server decides who is invited; this only catches typos. */
+/** Deliberately loose: the server decides who is on the staff list; this only catches typos. */
 export const isValidEmail = (raw: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw.trim());
 
-/** Keeps digits only (people paste "123 456"), at most six. */
-export const cleanOtp = (raw: string) => raw.replace(/\D/g, '').slice(0, CODE_LENGTH);
+/**
+ * The content key for a password the form should not send yet, or null. Sign-in only needs
+ * something typed (older passwords may be shorter); a new password needs PASSWORD_MIN characters.
+ */
+export function passwordProblem(password: string, isNew: boolean): string | null {
+  if (password === '') return 'signin.err.password_empty';
+  if (isNew && password.length < PASSWORD_MIN) return 'signin.err.password_short';
+  return null;
+}
 
-export const isCompleteOtp = (code: string) => code.length === CODE_LENGTH;
-
-/** Whole seconds until the next code may be requested (0 = now). */
-export const secondsLeft = (sentAt: number, now: number, cooldown = RESEND_SECONDS) =>
-  Math.max(0, Math.ceil(cooldown - (now - sentAt) / 1000));
-
-/** The content key explaining a failed sign-in step. `demo` is the password button, whose failure means something else. */
-export function signInErrorKey(err: unknown, demo = false): string {
+/**
+ * The content key explaining a failed step. `demo` is the local demo button, whose failure
+ * means something else; in `forgot` an unexplained failure is most likely the email not sending.
+ */
+export function signInErrorKey(err: unknown, opts: { demo?: boolean; mode?: Mode } = {}): string {
   if (isNetworkError(err)) return 'signin.err.network';
   switch (apiCode(err)) {
     case 'auth_not_invited':
       return 'signin.err.not_invited';
-    case 'auth_code_invalid':
-      return demo ? 'signin.err.demo' : 'signin.err.code_invalid';
+    case 'auth_wrong_password':
+      return opts.demo ? 'signin.err.demo' : 'signin.err.wrong_password';
+    case 'auth_account_exists':
+      return 'signin.err.account_exists';
+    case 'auth_weak_password':
+      return 'signin.err.weak_password';
+    case 'auth_link_invalid':
+      return 'signin.err.link_invalid';
+    case 'auth_email_invalid':
+      return 'signin.err.email';
     case 'auth_rate_limited':
       return 'signin.err.rate_limited';
     default:
-      return 'signin.err.unknown';
+      return opts.mode === 'forgot' ? 'signin.err.send_failed' : 'signin.err.unknown';
   }
 }
+
+/** Where a reset link should bring the person back to: this page, without its query or hash. */
+export const resetRedirect = (loc: Pick<Location, 'origin' | 'pathname'>) => `${loc.origin}${loc.pathname}`;

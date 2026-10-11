@@ -3,106 +3,109 @@ import type { DashboardApi } from '../../types';
 import { t } from '../../content';
 import type { Lang } from '../../i18n';
 import { SAMPLE_MODE, sampleModeHref } from '../../mode';
-import {
-  CODE_INPUT_MAX,
-  cleanOtp,
-  isCompleteOtp,
-  isValidEmail,
-  normalizeEmail,
-  secondsLeft,
-  signInErrorKey,
-} from './signin';
+import { PasswordField } from './PasswordField';
+import { isValidEmail, normalizeEmail, passwordProblem, resetRedirect, signInErrorKey, type Mode } from './signin';
 
 interface Props {
   api: DashboardApi;
   lang: Lang;
-  /** An invite or sign-in link in the URL failed (expired or already used). */
+  /** A sign-in or reset link in the URL failed (expired or already used). */
   linkError?: boolean;
+  /** Where the card starts: 'forgot' after a reset link that no longer works. */
+  initialMode?: Mode;
   /** Called after a successful sign-in so the shell re-reads the session. */
   onSignedIn: () => void;
 }
 
 // Local demo only (import.meta.env.DEV): this facilitator and its password come from
-// supabase/seed.sql and exist only on a local Supabase. Hosted staff have no password.
+// supabase/seed.sql and exist only on a local Supabase.
 const DEMO_EMAIL = 'demo.facilitator@example.org';
 const DEMO_PASSWORD = 'paisa-demo-2026';
 
-type Step = 'email' | 'code';
-type Busy = 'send' | 'verify' | 'demo' | null;
+// Spelled out (not built from `mode`) so the content test can check every key exists.
+const TEXT: Record<Mode, { title: string; intro: string; submit: string; busy: string }> = {
+  signin: { title: 'signin.title', intro: 'signin.intro', submit: 'signin.submit', busy: 'signin.signing_in' },
+  signup: {
+    title: 'signin.signup.title',
+    intro: 'signin.signup.intro',
+    submit: 'signin.signup.submit',
+    busy: 'signin.signup.busy',
+  },
+  forgot: {
+    title: 'signin.forgot.title',
+    intro: 'signin.forgot.intro',
+    submit: 'signin.forgot.submit',
+    busy: 'signin.forgot.busy',
+  },
+};
 
-export function SignIn({ api, lang, linkError, onSignedIn }: Props) {
+type Busy = 'submit' | 'demo' | null;
+type Notice = { key: 'signin.forgot.sent' | 'signin.signup.confirm'; email: string } | null;
+
+/**
+ * Staff sign-in on one card: email + password. "Create your account" is the one-time first visit
+ * (only emails on the staff list may), and "Forgot password?" emails a link to choose a new one.
+ */
+export function SignIn({ api, lang, linkError, initialMode = 'signin', onSignedIn }: Props) {
   const tr = (key: string, vars?: Record<string, string | number>) => t(lang, key, vars);
-  const [step, setStep] = useState<Step>('email');
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [email, setEmail] = useState('');
-  const [code, setCode] = useState('');
+  const [password, setPassword] = useState('');
   const [busy, setBusy] = useState<Busy>(null);
   const [error, setError] = useState<string | null>(null);
-  const [resent, setResent] = useState(false);
-  const [sentAt, setSentAt] = useState(0);
-  const [now, setNow] = useState(() => Date.now());
+  const [notice, setNotice] = useState<Notice>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
-  const codeRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
 
-  const wait = secondsLeft(sentAt, now);
-  const counting = step === 'code' && wait > 0;
-
-  // Tick once a second only while the resend countdown is running.
+  // A new mode is a new page to a screen reader: read its title, but not on first load.
+  const lastMode = useRef(mode);
   useEffect(() => {
-    if (!counting) return;
-    const id = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(id);
-  }, [counting]);
+    if (lastMode.current === mode) return;
+    lastMode.current = mode;
+    titleRef.current?.focus();
+  }, [mode]);
 
-  // Move focus to the box the person needs next, but not on first load.
-  const lastStep = useRef<Step>(step);
-  useEffect(() => {
-    if (lastStep.current === step) return;
-    lastStep.current = step;
-    (step === 'code' ? codeRef : emailRef).current?.focus();
-  }, [step]);
-
-  async function sendCode(isResend: boolean) {
-    const clean = normalizeEmail(email);
-    if (!isValidEmail(clean)) {
-      setError('signin.err.email');
-      emailRef.current?.focus();
-      return;
-    }
-    setBusy('send');
+  function switchTo(next: Mode) {
+    setMode(next);
     setError(null);
-    setResent(false);
-    try {
-      await api.signInWithEmail(clean);
-      setEmail(clean);
-      setCode('');
-      setSentAt(Date.now());
-      setNow(Date.now());
-      setStep('code');
-      setResent(isResend);
-      // The resend button just went disabled, so keep focus on the code box.
-      if (isResend) codeRef.current?.focus();
-    } catch (err) {
-      setError(signInErrorKey(err));
-    } finally {
-      setBusy(null);
-    }
+    setNotice(null);
   }
 
-  async function verify() {
-    if (!isCompleteOtp(code)) {
-      setError('signin.err.code');
-      codeRef.current?.focus();
-      return;
-    }
-    setBusy('verify');
+  function fail(key: string) {
+    setError(key);
+    const field = /password/.test(key) ? passwordRef : /email|not_invited|account_exists/.test(key) ? emailRef : null;
+    field?.current?.focus();
+  }
+
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    if (busy) return;
+    const clean = normalizeEmail(email);
+    if (!isValidEmail(clean)) return fail('signin.err.email');
+    const problem = mode === 'forgot' ? null : passwordProblem(password, mode === 'signup');
+    if (problem) return fail(problem);
+
+    setBusy('submit');
     setError(null);
+    setNotice(null);
     try {
-      await api.verifyEmailCode(normalizeEmail(email), code);
-      onSignedIn();
+      if (mode === 'signin') {
+        await api.signInWithPassword(clean, password);
+        onSignedIn();
+      } else if (mode === 'signup') {
+        const { signedIn } = await api.signUpWithPassword(clean, password);
+        if (signedIn) return onSignedIn();
+        // Only if the server still asks to confirm the email (supabase/config.toml has it off).
+        setMode('signin');
+        setNotice({ key: 'signin.signup.confirm', email: clean });
+      } else {
+        await api.sendPasswordReset(clean, resetRedirect(window.location));
+        setEmail(clean);
+        setNotice({ key: 'signin.forgot.sent', email: clean });
+      }
     } catch (err) {
-      setError(signInErrorKey(err));
-      setCode('');
-      codeRef.current?.focus();
+      fail(signInErrorKey(err, { mode }));
     } finally {
       setBusy(null);
     }
@@ -115,25 +118,27 @@ export function SignIn({ api, lang, linkError, onSignedIn }: Props) {
       await api.signInWithPassword(DEMO_EMAIL, DEMO_PASSWORD);
       onSignedIn();
     } catch (err) {
-      setError(signInErrorKey(err, true));
+      setError(signInErrorKey(err, { demo: true }));
     } finally {
       setBusy(null);
     }
   }
 
-  const submit = (e: FormEvent) => {
-    e.preventDefault();
-    if (busy) return;
-    void (step === 'email' ? sendCode(false) : verify());
+  const text = TEXT[mode];
+  const toggle = {
+    show: tr('signin.show'),
+    hide: tr('signin.hide'),
+    showName: tr('signin.show_password'),
+    hideName: tr('signin.hide_password'),
   };
-
   const errorId = 'signin-error';
-  const sending = busy === 'send';
+  const emailError = error !== null && /email|not_invited|account_exists/.test(error);
+  const passwordError = error !== null && /password/.test(error);
 
   return (
     <section className="card narrow" aria-labelledby="signin-title">
-      <h1 id="signin-title" tabIndex={-1}>
-        {tr('signin.title')}
+      <h1 id="signin-title" ref={titleRef} tabIndex={-1}>
+        {tr(text.title)}
       </h1>
 
       {linkError && (
@@ -144,53 +149,48 @@ export function SignIn({ api, lang, linkError, onSignedIn }: Props) {
       )}
 
       <form className="stack" onSubmit={submit} noValidate>
-        {step === 'email' ? (
-          <>
-            <p>{tr(SAMPLE_MODE ? 'sample.email_hint' : 'signin.intro')}</p>
-            <div className="field">
-              <label htmlFor="signin-email">{tr('signin.email')}</label>
-              <input
-                id="signin-email"
-                ref={emailRef}
-                className="input"
-                type="email"
-                inputMode="email"
-                autoComplete="email"
-                autoCapitalize="none"
-                spellCheck={false}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                aria-invalid={error === 'signin.err.email' || undefined}
-                aria-describedby={error ? errorId : undefined}
-              />
-            </div>
-          </>
-        ) : (
-          <>
-            <p>{SAMPLE_MODE ? tr('sample.code_hint') : tr('signin.code_sent', { email })}</p>
-            {resent && (
-              <p className="muted" role="status">
-                {tr('signin.resent')}
-              </p>
-            )}
-            <div className="field">
-              <label htmlFor="signin-code">{tr('signin.code')}</label>
-              <input
-                id="signin-code"
-                ref={codeRef}
-                className="input code-input"
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                autoComplete="one-time-code"
-                maxLength={CODE_INPUT_MAX}
-                value={code}
-                onChange={(e) => setCode(cleanOtp(e.target.value))}
-                aria-invalid={error === 'signin.err.code' || error === 'signin.err.code_invalid' || undefined}
-                aria-describedby={error ? errorId : undefined}
-              />
-            </div>
-          </>
+        <p>{tr(SAMPLE_MODE ? 'sample.hint' : text.intro)}</p>
+
+        {notice && (
+          <div className="banner good" role="status">
+            <span aria-hidden="true">✓</span>
+            <span>{tr(notice.key, { email: notice.email })}</span>
+          </div>
+        )}
+
+        <div className="field">
+          <label htmlFor="signin-email">{tr('signin.email')}</label>
+          <input
+            id="signin-email"
+            ref={emailRef}
+            className="input"
+            type="email"
+            inputMode="email"
+            autoComplete={mode === 'signup' ? 'username' : 'email'}
+            autoCapitalize="none"
+            spellCheck={false}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            aria-invalid={emailError || undefined}
+            aria-describedby={error ? errorId : undefined}
+          />
+        </div>
+
+        {mode !== 'forgot' && (
+          <PasswordField
+            // A new key per mode: the Show/Hide state and the browser's autofill start fresh.
+            key={mode}
+            id="signin-password"
+            label={tr('signin.password')}
+            value={password}
+            onChange={setPassword}
+            autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+            toggle={toggle}
+            hint={mode === 'signup' ? tr('signin.password_hint') : undefined}
+            invalid={passwordError}
+            errorId={error ? errorId : undefined}
+            inputRef={passwordRef}
+          />
         )}
 
         {error && (
@@ -202,46 +202,28 @@ export function SignIn({ api, lang, linkError, onSignedIn }: Props) {
 
         <div className="btn-row">
           <button type="submit" className="btn primary" disabled={busy !== null}>
-            {step === 'email'
-              ? sending
-                ? tr('signin.sending')
-                : tr('signin.send')
-              : busy === 'verify'
-                ? tr('signin.verifying')
-                : tr('signin.submit')}
+            {busy === 'submit' ? tr(text.busy) : tr(text.submit)}
           </button>
-          {step === 'code' && (
-            <>
-              {!SAMPLE_MODE && (
-                <button
-                  type="button"
-                  className="btn"
-                  disabled={busy !== null || wait > 0}
-                  onClick={() => void sendCode(true)}
-                >
-                  {sending
-                    ? tr('signin.sending')
-                    : wait > 0
-                      ? tr('signin.resend_wait', { s: wait })
-                      : tr('signin.resend')}
-                </button>
-              )}
-              <button
-                type="button"
-                className="btn quiet"
-                disabled={busy !== null}
-                onClick={() => {
-                  setStep('email');
-                  setError(null);
-                  setCode('');
-                }}
-              >
-                {tr('signin.change_email')}
-              </button>
-            </>
+          {mode === 'signin' ? (
+            <button type="button" className="btn quiet" disabled={busy !== null} onClick={() => switchTo('forgot')}>
+              {tr('signin.forgot_link')}
+            </button>
+          ) : (
+            <button type="button" className="btn quiet" disabled={busy !== null} onClick={() => switchTo('signin')}>
+              {tr('signin.back')}
+            </button>
           )}
         </div>
       </form>
+
+      {mode === 'signin' && (
+        <div className="signin-first">
+          <h2>{tr('signin.new_here')}</h2>
+          <button type="button" className="btn" disabled={busy !== null} onClick={() => switchTo('signup')}>
+            {tr('signin.create_link')}
+          </button>
+        </div>
+      )}
 
       {!SAMPLE_MODE && (
         <div className="sample-offer">
@@ -256,7 +238,7 @@ export function SignIn({ api, lang, linkError, onSignedIn }: Props) {
       {import.meta.env.DEV && !SAMPLE_MODE && (
         <div className="dev-box">
           <button type="button" className="btn quiet" disabled={busy !== null} onClick={() => void demo()}>
-            {busy === 'demo' ? tr('signin.verifying') : tr('signin.demo')}
+            {busy === 'demo' ? tr('signin.signing_in') : tr('signin.demo')}
           </button>
           <p className="muted">{tr('signin.demo_note')}</p>
         </div>

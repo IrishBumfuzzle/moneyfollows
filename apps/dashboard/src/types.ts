@@ -8,9 +8,11 @@ import type { ClassPatch } from './screens/classes/classes';
  */
 export type DashboardApi = Pick<
   ApiClient,
-  | 'signInWithEmail'
-  | 'verifyEmailCode'
   | 'signInWithPassword'
+  | 'signUpWithPassword'
+  | 'sendPasswordReset'
+  | 'verifyPasswordReset'
+  | 'setPassword'
   | 'signOut'
   | 'currentEmail'
   | 'onAuthChange'

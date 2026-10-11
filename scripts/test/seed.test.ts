@@ -82,13 +82,13 @@ describe.skipIf(skipDbTests)('demo seed in the database', () => {
     expect(code).toBe('HYD234');
   });
 
-  it('hosted mode needs an invited account, then gives it the demo class (re-runnable)', async () => {
+  it('hosted mode needs an existing staff account, then gives it the demo class (re-runnable)', async () => {
     const email = 'lead.facilitator@example.org';
     const conn = await db.sql.reserve();
     try {
-      await expect(conn.unsafe(hosted(email))).rejects.toThrow(/Invite lead.facilitator@example.org first/);
+      await expect(conn.unsafe(hosted(email))).rejects.toThrow(/lead.facilitator@example.org has no account yet/);
       await conn.unsafe('rollback');
-      // Invited (an auth user) but not yet on the allowlist: the seed adds them.
+      // An account (an auth user) not on the allowlist: the seed adds it.
       const lead = await db.createFacilitator(email, false);
       await conn.unsafe(hosted(email));
       await conn.unsafe(hosted(email));
