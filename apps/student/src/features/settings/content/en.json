@@ -1,0 +1,16 @@
+{
+  "settings.open": "Settings",
+  "settings.title": "Settings",
+  "settings.close": "Close settings",
+  "settings.language": "Language",
+  "settings.lang.en": "English",
+  "settings.lang.hi": "हिंदी (Hindi)",
+  "settings.lang.te": "తెలుగు (Telugu)",
+  "settings.draft": "Draft — pending native review",
+  "settings.data_saver": "Data saver",
+  "settings.data_saver.hint": "Turns off animations. Saves battery on old phones.",
+  "settings.voice": "Read aloud",
+  "settings.voice.hint": "Shows the speaker button on words and articles.",
+  "settings.on": "On",
+  "settings.off": "Off"
+}

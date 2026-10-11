@@ -10,6 +10,8 @@ import { ClassroomScreen } from './features/classroom/ClassroomScreen';
 import { loadClassroomConfig } from './features/classroom/config';
 import type { ClassroomConfig } from './features/classroom/config';
 import { PhoneLayer, SuddenEventSheet, triggerEvent, useEvents } from './features/events';
+import { DemoPanel } from './features/demo/DemoPanel';
+import { DEMO } from './features/demo/slot';
 import { ClaimDesk, CoverOrCash, HospitalSheet } from './features/hospital';
 import { IncomingCall, PhoneScreen } from './features/phone';
 import type { PhoneNav } from './features/phone';
@@ -25,6 +27,7 @@ import { PaisaTimes } from './features/news';
 import { Onboarding, loadProfile } from './features/onboarding';
 import { CounterShift, KiranaRun } from './features/store';
 import type { Receipt } from './features/store';
+import { SettingsSheet } from './features/settings/SettingsSheet';
 import { OfflineBanner } from './features/sync/OfflineBanner';
 import type { Profile } from './features/onboarding';
 import { useStoresHydrated } from './game/hydration';
@@ -95,6 +98,8 @@ function Game({
   const tick = useEvents((s) => s.tick);
   const hydrated = useStoresHydrated();
   const endlineOpen = useClassStatus((s) => s.endlineOpen);
+  // Main screen sheets: the gear's settings, and the hidden demo panel (demo mode and dev only).
+  const [sheet, setSheet] = useState<'settings' | 'demo' | null>(null);
 
   // map_opened each time the map is shown (CLAUDE.md 5.5); closing a sheet over it doesn't count.
   const prevScreen = useRef<Screen | null>(null);
@@ -230,8 +235,16 @@ function Game({
           }}
           onOpenNews={() => open('news')}
           onOpenLearn={() => open('learn')}
+          onSettings={() => setSheet('settings')}
+          onSecret={DEMO || import.meta.env.DEV ? () => setSheet('demo') : undefined}
         />
         {eventLayer('main')}
+        {sheet === 'settings' && (
+          <SettingsSheet profile={profile} lang={lang} setProfile={setProfile} onClose={() => setSheet(null)} />
+        )}
+        {sheet === 'demo' && (
+          <DemoPanel ctx={{ go: open, profile, setProfile }} onClose={() => setSheet(null)} />
+        )}
       </>
     );
   }

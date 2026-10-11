@@ -1,0 +1,5 @@
+.dm-sheet { gap: 8px; }
+.dm-group { display: flex; flex-direction: column; gap: 4px; }
+.dm-head { margin: 4px 0 0; font-size: 16px; }
+.dm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.dm-btn { justify-content: center; text-align: center; font-size: 16px; text-transform: none; }

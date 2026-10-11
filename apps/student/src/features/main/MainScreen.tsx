@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useGame } from '../../game/useGame';
+import { NO_TAPS, tap } from '../demo/tripleTap';
 import { lifeApi } from '../life/life';
 import { useHasUnread } from '../news';
 import type { Profile } from '../onboarding';
 import { PERSONAS } from '../onboarding/presets';
 import { formatRejoinCode } from '../onboarding/validate';
+import { t as settingsT } from '../settings/content';
 import { trackAppOpen } from './appOpen';
 import { formatRupees, t } from './content';
 import '../../design/kenney.css';
@@ -41,6 +43,8 @@ export function MainScreen({
   onPlay,
   onOpenNews,
   onOpenLearn,
+  onSettings,
+  onSecret,
 }: {
   profile: Profile;
   lang: Profile['lang'];
@@ -48,7 +52,12 @@ export function MainScreen({
   onOpenNews: () => void;
   /** Learn: real-life guides, My progress and the Notebook. */
   onOpenLearn: () => void;
+  /** The gear: opens the settings sheet. */
+  onSettings?: () => void;
+  /** Triple-tap on the day chip: the hidden demo panel (only passed in demo mode and dev builds). */
+  onSecret?: () => void;
 }) {
+  const taps = useRef(NO_TAPS);
   const scale = useStageScale();
   const tr = (k: string, vars?: Record<string, string | number>) => t(lang, k, vars);
   const life = useGame((s) => s.life);
@@ -82,7 +91,24 @@ export function MainScreen({
             <span className="ms-sr">{`${tr('main.money')}: ${money}`}</span>
             <span aria-hidden="true">{money}</span>
           </p>
-          <p className="k-panel ms-chip">{tr('main.week', { month: life.month, week: life.week, day: life.day })}</p>
+          <p
+            className="k-panel ms-chip"
+            onClick={() => {
+              if (!onSecret) return;
+              const r = tap(taps.current, performance.now());
+              taps.current = r.taps;
+              if (r.fire) onSecret();
+            }}
+          >
+            {tr('main.week', { month: life.month, week: life.week, day: life.day })}
+          </p>
+          {onSettings && (
+            <button className="k-round ms-gear" onClick={onSettings} aria-label={settingsT(lang, 'settings.open')}>
+              <svg viewBox="0 0 9 9" width="22" height="22" aria-hidden="true" shapeRendering="crispEdges">
+                <path fill="#4a2b17" d="M3 0h3v1H3zM1 1h2v1H1zM6 1h2v1H6zM1 2h7v1H1zM0 3h3v3H0zM6 3h3v3H6zM1 6h7v1H1zM1 7h2v1H1zM6 7h2v1H6zM3 8h3v1H3zM3 2h3v1H3zM3 6h3v1H3z" />
+              </svg>
+            </button>
+          )}
         </div>
 
         <div

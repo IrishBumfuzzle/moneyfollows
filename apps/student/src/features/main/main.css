@@ -130,3 +130,6 @@
 }
 @keyframes ms-idle { 50% { background-position: -80px 0; } }
 @keyframes ms-bob { 50% { transform: translateY(-3px); } }
+
+/* Settings gear: under the day chip, clear of the wallet and the news rack. */
+.ms-gear { position: absolute; right: 8px; top: 60px; }

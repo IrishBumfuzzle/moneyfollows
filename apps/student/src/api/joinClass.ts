@@ -114,7 +114,7 @@ async function standIn(classCode: string, nickname: string): Promise<JoinResult>
 }
 
 // crypto.randomUUID needs a secure context; a phone on http://192.168.x.x:5173 isn't one.
-function uuid(): string {
+export function uuid(): string {
   if (typeof crypto.randomUUID === 'function') return crypto.randomUUID();
   const b = crypto.getRandomValues(new Uint8Array(16));
   b[6] = (b[6]! & 0x0f) | 0x40;

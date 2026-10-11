@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useAssessments } from '../features/classroom/assessments';
 import { clearProfile } from '../features/onboarding/profile';
 import type { Profile } from '../features/onboarding/types';
+import { DEMO } from '../features/demo/slot';
 import { forget, identify, startSync } from './backend';
 import { refreshClassStatus, seedClassStatus, useClassStatus } from './classStatus';
 
@@ -44,7 +45,8 @@ export function useBackendSync(profile: Profile | null | undefined, setProfile: 
       const result = await refreshClassStatus(p, (updated) => {
         if (live) setProfile(updated);
       });
-      if (result === 'stale' && live) {
+      // A demo played on the offline stand-in is unknown to the server: keep playing it.
+      if (result === 'stale' && live && !DEMO) {
         // Game progress stays on the phone; only who this phone is gets forgotten. The start and
         // end checks belong to the old identity, so the new one is offered them again.
         await forget();
