@@ -78,6 +78,7 @@ export function LocationScreen({ lang, pinned = [], guide, onSelect }: {
             style={{ left: ORIGIN.x + l.x - SPRITE_PAD, top: ORIGIN.y + l.y - SPRITE_PAD, width: HOUSE.w }}
           >
             <span className="stack">
+              <img className="halo halo-outline" src={`/assets/buildings/${l.id}-outline.png`} alt="" />
               <img className="halo halo-hover" src={`/assets/buildings/${l.id}-hover.png`} alt="" />
               <img className="halo halo-active" src={`/assets/buildings/${l.id}-active.png`} alt="" />
               <img src={`/assets/buildings/${l.id}.png`} alt="" />

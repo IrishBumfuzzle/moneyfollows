@@ -1,7 +1,7 @@
 """Builds the five building sprites + pixel halos from the Kenney RPG Urban Kit tilemap (CC0).
 Run from apps/student:  python3 tools/build-sprites.py   (needs Pillow)
 Sprite size must match src/screens/LocationScreen.tsx; building positions are the LOTS in tools/build-world.py."""
-from PIL import Image, ImageFilter
+from PIL import Image, ImageFilter, ImageOps
 
 T, PAD, W, H = 16, 4, 5, 6
 sheet = Image.open('assets-src/kenney/tilemap_packed.png').convert('RGBA')
@@ -30,6 +30,17 @@ def wall(im, fill):
             put(im, tile(*fill), x, y)
 
 
+def tint_roof(im, color, amount):
+    """Recolours the roof rows (keeping their shading) so a grey roof does not vanish into the grey
+    pavement of the map."""
+    box = (PAD, PAD, PAD + W * T, PAD + 4 * T)
+    roof_px = im.crop(box)
+    colored = ImageOps.colorize(ImageOps.grayscale(roof_px), black=(20, 20, 30), white=color).convert('RGBA')
+    mixed = Image.blend(roof_px, colored, amount)
+    mixed.putalpha(roof_px.getchannel('A'))
+    im.paste(mixed, box[:2])
+
+
 def cross(im):
     red, cx, cy = (214, 64, 64, 255), PAD + W * T // 2, PAD + 2 * T
     for a in range(-2, 3):
@@ -56,7 +67,7 @@ for x in (0, 1, 3, 4): put(im, tile(*WIN), x, 5)
 put(im, tile(*DOOR_OO), 2, 5); B['school'] = im
 
 im = canvas(); roof(im, GRAY, (0, 1, 1, 2)); wall(im, (1, 4)); glass(im, GLASS, 0, W - 1)
-put(im, tile(*DOOR_W), 2, 5); cross(im); B['hospital'] = im
+put(im, tile(*DOOR_W), 2, 5); tint_roof(im, (255, 255, 255), 0.7); cross(im); B['hospital'] = im
 
 im = canvas(); roof(im, TAN, (3, 4, 4, 5)); wall(im, (9, 4)); glass(im, GLASS, 0, 2)
 put(im, tile(*WIN), 3, 4); put(im, tile(*DOOR_OO), 3, 5)
@@ -83,7 +94,7 @@ def coin(im):
 PILLAR = (14, 13), (14, 14)
 im = canvas(); roof(im, (8, 9, 10), (3, 4, 4, 5)); wall(im, (9, 4))
 for x in (0, 1, 3, 4): put(im, tile(*PILLAR[0]), x, 4); put(im, tile(*PILLAR[1]), x, 5)
-put(im, tile(*WIN), 2, 4); put(im, tile(*DOOR_W), 2, 5); coin(im); B['bank'] = im
+put(im, tile(*WIN), 2, 4); put(im, tile(*DOOR_W), 2, 5); tint_roof(im, (120, 150, 230), 0.85); coin(im); B['bank'] = im
 
 
 def halo(spr, colors):
@@ -96,10 +107,14 @@ def halo(spr, colors):
     return out
 
 
+# Always shown on the map, so the five places stand out from the town around them: a white inner
+# ring and a dark outer ring (the hover and tap glows draw over it).
+OUTLINE = [(255, 255, 255, 255), (255, 255, 255, 255), (40, 30, 50, 255)]
 HOVER = [(255, 255, 255, 255), (221, 196, 255, 255), (147, 51, 234, 255)]
 ACTIVE = [(254, 240, 138, 255), (251, 191, 36, 255), (249, 115, 22, 255)]
 for name, spr in B.items():
     spr.save(f'public/assets/buildings/{name}.png')
     halo(spr, HOVER).save(f'public/assets/buildings/{name}-hover.png')
     halo(spr, ACTIVE).save(f'public/assets/buildings/{name}-active.png')
+    halo(spr, OUTLINE).save(f'public/assets/buildings/{name}-outline.png')
 print('buildings', B['school'].size)
