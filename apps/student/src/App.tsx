@@ -10,6 +10,7 @@ import { ClassroomScreen } from './features/classroom/ClassroomScreen';
 import { loadClassroomConfig } from './features/classroom/config';
 import type { ClassroomConfig } from './features/classroom/config';
 import { PhoneLayer, SuddenEventSheet, triggerEvent, useEvents } from './features/events';
+import { ClaimDesk, CoverOrCash, HospitalSheet } from './features/hospital';
 import { IncomingCall, PhoneScreen } from './features/phone';
 import type { PhoneNav } from './features/phone';
 import { HomeSheet, RestScene } from './features/home';
@@ -32,10 +33,18 @@ import type { LifeDelta } from './features/life/types';
 import { LocationScreen } from './screens/LocationScreen';
 import './design/kenney.css';
 
-type Screen = 'main' | 'map' | 'classroom' | 'home' | 'rest' | 'store' | 'kirana' | 'counter' | 'news' | 'phone' | 'learn';
-const SCREENS: Screen[] = ['main', 'map', 'classroom', 'home', 'rest', 'store', 'kirana', 'counter', 'news', 'phone', 'learn'];
+type Screen =
+  | 'main' | 'map' | 'classroom' | 'home' | 'rest' | 'store' | 'kirana' | 'counter'
+  | 'hospital' | 'cover' | 'claims' | 'news' | 'phone' | 'learn';
+const SCREENS: Screen[] = [
+  'main', 'map', 'classroom', 'home', 'rest', 'store', 'kirana', 'counter',
+  'hospital', 'cover', 'claims', 'news', 'phone', 'learn',
+];
+/** Sheets drawn over the map: closing one shows the map again without a new map_opened. */
+const MAP_SHEETS: (Screen | null)[] = ['store', 'home', 'hospital'];
 
-// No router or language picker yet: ?lang=hi switches language, ?screen=map|classroom|home|store|kirana|counter|news|phone
+// No router or language picker yet: ?lang=hi switches language,
+// ?screen=map|classroom|home|store|kirana|counter|hospital|cover|claims|news|phone
 // opens that screen directly, ?seed=N fixes the quiz, ?event=<id> fires an event (demo / tests).
 // Learn (guides, progress, Notebook) loads when first opened; its store and recording stay eager.
 const LearnScreen = lazy(() => import('./features/learn/LearnScreen').then((m) => ({ default: m.LearnScreen })));
@@ -87,10 +96,10 @@ function Game({
   const hydrated = useStoresHydrated();
   const endlineOpen = useClassStatus((s) => s.endlineOpen);
 
-  // map_opened each time the map is shown (CLAUDE.md 5.5); closing the store or home sheet over it doesn't count.
+  // map_opened each time the map is shown (CLAUDE.md 5.5); closing a sheet over it doesn't count.
   const prevScreen = useRef<Screen | null>(null);
   useEffect(() => {
-    if (screen === 'map' && profile && prevScreen.current !== 'store' && prevScreen.current !== 'home') track('map_opened');
+    if (screen === 'map' && profile && !MAP_SHEETS.includes(prevScreen.current)) track('map_opened');
     prevScreen.current = screen;
   }, [screen, profile]);
 
@@ -122,9 +131,11 @@ function Game({
   const parentOf = (s: Screen): Screen =>
     s === 'counter' || s === 'kirana'
       ? 'store'
-      : s === 'store' || s === 'classroom' || s === 'home' || s === 'rest'
-        ? 'map'
-        : 'main';
+      : s === 'cover' || s === 'claims'
+        ? 'hospital'
+        : s === 'store' || s === 'hospital' || s === 'classroom' || s === 'home' || s === 'rest'
+          ? 'map'
+          : 'main';
   const back = useCallback(() => {
     const from = screenOf(window.history.state);
     if (!(window.history.state as { screen?: Screen } | null)?.screen) return setScreen((s) => parentOf(s));
@@ -300,6 +311,29 @@ function Game({
       />
     );
   }
+  // The hospital's insurance games are practice: they never touch the wallet, only the tracker.
+  // A new round each week; ?seed= fixes it for demos and tests.
+  const weekSeed = (SEED + life.month * 8 + life.week) >>> 0;
+  if (screen === 'cover') {
+    return (
+      <CoverOrCash
+        lang={lang}
+        seed={weekSeed}
+        onFinish={(r) => track('minigame_complete', { game: 'cover_or_cash', bought: r.choices.filter(Boolean).length, net: r.savings - r.debt })}
+        onExit={back}
+      />
+    );
+  }
+  if (screen === 'claims') {
+    return (
+      <ClaimDesk
+        lang={lang}
+        seed={weekSeed}
+        onFinish={(r) => track('minigame_complete', { game: 'claim_desk', score: r.score, total: r.total })}
+        onExit={back}
+      />
+    );
+  }
   if (screen === 'counter') {
     return (
       <CounterShift
@@ -330,6 +364,7 @@ function Game({
           if (id === 'school') open('classroom');
           else if (id === 'convenience') open('store');
           else if (id === 'home') open('home');
+          else if (id === 'hospital') open('hospital');
           else console.log('go to', id);
         }}
       />
@@ -345,6 +380,9 @@ function Game({
           onWork={() => open('counter')}
           onClose={back}
         />
+      )}
+      {screen === 'hospital' && (
+        <HospitalSheet lang={lang} onCover={() => open('cover')} onClaims={() => open('claims')} onClose={back} />
       )}
     </>
   );

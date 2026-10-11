@@ -1,0 +1,64 @@
+/* Hospital games (Cover or Cash?, Claim Desk). Built on the store's ct-* screen, card, bill and
+   feedback styles (counter.css); only what the hospital adds lives here. */
+.ct-screen h3 { margin: 0; font-size: 18px; font-weight: normal; }
+
+.hp-wallet { flex: none; display: flex; flex-direction: column; align-items: flex-end; color: #2f7a2a; font-size: 14px; }
+
+/* ---- The policy card: what the plan pays (✓) and doesn't (✗) ---- */
+.hp-policy { display: flex; flex-direction: column; gap: 4px; }
+.hp-policy-title { display: flex; align-items: center; gap: 8px; }
+.hp-rules { display: flex; flex-direction: column; gap: 4px; }
+.hp-rules li { position: relative; padding-left: 24px; }
+.hp-rules li::before { position: absolute; left: 4px; }
+.hp-yes::before { content: "✓"; color: #2f7a2a; }
+.hp-no::before { content: "✗"; color: #b0362f; }
+.hp-rules li.is-hit { background: #ffe9a8; box-shadow: 0 0 0 2px #e0a526; }
+.hp-made-up { font-size: 14px; color: #7a4a2a; font-style: italic; }
+
+.hp-terms { display: flex; flex-direction: column; gap: 4px; color: #7a4a2a; }
+
+/* ---- A year: twelve month tiles, then the bills ---- */
+.hp-months { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+.hp-month {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 48px;
+  background: #fff8e8;
+  box-shadow: inset 0 0 0 2px #c9a77c;
+  font-size: 14px;
+}
+.hp-month.is-bill { background: #ffe0b8; }
+.hp-month.is-big { background: #f6c1b8; box-shadow: inset 0 0 0 2px #b0362f; }
+.hp-month.is-covered { background: #d6f0d0; box-shadow: inset 0 0 0 2px #2f7a2a; }
+
+.hp-lines { display: flex; flex-direction: column; gap: 8px; }
+.hp-lines li { display: flex; flex-direction: column; gap: 2px; }
+.hp-line-what { display: flex; justify-content: space-between; gap: 8px; }
+
+.hp-sum {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 8px;
+  margin: 8px 0 0;
+  padding-top: 4px;
+  border-top: 2px dashed #c9a77c;
+}
+.hp-sum dd { margin: 0; }
+.hp-sum-total { font-size: 18px; }
+
+/* ---- Three paths compared at the end ---- */
+.hp-paths { width: 100%; border-collapse: collapse; }
+.hp-paths th, .hp-paths td { padding: 4px; text-align: left; font-weight: normal; }
+.hp-paths td { text-align: right; }
+.hp-paths thead th { color: #7a4a2a; font-size: 14px; text-align: right; }
+.hp-paths tbody tr + tr { border-top: 2px dashed #c9a77c; }
+.hp-paths tr.is-you { background: #fff3dc; }
+
+/* Data saver (<html data-saver>) and reduced motion both keep the months still. */
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-saver]) .hp-month { animation: hp-flip 200ms ease-out both; animation-delay: calc(var(--i, 0) * 60ms); }
+}
+@keyframes hp-flip { from { transform: scale(0.6); opacity: 0; } }
