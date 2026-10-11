@@ -133,6 +133,8 @@ function Game({
   useEffect(() => {
     const on = (e: PopStateEvent) => {
       pops.current += 1;
+      // Leaving Home's "still to do" list by back (or forward) drops it, so it never shows stale pins.
+      setTodo(null);
       setScreen(screenOf(e.state));
     };
     window.addEventListener('popstate', on);

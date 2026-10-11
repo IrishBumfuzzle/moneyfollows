@@ -80,6 +80,9 @@ describe('store actions (useGame)', () => {
     expect(first).toEqual(startPlan('sana', 11));
     useGame.getState().ensurePlan('sana', 99);
     expect(useGame.getState().plan).toBe(first);
+    // A new student who picks another persona gets that persona's plan.
+    useGame.getState().ensurePlan('ravi', 99);
+    expect(useGame.getState().plan?.personaId).toBe('ravi');
   });
 
   it('choose then rewind gives back the exact plan', () => {

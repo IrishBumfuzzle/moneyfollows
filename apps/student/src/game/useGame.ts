@@ -32,7 +32,10 @@ export interface GameStore {
   /** The persona's monthly money plan (engine GameState). Null until the map first opens. */
   plan: GameState | null;
   overnight: Overnight | null;
-  /** Creates the plan if there is none yet (first map open). `seed` from ?seed=, else random. */
+  /**
+   * Creates the plan if there is none yet (first map open), or if it belongs to another persona
+   * (a new student on this phone). `seed` from ?seed=, else random.
+   */
   ensurePlan: (persona: PersonaId, seed?: number) => void;
   /** Plays a choice on a pinned card. Null (nothing changes) if the card isn't pinned. */
   choosePlan: (scenarioId: string, choiceId: string) => Consequence | null;
@@ -77,7 +80,7 @@ export const useGame = create<GameStore>()(
       plan: null,
       overnight: null,
       ensurePlan: (persona, seed) => {
-        if (get().plan) return;
+        if (get().plan?.personaId === persona) return;
         set({ plan: startPlan(persona, seed ?? randomSeed()) });
       },
       choosePlan: (scenarioId, choiceId) => {
