@@ -3,12 +3,13 @@ import { t as et } from '../events/content';
 import { getEvent } from '../events/data';
 import { useEvents } from '../events/useEvents';
 import type { Profile } from '../onboarding';
-import { trackPhoneApp } from './api';
+import { trackPhoneApp, trackScamGame } from './api';
 import type { PhoneApp } from './api';
 import { CallLog, CallView } from './CallsApp';
 import { t } from './content';
 import type { Lang } from './content';
 import { ChatThread, Inbox } from './MessagesApp';
+import { ScamOrSafe } from '../scams';
 import { SnakeApp } from './SnakeApp';
 import { VanguardApp } from './VanguardApp';
 import '../../design/kenney.css';
@@ -29,7 +30,7 @@ const navOf = (s: unknown): PhoneNav => {
   return n?.screen === 'phone' ? { app: n.app, item: n.item } : {};
 };
 
-const APPS: PhoneApp[] = ['messages', 'calls', 'vanguard', 'snake'];
+const APPS: PhoneApp[] = ['messages', 'calls', 'vanguard', 'snake', 'scams'];
 
 function useClock(): string {
   const read = () => new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -46,6 +47,8 @@ export function PhoneScreen({ lang, name, profile, onExit }: { lang: Lang; name:
   const unread = useEvents((s) => s.inbox.filter((m) => !m.read).length);
   const missed = useEvents((s) => s.calls.filter((c) => c.status === 'missed').length);
   const clock = useClock();
+  // A new deal each time the phone opens, like the store games' daily seeds.
+  const [scamSeed] = useState(() => Math.floor(Math.random() * 2 ** 31));
   const tr = (k: string, vars?: Record<string, string | number>) => t(lang, k, vars);
 
   useEffect(() => {
@@ -122,6 +125,7 @@ export function PhoneScreen({ lang, name, profile, onExit }: { lang: Lang; name:
                 ))}
               {nav.app === 'vanguard' && <VanguardApp lang={lang} profile={profile} />}
               {nav.app === 'snake' && <SnakeApp lang={lang} />}
+              {nav.app === 'scams' && <ScamOrSafe lang={lang} seed={scamSeed} embedded onFinish={trackScamGame} />}
             </div>
           </>
         ) : (
@@ -154,13 +158,15 @@ export function PhoneScreen({ lang, name, profile, onExit }: { lang: Lang; name:
   );
 }
 
-/** Pixel glyphs for the four app icons (8x8, white on the icon colour). */
+/** Pixel glyphs for the app icons (8x8, white on the icon colour). */
 function AppGlyph({ app }: { app: PhoneApp }) {
   const paths: Record<PhoneApp, string> = {
     messages: 'M1 1h6v1H1zM0 2h1v3H0zM7 2h1v3H7zM1 5h3v1H1zM5 5h2v1H5zM2 6h1v1H2zM2 3h4v1H2z',
     calls: 'M1 1h2v2H1zM2 3h1v1H2zM3 4h1v1H3zM4 5h1v1H4zM5 5h2v2H5z',
     vanguard: 'M0 1h2v1H0zM6 1h2v1H6zM1 2h2v1H1zM5 2h2v1H5zM2 3h1v2H2zM5 3h1v2H5zM3 5h2v1H3zM3 6h2v1H3z',
     snake: 'M1 1h4v1H1zM1 2h1v2H1zM2 3h4v1H2zM5 4h1v2H5zM2 5h3v1H2zM6 1h1v1H6z',
+    // a magnifying glass: inspect the message
+    scams: 'M2 0h3v1H2zM1 1h1v1H1zM5 1h1v1H5zM0 2h1v3H0zM6 2h1v3H6zM1 5h1v1H1zM5 5h1v1H5zM2 6h3v1H2zM6 6h1v1H6zM7 7h1v1H7z',
   };
   return (
     <svg viewBox="0 0 8 8" width="32" height="32" shapeRendering="crispEdges">

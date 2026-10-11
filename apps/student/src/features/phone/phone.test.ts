@@ -1,11 +1,13 @@
 import { projectGrowth } from '@paisa/engine';
 import { GROWTH_RATES } from '@paisa/shared';
 import { describe, expect, it } from 'vitest';
-import { CALLS, SCHEDULE } from '../events/data';
+import { STRINGS as EV } from '../events/content';
+import { CALLS, SCHEDULE, THREADS } from '../events/data';
 import { canChoose, resolveChoice } from '../events/resolve';
 import { startLife } from '../life/life';
 import { DEFAULT_FEED, normalizeFeed } from './api';
 import { STRINGS } from './content';
+import { LINE_FLAGS, threadMessage } from './inspect';
 import { createSnake, placeFood, step, tickMs, turn } from './snake';
 import type { SnakeState } from './snake';
 import { TIPS } from './tips';
@@ -112,5 +114,25 @@ describe('phone strings', () => {
       expect(v, k).not.toMatch(/you should (invest|buy)|guarantee|risk-free|sure returns/i);
     }
     expect(STRINGS.en!['phone.vg.assumption']).toMatch(/not promises/);
+  });
+});
+
+describe('Message Inspector on Messages threads', () => {
+  it('maps every scam thread line to a reason that exists in en and hi; honest threads have none', () => {
+    for (const thread of THREADS) {
+      const m = threadMessage(thread);
+      expect(m.segments).toHaveLength(thread.messages.length);
+      if (thread.verdict === 'scam') {
+        expect(LINE_FLAGS[thread.id], thread.id).toHaveLength(thread.messages.length);
+        for (const s of m.segments) {
+          if (!s.suspicious) continue;
+          expect(EV.en![s.suspicious.slice(2)], s.suspicious).toBeTruthy();
+          expect(EV.hi![s.suspicious.slice(2)], s.suspicious).toBeTruthy();
+        }
+        expect(m.segments.some((s) => s.suspicious)).toBe(true);
+      } else {
+        expect(m.segments.every((s) => !s.suspicious), thread.id).toBe(true);
+      }
+    }
   });
 });

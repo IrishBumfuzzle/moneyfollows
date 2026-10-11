@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useGame } from '../../game/useGame';
 import { t } from '../events/content';
 import { getEvent } from '../events/data';
@@ -6,6 +6,9 @@ import { OutcomePanel } from '../events/OutcomePanel';
 import { canChoose } from '../events/resolve';
 import type { PhoneThread } from '../events/types';
 import { useEvents } from '../events/useEvents';
+import { MessageInspector } from '../scams';
+import { t as phoneT } from './content';
+import { threadMessage } from './inspect';
 import { PixelIcon } from '../life/PixelIcon';
 import type { Lang } from './content';
 
@@ -55,12 +58,28 @@ export function ChatThread({ lang, name, thread, onDone }: { lang: Lang; name: s
   }, [item?.choice]);
 
   const chosen = thread.choices.find((c) => c.id === item?.choice);
+  // The Message Inspector: tap each line to check it before replying (the same one Scam or Safe? uses).
+  const [inspecting, setInspecting] = useState(false);
+  const [inspected, setInspected] = useState<Set<number>>(new Set());
 
   return (
     <div className="ev-chat">
-      {thread.messages.map((m) => (
-        <p key={m} className="ev-bubble is-them">{tr(m)}</p>
-      ))}
+      <button className="k-btn ph-inspect" aria-pressed={inspecting} onClick={() => setInspecting((v) => !v)}>
+        {phoneT(lang, inspecting ? 'phone.inspect.close' : 'phone.inspect.open')}
+      </button>
+      {inspecting ? (
+        <MessageInspector
+          lang={lang}
+          message={threadMessage(thread)}
+          inspected={inspected}
+          onInspect={(i) => setInspected((s) => new Set(s).add(i))}
+          text={(k) => tr(k)}
+        />
+      ) : (
+        thread.messages.map((m) => (
+          <p key={m} className="ev-bubble is-them">{tr(m)}</p>
+        ))
+      )}
       {!chosen && (
         <div className="ev-replies" role="group" aria-label={tr('events.ui.reply')}>
           <p className="ev-muted">{tr('events.ui.reply')}</p>

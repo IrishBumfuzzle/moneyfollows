@@ -1,4 +1,4 @@
-"""Builds the four building sprites + pixel halos from the Kenney RPG Urban Kit tilemap (CC0).
+"""Builds the five building sprites + pixel halos from the Kenney RPG Urban Kit tilemap (CC0).
 Run from apps/student:  python3 tools/build-sprites.py   (needs Pillow)
 Sprite size / positions must match src/screens/LocationScreen.tsx and BUILD in tools/build-world.py."""
 from PIL import Image, ImageFilter
@@ -65,6 +65,25 @@ put(im, tile(*WIN), 4, 4); put(im, tile(*WIN), 4, 5); B['convenience'] = im
 im = canvas(); roof(im, ORANGE, (4, 5, 6, 7)); wall(im, (1, 4))
 for x in (1, 3): put(im, tile(*WIN), x, 4); put(im, tile(*WIN), x, 5)
 put(im, tile(*DOOR_O), 2, 5); B['home'] = im
+
+
+def coin(im):
+    """A gold coin on the bank's roof, like the hospital's cross: outline, gold, a highlight."""
+    cx, cy = PAD + W * T // 2, PAD + 2 * T
+    for x in range(-9, 10):
+        for y in range(-9, 10):
+            d = x * x + y * y
+            if d <= 81:
+                ring = 20 < d <= 30  # an embossed inner rim
+                im.putpixel((cx + x, cy + y), (74, 43, 23, 255) if d > 64 else (201, 138, 27, 255) if ring else (242, 194, 48, 255))
+    for x, y in ((-5, -5), (-4, -5), (-5, -4), (-6, -3)):
+        im.putpixel((cx + x, cy + y), (255, 243, 220, 255))
+
+
+PILLAR = (14, 13), (14, 14)
+im = canvas(); roof(im, (8, 9, 10), (3, 4, 4, 5)); wall(im, (9, 4))
+for x in (0, 1, 3, 4): put(im, tile(*PILLAR[0]), x, 4); put(im, tile(*PILLAR[1]), x, 5)
+put(im, tile(*WIN), 2, 4); put(im, tile(*DOOR_W), 2, 5); coin(im); B['bank'] = im
 
 
 def halo(spr, colors):

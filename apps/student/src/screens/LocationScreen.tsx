@@ -30,7 +30,7 @@ function useCamera() {
   return cam;
 }
 
-export type LocationId = 'school' | 'hospital' | 'convenience' | 'home';
+export type LocationId = 'school' | 'hospital' | 'convenience' | 'home' | 'bank';
 
 // x/y: top-left of the building in play-area pixels. Layout follows the sketch in /map.png
 // (School bottom-left, House middle, Store top-right, Hospital bottom-right) and tools/build-world.py.
@@ -40,6 +40,7 @@ const LOCATIONS: { id: LocationId; label: string; x: number; y: number }[] = [
   { id: 'hospital', label: 'Hospital', x: 275, y: 236 },
   { id: 'convenience', label: 'Convenience Store', x: 269, y: 26 },
   { id: 'home', label: 'Home', x: 119, y: 80 },
+  { id: 'bank', label: 'Bank', x: 182, y: 200 }, // between School and Hospital (tools/build-sprites.py)
 ];
 
 /**

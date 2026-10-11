@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { projectGrowth } from '@paisa/engine';
 import { useGame } from '../../game/useGame';
+import { AssumptionBanner, GrowthChart, TimeSlider } from '../bank';
 import type { Profile } from '../onboarding';
 import { PixelIcon } from '../life/PixelIcon';
 import { DEFAULT_FEED, loadVanguardFeed } from './api';
@@ -8,6 +9,7 @@ import type { VanguardFeed } from './api';
 import { formatRupees, t } from './content';
 import type { Lang } from './content';
 import { TIPS } from './tips';
+import '../bank/bank.css'; // the shared Time Machine chart, slider and banner
 
 const MONTHLY_MIN = 100;
 const MONTHLY_MAX = 1000;
@@ -37,12 +39,12 @@ export function VanguardApp({ lang, profile }: { lang: Lang; profile: Profile })
 
   const p = projectGrowth(monthly, years, feed.rates);
   const pct = (r: number) => Math.round(r * 1000) / 10;
-  const rows = [
-    { key: 'low', label: tr('phone.vg.growth.low', { rate: pct(feed.rates.low) }), value: p.low[years] },
-    { key: 'avg', label: tr('phone.vg.growth.avg', { rate: pct(feed.rates.avg) }), value: p.avg[years] },
-    { key: 'high', label: tr('phone.vg.growth.high', { rate: pct(feed.rates.high) }), value: p.high[years] },
-  ];
-  const max = Math.max(...rows.map((r) => r.value), 1);
+  const labels = {
+    low: tr('phone.vg.growth.low', { rate: pct(feed.rates.low) }),
+    avg: tr('phone.vg.growth.avg', { rate: pct(feed.rates.avg) }),
+    high: tr('phone.vg.growth.high', { rate: pct(feed.rates.high) }),
+    summary: `${formatRupees(p.low[years] ?? 0)} – ${formatRupees(p.high[years] ?? 0)}`,
+  };
   const tips = feed.tips.map((id) => TIPS.find((x) => x.id === id)).filter((x) => x !== undefined);
 
   return (
@@ -68,18 +70,15 @@ export function VanguardApp({ lang, profile }: { lang: Lang; profile: Profile })
       <section className="vg-card" aria-labelledby="vg-growth">
         <h3 id="vg-growth" className="vg-h">{tr('phone.vg.growth.title')}</h3>
         <p>{tr('phone.vg.growth.intro')}</p>
-        <label className="vg-slider">
-          <span>{tr('phone.vg.growth.monthly', { amount: formatRupees(monthly) })}</span>
-          <input
-            type="range"
-            min={MONTHLY_MIN}
-            max={MONTHLY_MAX}
-            step={MONTHLY_STEP}
-            value={monthly}
-            onChange={(e) => setMonthly(Number(e.target.value))}
-            aria-valuetext={formatRupees(monthly)}
-          />
-        </label>
+        <TimeSlider
+          label={tr('phone.vg.growth.monthly', { amount: formatRupees(monthly) })}
+          valueText={formatRupees(monthly)}
+          value={monthly}
+          min={MONTHLY_MIN}
+          max={MONTHLY_MAX}
+          step={MONTHLY_STEP}
+          onChange={setMonthly}
+        />
         <p className="vg-label">{tr('phone.vg.growth.years')}</p>
         <div className="vg-chips" role="group" aria-label={tr('phone.vg.growth.years')}>
           {YEAR_CHOICES.map((y) => (
@@ -89,20 +88,8 @@ export function VanguardApp({ lang, profile }: { lang: Lang; profile: Profile })
           ))}
         </div>
         <p className="vg-put-in">{tr('phone.vg.growth.put_in', { amount: formatRupees(monthly * 12 * years) })}</p>
-        <ul className="vg-bars">
-          {rows.map((r) => (
-            <li key={r.key} className={`vg-bar is-${r.key}`}>
-              <span className="vg-bar-label">{r.label}</span>
-              <span className="vg-bar-track">
-                <span className="vg-bar-fill" style={{ width: `${(100 * r.value) / max}%` }} />
-              </span>
-              <span className="vg-bar-value">{formatRupees(r.value)}</span>
-            </li>
-          ))}
-        </ul>
-        <p className="vg-assume" role="note">
-          <PixelIcon id="warn" /> {tr('phone.vg.assumption')}
-        </p>
+        <AssumptionBanner text={tr('phone.vg.assumption')} />
+        <GrowthChart projection={p} labels={labels} format={formatRupees} />
         <p className="vg-what">{tr('phone.vg.growth.what')}</p>
       </section>
 

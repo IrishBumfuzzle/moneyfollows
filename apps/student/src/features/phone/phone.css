@@ -65,6 +65,8 @@
 .ph-icon.is-calls { background: #3a6ea5; }
 .ph-icon.is-vanguard { background: #8b1e2d; }
 .ph-icon.is-snake { background: #4a3a7a; }
+.ph-icon.is-scams { background: #c0392b; }
+.ph-inspect { align-self: flex-end; justify-content: center; min-width: 48px; font-size: 16px; }
 .ph-badge {
   position: absolute;
   top: -10px;
@@ -98,6 +100,7 @@
 .ph-bar.is-calls { background: #3a6ea5; }
 .ph-bar.is-vanguard { background: #8b1e2d; }
 .ph-bar.is-snake { background: #4a3a7a; }
+.ph-bar.is-scams { background: #c0392b; }
 .ph-section { margin: 0; padding: 12px 12px 4px; font: inherit; font-size: 14px; color: #4f5d6b; }
 
 /* ---- calls ---- */
@@ -158,23 +161,11 @@
 .vg-stats dt { display: flex; align-items: center; gap: 4px; font-size: 14px; color: #4f5d6b; }
 .vg-stats dd { font-size: 20px; }
 .vg-owe { color: #b0362f; }
-.vg-slider { display: flex; flex-direction: column; gap: 4px; }
-.vg-slider input { width: 100%; min-height: 48px; accent-color: #8b1e2d; }
 .vg-label { font-size: 14px; color: #4f5d6b; }
 .vg-chips { display: flex; gap: 8px; flex-wrap: wrap; }
 .vg-chip { min-width: 64px; min-height: 48px; padding: 0 12px; border: 2px solid #8b1e2d; border-radius: 24px; background: #fff; color: #8b1e2d; font: inherit; cursor: pointer; }
 .vg-chip.is-on { background: #8b1e2d; color: #fff; }
 .vg-put-in { color: #4f5d6b; }
-.vg-bars { display: flex; flex-direction: column; gap: 8px; }
-.vg-bar { display: grid; grid-template-columns: 1fr auto; grid-template-areas: 'label value' 'track track'; gap: 2px 8px; }
-.vg-bar-label { grid-area: label; font-size: 14px; }
-.vg-bar-value { grid-area: value; font-size: 16px; }
-.vg-bar-track { grid-area: track; height: 12px; border-radius: 6px; background: #e8eef2; overflow: hidden; }
-.vg-bar-fill { display: block; height: 100%; border-radius: 6px; }
-.vg-bar.is-low .vg-bar-fill { background: #8aa4b8; }
-.vg-bar.is-avg .vg-bar-fill { background: #3a6ea5; }
-.vg-bar.is-high .vg-bar-fill { background: #2a5a50; }
-.vg-assume { display: flex; gap: 6px; align-items: flex-start; padding: 8px; border-radius: 8px; background: #fff3dc; border: 2px solid #e8960c; font-size: 14px; }
 .vg-what { font-size: 14px; color: #4f5d6b; }
 .vg-tips { display: flex; flex-direction: column; gap: 10px; }
 .vg-tips li { padding-left: 10px; border-left: 4px solid #e8960c; }
