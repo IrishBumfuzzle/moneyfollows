@@ -464,6 +464,13 @@ function Game({
           lang={lang}
           state={life}
           work={worked ? 'practice' : schoolToday(life) ? 'open' : 'school_first'}
+          pinned={pins.flatMap((p) => (p.location === 'convenience' && p.sublocation ? [p.sublocation] : []))}
+          onSpot={(spot) => {
+            track('location_selected', { location_id: spot });
+            const card = cardAt(plan, 'convenience', spot);
+            // In place of the store sheet, so Continue (or back) returns to the map's Shop.
+            if (card) playPin(card, 'convenience', true);
+          }}
           onShop={() => open('kirana')}
           onWork={() => open('counter')}
           onClose={back}

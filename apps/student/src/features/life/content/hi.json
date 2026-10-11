@@ -20,5 +20,7 @@
   "life.blocked.already_worked": "आज तुम काम कर चुके हो।",
   "life.blocked.already_at_school": "आज तुम स्कूल जा चुके हो।",
   "life.meter.debt": "उधार {{debt}}",
-  "life.blocked.school_first": "पहले स्कूल जाओ। स्कूल के बाद काम कर सकते हो।"
+  "life.blocked.school_first": "पहले स्कूल जाओ। स्कूल के बाद काम कर सकते हो।",
+  "life.store.spot.pinned": "इस हफ़्ते यहाँ कुछ तुम्हारा इंतज़ार कर रहा है।",
+  "life.store.spot.quiet": "इस हफ़्ते यहाँ करने को कुछ नहीं।"
 }

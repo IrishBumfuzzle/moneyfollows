@@ -101,6 +101,15 @@ for (const lang of ['en', 'hi']) {
   const plan = (await store(p)).plan;
   check(plan?.personaId === 'sana' && plan.seed === 42, `${lang}: the plan starts for Sana with ?seed=42`);
 
+  // The Shop's sub-map: three spots and the work counter; seed 42 pins the phone shop.
+  await tap(p, '.loc >> nth=2');
+  await p.waitForSelector('.lf-offer');
+  check((await p.locator('.lf-offer').count()) === 4, `${lang}: the Shop shows phone shop, kirana, clothes stall and work`);
+  check((await p.locator('.lf-offer.is-pinned').count()) === 1, `${lang}: the pinned spot has a badge`);
+  await shot(p, lang, '1b-shop');
+  await p.goBack();
+  await p.waitForSelector('.loc');
+
   // The first pin that is on this map (the Bank arrives with the Time Machine).
   await tap(p, '.loc.is-pinned');
   await p.waitForSelector('.dc-choice');
@@ -196,6 +205,23 @@ for (const lang of ['en', 'hi']) {
   check(s.plan.month === 2 && s.overnight?.payday?.income === 4000, `${lang}: payday starts month 2 (${s.overnight?.payday?.income})`);
   await p.evaluate(async () => (await import('/src/features/decisions/demo.ts')).fireFlashback());
   check(errors.length === 0, `${lang}: no page errors ${JSON.stringify(errors)}`);
+  await ctx.close();
+}
+
+// A sub-map pin plays inside the Shop, then the store sheet comes back.
+{
+  const { p, errors, ctx } = await fresh('en');
+  await tap(p, '.loc >> nth=2');
+  await tap(p, '.lf-offer.is-pinned');
+  await p.waitForSelector('.dc-choice');
+  await tap(p, '.dc-choice');
+  await tap(p, '.dc-sheet .is-primary');
+  await p.waitForSelector('.lf-offer');
+  const s = await store(p);
+  check(s.plan.seen.length === 1 && (await p.locator('.lf-offer.is-pinned').count()) === 0, 'en: the phone shop pin plays in the Shop and the store sheet returns');
+  await p.goBack();
+  await p.waitForSelector('.loc');
+  check(errors.length === 0, `en: no page errors ${JSON.stringify(errors)}`);
   await ctx.close();
 }
 

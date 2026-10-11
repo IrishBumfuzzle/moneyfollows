@@ -131,3 +131,23 @@ describe('demo hooks (hidden demo panel)', () => {
     expect(useGame.getState().overnight?.landed).toHaveLength(1);
   });
 });
+
+describe('Shop sub-map', () => {
+  it('lists the three spots from places.json', async () => {
+    const { subPlaces } = await import('./plan');
+    expect(subPlaces('convenience')).toEqual(['convenience.phone_shop', 'convenience.kirana', 'convenience.clothes_stall']);
+    expect(subPlaces('school')).toEqual([]);
+  });
+
+  it('a pin with a sublocation plays at its spot, not on the Shop itself', async () => {
+    const { cardAt } = await import('./plan');
+    // Seed 42 pins Sana's phone shop in week 1.
+    const plan = startPlan('sana', 42);
+    const pin = planPins(plan).find((p) => p.sublocation)!;
+    expect(pin.sublocation).toBe('convenience.phone_shop');
+    expect(cardAt(plan, 'convenience', pin.sublocation)?.scenario.id).toBe(pin.scenarioId);
+    expect(cardAt(plan, 'convenience', 'convenience.kirana')).toBeNull();
+    const own = planPins(plan).find((p) => p.location === 'convenience' && !p.sublocation);
+    expect(cardAt(plan, 'convenience')?.scenario.id ?? null).toBe(own?.scenarioId ?? null);
+  });
+});

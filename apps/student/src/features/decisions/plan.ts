@@ -1,7 +1,7 @@
 // The persona's monthly money plan (four jars) on top of the engine (CLAUDE.md 5.2). Pure
 // glue: every function takes a GameState and returns a new one; the shared store (useGame)
 // calls these, components never touch the engine or mutate the plan themselves.
-import { content } from '@paisa/content';
+import { content, places } from '@paisa/content';
 import { EngineError, choose, createGame, monthReport, playAt, pinsForWeek, rewind, sleepStep } from '@paisa/engine';
 import type { SleepResult } from '@paisa/engine';
 import type {
@@ -46,11 +46,23 @@ export function planPins(plan: GameState | null): PlanPin[] {
   return pinsForWeek(plan, content);
 }
 
-/** The pinned card at a place (or one of its sub-map spots), if any. */
+/**
+ * The pinned card at exactly this spot: a place itself (not inside its sub-map) or one
+ * sub-map location. The Shop plays its own pins on the map and the sub-map's in the store.
+ */
 export function cardAt(plan: GameState | null, location: LocationId, sublocation?: string): PlayCard | null {
   if (!plan) return null;
-  const card = playAt(plan, content, location, sublocation);
-  return card && (card.kind === 'decision' || card.kind === 'event') ? card : null;
+  if (sublocation !== undefined) {
+    const card = playAt(plan, content, location, sublocation);
+    return card && (card.kind === 'decision' || card.kind === 'event') ? card : null;
+  }
+  const pin = planPins(plan).find((p) => p.location === location && p.sublocation === undefined);
+  return pin ? cardFor(plan, pin.scenarioId) : null;
+}
+
+/** A place's sub-map locations (places.json), e.g. the Shop's phone shop, kirana and clothes stall. */
+export function subPlaces(location: LocationId): string[] {
+  return places.find((p) => p.id === location)?.children ?? [];
 }
 
 /** The card for one pinned scenario (to resume a scene, or play it from the "still to do" list). */
