@@ -1,6 +1,6 @@
 """Builds the five building sprites + pixel halos from the Kenney RPG Urban Kit tilemap (CC0).
 Run from apps/student:  python3 tools/build-sprites.py   (needs Pillow)
-Sprite size / positions must match src/screens/LocationScreen.tsx and BUILD in tools/build-world.py."""
+Sprite size must match src/screens/LocationScreen.tsx; building positions are the LOTS in tools/build-world.py."""
 from PIL import Image, ImageFilter
 
 T, PAD, W, H = 16, 4, 5, 6

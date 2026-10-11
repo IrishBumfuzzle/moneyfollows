@@ -4,8 +4,8 @@ import { t } from '../features/decisions/content';
 import '../features/decisions/decisions.css';
 import { PixelText } from '../PixelText';
 
-// Backdrop: public/assets/world.png (1920x1280, 32px-tile art, built by tools/build-world.py) is pure
-// scenery; the four buildings are drawn over it at fixed pixel positions. The camera only ever scales
+// Backdrop: public/assets/world.png (1920x1280, a 16px-tile town from the Kenney RPG Urban Kit, built by
+// tools/build-world.py) is pure scenery; the five buildings are drawn over it at fixed pixel positions. The camera only ever scales
 // by whole numbers (like a tile RPG), so bigger screens just see more of the world.
 const WORLD = { w: 1920, h: 1280 };
 const STAGE = { w: 352, h: 380 };
@@ -15,11 +15,15 @@ const MAX_ZOOM = 3;
 const SPRITE_PAD = 4;
 const HOUSE = { w: 80 + 2 * SPRITE_PAD };
 
+// The meters bar (money, health, sanity) covers the top of the screen; the play area is centred in
+// the space below it, so no building sits under the bar.
+const TOP_BAR = 88;
+
 function useCamera() {
   const read = () => {
-    const vw = window.innerWidth, vh = window.innerHeight;
+    const vw = window.innerWidth, vh = window.innerHeight - TOP_BAR;
     const zoom = Math.min(MAX_ZOOM, Math.max(1, Math.floor(Math.min(vw / FOCUS.w, vh / FOCUS.h))));
-    return { zoom, x: Math.round(vw / 2 - zoom * FOCUS.x), y: Math.round(vh / 2 - zoom * FOCUS.y) };
+    return { zoom, x: Math.round(vw / 2 - zoom * FOCUS.x), y: Math.round(TOP_BAR + vh / 2 - zoom * FOCUS.y) };
   };
   const [cam, setCam] = useState(read);
   useEffect(() => {
@@ -32,15 +36,16 @@ function useCamera() {
 
 export type LocationId = 'school' | 'hospital' | 'convenience' | 'home' | 'bank';
 
-// x/y: top-left of the building in play-area pixels. Layout follows the sketch in /map.png
-// (School bottom-left, House middle, Store top-right, Hospital bottom-right) and tools/build-world.py.
+// x/y: top-left of the building in play-area pixels: the lots tools/build-world.py prints. Two rows
+// facing the main streets, all inside the 352x380 play area so a 360 px phone sees every building:
+// Home, School and Shop on top; Bank and Hospital below, with a little park and fountain between.
 // `label` is only the English fallback: the map shows the t:place.<id> name in the player's language.
 const LOCATIONS: { id: LocationId; label: string; x: number; y: number }[] = [
-  { id: 'school', label: 'School', x: 91, y: 214 },
-  { id: 'hospital', label: 'Hospital', x: 275, y: 236 },
-  { id: 'convenience', label: 'Convenience Store', x: 269, y: 26 },
-  { id: 'home', label: 'Home', x: 119, y: 80 },
-  { id: 'bank', label: 'Bank', x: 182, y: 200 }, // between School and Hospital (tools/build-sprites.py)
+  { id: 'home', label: 'Home', x: 16, y: 14 },
+  { id: 'school', label: 'School', x: 128, y: 14 },
+  { id: 'convenience', label: 'Convenience Store', x: 256, y: 14 },
+  { id: 'bank', label: 'Bank', x: 16, y: 190 },
+  { id: 'hospital', label: 'Hospital', x: 256, y: 190 },
 ];
 
 /**
