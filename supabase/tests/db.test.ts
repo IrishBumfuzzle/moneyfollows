@@ -540,7 +540,7 @@ describe.skipIf(skipDbTests)('database', () => {
       expect(asha.last_active).toBeInstanceOf(Date);
     });
 
-    it('counts one decision per weekly slot, drops rewound ones, and dedupes modules', async () => {
+    it('counts one decision per card, drops rewound ones, and dedupes modules', async () => {
       const rows = await progress(facilitator, cls.id);
       expect(rows.find((r) => r.nickname === 'Bilal')).toMatchObject({
         decisions: 1,
@@ -548,6 +548,34 @@ describe.skipIf(skipDbTests)('database', () => {
         modules_done: 2,
         baseline_score: 25,
         endline_score: null,
+      });
+    });
+
+    it('counts every pinned card of a week; a rewind hides only its own card', async () => {
+      const esha = await join(cls.class_code, 'Esha');
+      const at = (min: number) => `2026-10-02T10:${String(min).padStart(2, '0')}:00Z`;
+      const made = (scenarioId: string, choiceId: string, pillar: string, min: number) =>
+        ev(esha, 'decision_made', { scenarioId, choiceId, pillar, month: 1, week: 1 }, at(min));
+      await push([
+        // Week 1 pins three cards. The phone card is rewound and made again: it counts once.
+        made('budget.recharge.01', 'a', 'plan_budget', 1),
+        made('save.fund.01', 'b', 'save_manage', 2),
+        made('safe.otp.01', 'a', 'stay_safe', 3),
+        ev(esha, 'rewind_used', { scenarioId: 'safe.otp.01', month: 1, week: 1 }, at(4)),
+        made('safe.otp.01', 'b', 'stay_safe', 5),
+        // Week 2: one card, rewound and left: it does not count, and week 1's cards stay.
+        ev(
+          esha,
+          'decision_made',
+          { scenarioId: 'budget.bus.01', choiceId: 'a', pillar: 'plan_budget', month: 1, week: 2 },
+          at(6),
+        ),
+        ev(esha, 'rewind_used', { scenarioId: 'budget.bus.01', month: 1, week: 2 }, at(7)),
+      ]);
+      const rows = await progress(facilitator, cls.id);
+      expect(rows.find((r) => r.nickname === 'Esha')).toMatchObject({
+        decisions: 3,
+        pillars: { plan_budget: 1, save_manage: 1, understand_investing: 0, stay_safe: 1 },
       });
     });
 
