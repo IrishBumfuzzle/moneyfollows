@@ -90,6 +90,8 @@
 
   "class.code": "क्लास कोड",
   "class.open": "क्लास खोलें",
+  "class.show_qr": "QR कोड दिखाएँ",
+  "class.hide_qr": "QR कोड छिपाएँ",
   "class.copy_code": "कोड कॉपी करें",
   "class.copy_link": "लिंक कॉपी करें",
   "class.copied_code": "कोड कॉपी हो गया",

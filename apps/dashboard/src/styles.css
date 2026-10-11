@@ -213,6 +213,9 @@ table.data th button.sort:focus-visible { outline: 3px solid var(--focus); outli
 .class-item-code .class-code { font-size: 1.375rem; letter-spacing: 0.1em; }
 .class-item-actions { display: flex; flex-wrap: wrap; gap: 8px 12px; justify-content: flex-end; }
 .class-search { max-width: 420px; }
+.class-item-qr { grid-column: 1 / -1; padding-top: 8px; border-top: 1px solid var(--line); }
+.qr.big { max-width: none; }
+.qr.big svg { width: 280px; height: 280px; max-width: 100%; }
 @media (max-width: 960px) {
   .class-item { grid-template-columns: 1fr; }
   .class-item-actions { justify-content: flex-start; }

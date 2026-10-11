@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ClassRow } from '@paisa/api-client';
 import { studentUrlConfigured } from '../../api';
 import { t } from '../../content';
@@ -70,6 +70,8 @@ export function ClassCard({ cls, lang, highlighted, onPrint }: Props) {
 export function ClassListItem({ cls, lang, onPrint }: Omit<Props, 'highlighted'>) {
   const tr = (key: string, vars?: Record<string, string | number>) => t(lang, key, vars);
   const open = hashFor({ name: 'class', id: cls.id, tab: 'progress' });
+  const [showQr, setShowQr] = useState(false);
+  const qrId = `qr-${cls.id}`;
 
   return (
     <article className="card class-item" aria-labelledby={`class-${cls.id}`}>
@@ -97,11 +99,27 @@ export function ClassListItem({ cls, lang, onPrint }: Omit<Props, 'highlighted'>
           {tr('class.open')}
         </a>
         {studentUrlConfigured && (
-          <button type="button" className="btn" onClick={() => onPrint(cls)}>
-            {tr('class.print')}
-          </button>
+          <>
+            <button
+              type="button"
+              className="btn"
+              aria-expanded={showQr}
+              aria-controls={qrId}
+              onClick={() => setShowQr((v) => !v)}
+            >
+              {tr(showQr ? 'class.hide_qr' : 'class.show_qr')}
+            </button>
+            <button type="button" className="btn" onClick={() => onPrint(cls)}>
+              {tr('class.print')}
+            </button>
+          </>
         )}
       </div>
+      {showQr && (
+        <div className="class-item-qr" id={qrId}>
+          <JoinQr cls={cls} lang={lang} big />
+        </div>
+      )}
     </article>
   );
 }

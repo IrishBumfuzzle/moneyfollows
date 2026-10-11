@@ -90,6 +90,8 @@
 
   "class.code": "Class code",
   "class.open": "Open class",
+  "class.show_qr": "Show QR code",
+  "class.hide_qr": "Hide QR code",
   "class.copy_code": "Copy code",
   "class.copy_link": "Copy link",
   "class.copied_code": "Code copied",
