@@ -101,3 +101,18 @@
 }
 /* Without animation the pop just shows the last change. */
 @media (prefers-reduced-motion: reduce) { .lf-pop { opacity: 1; } }
+
+/* Store sub-map: a spot holding this week's pin (badge, like the map's). */
+.lf-offer.is-pinned { outline: 3px solid #f2c230; outline-offset: -2px; }
+.lf-spot-pin {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-left: 8px;
+  border: 2px solid #4a2b17;
+  border-radius: 50%;
+  background: #f2c230;
+  font: 16px/18px "Pixelify Sans", sans-serif;
+  text-align: center;
+  vertical-align: middle;
+}

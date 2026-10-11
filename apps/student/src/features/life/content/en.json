@@ -20,5 +20,7 @@
   "life.blocked.already_worked": "You already worked today.",
   "life.blocked.already_at_school": "You already went to school today.",
   "life.meter.debt": "Owe {{debt}}",
-  "life.blocked.school_first": "Go to school first. You can work after school."
+  "life.blocked.school_first": "Go to school first. You can work after school.",
+  "life.store.spot.pinned": "Something is waiting for you here this week.",
+  "life.store.spot.quiet": "Nothing to do here this week."
 }
