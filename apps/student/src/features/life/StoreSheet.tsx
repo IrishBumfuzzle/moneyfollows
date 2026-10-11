@@ -1,4 +1,7 @@
 import { useEffect, useRef } from 'react';
+import { t as placeT } from '../decisions/content';
+import { Icon } from '../decisions/icons';
+import { subPlaces } from '../decisions/plan';
 import { t as storeT } from '../store/content';
 import { WORK } from './config';
 import { rupees, t } from './content';
@@ -8,16 +11,24 @@ import type { LifeState } from './types';
 import '../../design/kenney.css';
 import './life.css';
 
+const KIRANA = 'convenience.kirana';
+const SPOT_ICON: Record<string, string> = { 'convenience.phone_shop': 'phone', [KIRANA]: 'basket', 'convenience.clothes_stall': 'festival' };
+
 /**
- * The convenience store as a bottom sheet over the map: go shopping (the Kirana Run mini-game)
- * or work a shift at the counter (the Counter Shift mini-game; once a day, after school). The
- * games do the buying and earning; this sheet only opens them.
+ * The Shop's sub-map as a bottom sheet over the map (CLAUDE.md 5.8): the phone shop, the
+ * kirana and the clothes stall (places.json), plus a shift at the counter (Counter Shift; once
+ * a day, after school). A spot holding this week's pin shows a badge and plays it first; the
+ * kirana otherwise opens Kirana Run. The games and scenes do the buying and earning.
  */
-export function StoreSheet({ lang, state, work, onShop, onWork, onClose }: {
+export function StoreSheet({ lang, state, work, pinned = [], onSpot, onShop, onWork, onClose }: {
   lang: Lang;
   state: LifeState;
   /** Work is once a day, after school: 'open', 'practice' (already worked today) or 'school_first'. */
   work: 'open' | 'practice' | 'school_first';
+  /** Sub-map spots holding one of this week's pins, e.g. "convenience.phone_shop". */
+  pinned?: readonly string[];
+  /** A pinned spot was tapped: play its card. */
+  onSpot: (spot: string) => void;
   onShop: () => void;
   onWork: () => void;
   onClose: () => void;
@@ -53,15 +64,37 @@ export function StoreSheet({ lang, state, work, onShop, onWork, onClose }: {
         <p>{tr('life.store.intro', { money: rupees(state.money) })}</p>
 
         <div className="lf-offers">
-          <button ref={firstRef} className="k-btn lf-offer" onClick={onShop}>
-            <span className="lf-offer-icon">
-              <PixelIcon id="sack" size={32} />
-            </span>
-            <span className="lf-offer-body">
-              <span className="lf-offer-label">{storeT(lang, 'store.sheet.shop.label')}</span>
-              <span className="lf-offer-hint">{storeT(lang, 'store.sheet.shop.hint')}</span>
-            </span>
-          </button>
+          {subPlaces('convenience').map((spot, i) => {
+            const pin = pinned.includes(spot);
+            // Without a pin, only the kirana has something to do: Kirana Run.
+            const open = pin || spot === KIRANA;
+            return (
+              <button
+                key={spot}
+                ref={i === 0 ? firstRef : undefined}
+                className={`k-btn lf-offer ${open ? '' : 'is-dim'} ${pin ? 'is-pinned' : ''}`}
+                aria-disabled={!open}
+                onClick={() => (pin ? onSpot(spot) : spot === KIRANA ? onShop() : undefined)}
+              >
+                <span className="lf-offer-icon">
+                  <Icon name={SPOT_ICON[spot]} size={32} />
+                </span>
+                <span className="lf-offer-body">
+                  <span className="lf-offer-label">
+                    {placeT(lang, `t:place.${spot}`)}
+                    {pin && <span className="lf-spot-pin" aria-hidden="true">!</span>}
+                  </span>
+                  <span className="lf-offer-hint">
+                    {pin
+                      ? tr('life.store.spot.pinned')
+                      : spot === KIRANA
+                        ? storeT(lang, 'store.sheet.shop.hint')
+                        : tr('life.store.spot.quiet')}
+                  </span>
+                </span>
+              </button>
+            );
+          })}
           <button
             className={`k-btn lf-offer ${work === 'school_first' ? 'is-dim' : ''}`}
             aria-disabled={work === 'school_first'}
