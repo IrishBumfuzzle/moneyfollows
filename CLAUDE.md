@@ -464,9 +464,9 @@ Append decisions here as `YYYY-MM-DD HH:MM — decision — who`.
 - 2026-10-11 07:25 — Staff sign in with email + password, not an emailed code. Only emails on the staff list can create an account (auth hook `staff_signup_gate`); `pnpm staff:invite` just adds the email. Reset links come by Gmail SMTP, locally too. api-client: `signInWithEmail`/`verifyEmailCode` removed, sign-up/reset/set-password added (`packages/shared/changes/20261011-0725-ui2-staff-password-signin.md`) — UI-2, to review: BE-2.
 - 2026-10-11 07:35 — Map buildings get their own silhouettes, hand-drawn in the Kenney palette (tools/building_art.py): Home with a gable roof and chimney, a Japanese-style School with a central clock tower, a classical Bank (navy pediment, gold coin, columns), a Hospital with a taller cross tower. The Shop stays the square tile-built block. Same 88x104 sprites, so no code change — UI-1.
 - 2026-10-11 07:50 — Two building icon sets, five sprites each in map order: set1.png (flat, front-on, the Shop redrawn to match) and set2.png (the Kenney 3D view: the kit's Shop, the other four redrawn with roofs seen from above). Built by tools/build-icon-sets.py into public/assets/buildings/set1.png, set2.png and set1/, set2/ (same names and size as the map sprites). The map uses set2 (build-sprites.py draws it from building_art_3d.py), chosen by the team — UI-1.
+- 2026-10-11 — Final-submission docs: `LICENSE` is MIT. `README.md` holds setup and run steps only (plus external links: none needed, CC0 asset credits); the backend API, event payloads and app internals moved unchanged to `docs/backend.md` — team.
 
 Open questions:
-- Which license does Section 11 of the brief require for the `LICENSE` file?
 - Which success measures are scored: six or seven?
 - Compliance-approved assumed growth rates for Time Machine (placeholders: 4/8/12%).
 - Who is the native Telugu reviewer, if any, via the NGO partner?
