@@ -105,7 +105,7 @@ export function MainScreen({
           {onSettings && (
             <button className="k-round ms-gear" onClick={onSettings} aria-label={settingsT(lang, 'settings.open')}>
               <svg viewBox="0 0 9 9" width="22" height="22" aria-hidden="true" shapeRendering="crispEdges">
-                <path fill="#4a2b17" d="M3 0h3v1H3zM1 1h2v1H1zM6 1h2v1H6zM1 2h7v1H1zM0 3h3v3H0zM6 3h3v3H6zM1 6h7v1H1zM1 7h2v1H1zM6 7h2v1H6zM3 8h3v1H3zM3 2h3v1H3zM3 6h3v1H3z" />
+                <path fill="#4a2b17" d="M3 0h3v1H3zM1 1h1v1H1zM3 1h3v1H3zM7 1h1v1H7zM2 2h5v1H2zM0 3h3v3H0zM6 3h3v3H6zM2 6h5v1H2zM1 7h1v1H1zM3 7h3v1H3zM7 7h1v1H7zM3 8h3v1H3z" />
               </svg>
             </button>
           )}
