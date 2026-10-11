@@ -75,3 +75,23 @@
 @keyframes rs-dim { from { opacity: 0; } }
 @keyframes rs-zzz { from { opacity: 0; transform: translateY(4px); } }
 @keyframes rs-float { 50% { transform: translateY(-1px); } }
+
+/* ---- Month Recap: the Money Health Score ring and its four parts ---- */
+.hm-score { display: flex; align-items: center; gap: 16px; }
+.hm-ring { flex: none; }
+.hm-ring-track { fill: #fff3dc; stroke: #c9a77c; stroke-width: 10; }
+.hm-ring-fill { fill: none; stroke-width: 10; }
+.hm-ring.is-good .hm-ring-fill { stroke: #3f9a4a; }
+.hm-ring.is-mid .hm-ring-fill { stroke: #d99a1e; }
+.hm-ring.is-low .hm-ring-fill { stroke: #b0362f; }
+.hm-ring-num { fill: #4a2b17; font: 28px "Paisa Digits", "Pixelify Sans", sans-serif; }
+.hm-parts { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.hm-parts li { display: grid; grid-template-columns: 1fr 96px 48px; align-items: center; gap: 2px 8px; }
+.hm-part-label { min-width: 0; }
+.hm-part-num { text-align: right; }
+.hm-part-hint { grid-column: 1 / -1; font-size: 16px; color: #7a4a2a; }
+.hm-bar { display: block; height: 12px; background: #c9a77c; box-shadow: inset 0 0 0 2px #4a2b17; }
+.hm-bar-fill { display: block; height: 100%; background: #6a5acd; box-shadow: inset 0 0 0 2px #4a2b17; }
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-saver]) .hm-ring-fill { transition: stroke-dashoffset 600ms ease-out; }
+}

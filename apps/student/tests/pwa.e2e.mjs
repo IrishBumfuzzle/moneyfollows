@@ -87,7 +87,7 @@ check(true, 'offline banner shows');
 await p.screenshot({ path: `${OUT}pwa-offline-main.png` });
 
 await p.locator('.ms-play').click();
-await p.getByRole('button', { name: 'Convenience Store' }).click();
+await p.getByRole('button', { name: /^Shop/ }).click(); // the demo plan pins only the phone shop inside it
 await p.locator('.lf-sheet').waitFor();
 check(true, 'map -> store works offline');
 await p.locator('.lf-offer').first().click(); // Kirana Run

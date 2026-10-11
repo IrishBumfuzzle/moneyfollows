@@ -1,0 +1,94 @@
+/* Bank: the sheet reuses the store sheet (life.css); the Time Machine is a full screen in the
+   same Kenney panel style as the store games. Its chart and banner are shared with the phone's
+   growth explorer, so their styles carry no screen-specific colours. */
+.bk-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 8px 0 24px;
+  box-sizing: border-box;
+  background: #2b1b3d;
+  font: 16px/1.3 "Paisa Digits", "Pixelify Sans", "Noto Sans Devanagari", "Noto Sans Telugu", sans-serif;
+  font-variant-ligatures: none;
+}
+.bk-screen:lang(hi) { line-height: 1.45; }
+.bk-screen p, .bk-screen h1, .bk-screen h2 { margin: 0; }
+.bk-card { width: min(352px, calc(100vw - 8px)); box-sizing: border-box; display: flex; flex-direction: column; gap: 8px; padding: 4px 4px 8px; }
+.bk-head { display: flex; align-items: center; gap: 8px; }
+.bk-title { flex: 1; min-width: 0; font: inherit; font-size: 16px; }
+.bk-body { display: flex; flex-direction: column; gap: 8px; }
+.bk-body h2 { font-size: 20px; font-weight: normal; outline: none; }
+.bk-note { color: #4a2b17; }
+.bk-small { font-size: 14px; color: #7a4a2a; }
+.bk-main { justify-content: center; min-height: 56px; font-size: 18px; }
+.bk-plans { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.bk-plan { flex-direction: column; align-items: flex-start; gap: 2px; min-height: 96px; }
+.bk-plan-name { font-size: 18px; }
+.bk-plan.is-correct .bk-small, .bk-plan.is-wrong .bk-small { color: #fff; }
+.bk-feedback { display: flex; flex-direction: column; gap: 8px; }
+.bk-feedback-title { font-size: 18px; }
+.bk-done { text-align: center; }
+
+/* ---- Shared Time Machine parts (also used by the phone's growth explorer) ---- */
+.tm-slider { display: flex; flex-direction: column; gap: 4px; }
+.tm-slider-label { font-size: 18px; }
+.tm-slider input { width: 100%; min-height: 48px; margin: 0; accent-color: #8b1e2d; }
+.tm-assume {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  padding: 8px;
+  background: #fff4c2;
+  box-shadow: inset 0 0 0 2px #c98a1b;
+  color: #4a2b17;
+}
+.tm-assume .lf-px { flex: none; }
+.tm-chart { margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.tm-chart svg { display: block; width: 100%; height: 160px; background: #fffaf0; box-shadow: inset 0 0 0 2px #c9a77c; }
+.tm-axis { stroke: #c9a77c; stroke-width: 2; }
+.tm-band { fill: #6a5acd; fill-opacity: 0.18; }
+.tm-line { fill: none; stroke-width: 2; vector-effect: non-scaling-stroke; }
+.tm-line.is-low { stroke: #6b7f90; stroke-dasharray: 4 3; }
+.tm-line.is-avg { stroke: #6a5acd; stroke-width: 3; }
+.tm-line.is-high { stroke: #2f7a2a; stroke-dasharray: 4 3; }
+.tm-legend { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.tm-legend li { display: flex; align-items: center; gap: 8px; }
+.tm-legend b { margin-left: auto; font-weight: normal; font-size: 18px; white-space: nowrap; }
+.tm-key { flex: none; width: 16px; height: 4px; }
+.tm-legend .is-low .tm-key { background: #6b7f90; }
+.tm-legend .is-avg .tm-key { background: #6a5acd; height: 6px; }
+.tm-legend .is-high .tm-key { background: #2f7a2a; }
+
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-saver]) .bk-feedback { animation: bk-rise 180ms ease-out; }
+}
+@keyframes bk-rise { from { transform: translateY(16px); opacity: 0; } }
+
+/* ---- Jar Splitter: one slider per jar, each with its jar colour, icon and label ---- */
+.bk-body .bk-round { font-size: 16px; color: #7a4a2a; }
+.bk-income { font-size: 18px; }
+.js-jars { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.js-jar { display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-left: 6px solid; background: #fffaf0; }
+.js-jar .tm-slider { flex: 1; min-width: 0; }
+.js-jar .tm-slider-label { font-size: 16px; }
+.js-jar.is-needs { border-color: #1f8a8a; }
+.js-jar.is-needs input { accent-color: #1f8a8a; }
+.js-jar.is-wants { border-color: #b36b00; }
+.js-jar.is-wants input { accent-color: #b36b00; }
+.js-jar.is-goals { border-color: #6a4bb5; }
+.js-jar.is-goals input { accent-color: #6a4bb5; }
+.js-jar.is-savings { border-color: #2f7a2a; }
+.js-jar.is-savings input { accent-color: #2f7a2a; }
+.bk-left { font-size: 18px; color: #8a4b12; }
+.bk-left.is-done { color: #2f7a2a; }
+.bk-main:disabled { opacity: 0.6; }
+.js-checks { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.js-checks li { display: flex; align-items: flex-start; gap: 6px; }
+.js-checks li.is-ok { color: #2f5a2a; }
+.js-checks li.is-fix { color: #8a1f17; }
+.js-checks .lf-px { flex: none; margin-top: 2px; }

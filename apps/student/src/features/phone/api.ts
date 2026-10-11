@@ -13,7 +13,7 @@ import { api } from '../../api/client';
 import { track } from '../../api/track';
 import { TIPS } from './tips';
 
-export type PhoneApp = 'messages' | 'calls' | 'vanguard' | 'snake';
+export type PhoneApp = 'messages' | 'calls' | 'vanguard' | 'snake' | 'scams';
 
 export interface VanguardFeed {
   tips: string[];          // tip ids, in the order to show
@@ -58,6 +58,11 @@ export async function loadVanguardFeed(student: { anonId: string; classId: strin
     /* storage blocked */
   }
   return DEFAULT_FEED;
+}
+
+/** A finished Scam or Safe? game (practice: never touches the wallet). Same payload as the store games. */
+export function trackScamGame(r: { correct: number; total: number; score: number }): void {
+  track('minigame_complete', { game: 'scam_or_safe', correct: r.correct, total: r.total, score: r.score });
 }
 
 /** A finished Snake game. Accepted today: minigame_complete keeps game and score. */

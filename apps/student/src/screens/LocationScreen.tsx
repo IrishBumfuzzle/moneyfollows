@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react';
+import type { Lang } from '@paisa/shared';
+import { t } from '../features/decisions/content';
+import '../features/decisions/decisions.css';
 import { PixelText } from '../PixelText';
 
 // Backdrop: public/assets/world.png (1920x1280, 32px-tile art, built by tools/build-world.py) is pure
@@ -27,19 +30,34 @@ function useCamera() {
   return cam;
 }
 
-export type LocationId = 'school' | 'hospital' | 'convenience' | 'home';
+export type LocationId = 'school' | 'hospital' | 'convenience' | 'home' | 'bank';
 
 // x/y: top-left of the building in play-area pixels. Layout follows the sketch in /map.png
 // (School bottom-left, House middle, Store top-right, Hospital bottom-right) and tools/build-world.py.
+// `label` is only the English fallback: the map shows the t:place.<id> name in the player's language.
 const LOCATIONS: { id: LocationId; label: string; x: number; y: number }[] = [
   { id: 'school', label: 'School', x: 91, y: 214 },
   { id: 'hospital', label: 'Hospital', x: 275, y: 236 },
   { id: 'convenience', label: 'Convenience Store', x: 269, y: 26 },
   { id: 'home', label: 'Home', x: 119, y: 80 },
+  { id: 'bank', label: 'Bank', x: 182, y: 200 }, // between School and Hospital (tools/build-sprites.py)
 ];
 
-export function LocationScreen({ onSelect }: { onSelect: (id: LocationId) => void }) {
+/**
+ * The neighbourhood map. `pinned` places hold this week's decisions and glow; `guide` (the
+ * first pin, for a first-time player) gets a bobbing "Start here" arrow.
+ */
+export function LocationScreen({ lang, pinned = [], guide, onSelect }: {
+  lang: Lang;
+  pinned?: readonly string[];
+  guide?: string;
+  onSelect: (id: LocationId) => void;
+}) {
   const cam = useCamera();
+  const name = (l: (typeof LOCATIONS)[number]) => {
+    const s = t(lang, `t:place.${l.id}`);
+    return s === `place.${l.id}` ? l.label : s;
+  };
   return (
     <div className="screen">
       <div
@@ -49,8 +67,8 @@ export function LocationScreen({ onSelect }: { onSelect: (id: LocationId) => voi
         {LOCATIONS.map((l) => (
           <button
             key={l.id}
-            className="loc"
-            aria-label={l.label}
+            className={`loc ${pinned.includes(l.id) ? 'is-pinned' : ''}`}
+            aria-label={pinned.includes(l.id) ? `${name(l)} · ${t(lang, 'dec.pin')}` : name(l)}
             onClick={() => onSelect(l.id)}
             style={{ left: ORIGIN.x + l.x - SPRITE_PAD, top: ORIGIN.y + l.y - SPRITE_PAD, width: HOUSE.w }}
           >
@@ -58,8 +76,10 @@ export function LocationScreen({ onSelect }: { onSelect: (id: LocationId) => voi
               <img className="halo halo-hover" src={`/assets/buildings/${l.id}-hover.png`} alt="" />
               <img className="halo halo-active" src={`/assets/buildings/${l.id}-active.png`} alt="" />
               <img src={`/assets/buildings/${l.id}.png`} alt="" />
+              {pinned.includes(l.id) && <span className="loc-pin" aria-hidden="true">!</span>}
+              {guide === l.id && <span className="loc-guide" aria-hidden="true">{t(lang, 'dec.guide')}</span>}
             </span>
-            <PixelText text={l.label} size={16} scale={1} maxWidth={130} />
+            <PixelText text={name(l)} size={16} scale={1} maxWidth={130} />
           </button>
         ))}
       </div>
