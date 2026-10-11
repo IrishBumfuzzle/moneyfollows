@@ -30,7 +30,21 @@ export function ThoughtCloud({ lang, termId, anchor, onClose }: {
   const tailRef = useRef<HTMLSpanElement>(null);
   const { refs, floatingStyles, context, placement, middlewareData } = useFloating({
     open: true,
-    onOpenChange: (open) => !open && onClose(),
+    onOpenChange: (open, event, reason) => {
+      if (open) return;
+      // Moving to another glossary word, in an article or the Word Wallet (focus or a press on it),
+      // isn't a close: its click switches the cloud to that word (openTerm replaces the history
+      // entry). Closing here too would start a history.back() that lands after the switch, closing
+      // the new cloud and losing a level of history. Escape and the rest always close.
+      const to =
+        reason === 'focus-out'
+          ? (event as FocusEvent | undefined)?.relatedTarget
+          : reason === 'outside-press'
+            ? event?.target
+            : null;
+      if (to instanceof Element && to.closest('.nt-word, .nt-wallet-item')) return;
+      onClose();
+    },
     elements: { reference: anchor },
     placement: 'top',
     middleware: [offset(18), flip({ padding: 8 }), shift({ padding: 8 }), arrow({ element: tailRef, padding: 24 })],
