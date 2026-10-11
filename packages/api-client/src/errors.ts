@@ -11,12 +11,22 @@ export type ApiErrorCode =
   | 'rejoin_failed'
   | 'too_many_events'
   | 'not_signed_in'
-  /** Staff sign-in (additive): wrong or expired email code, or wrong demo password. */
-  | 'auth_code_invalid'
-  /** Staff sign-in (additive): too many codes requested; wait and try again. */
+  /** Staff sign-in (additive): wrong email or password, or an account that never set a password. */
+  | 'auth_wrong_password'
+  /** Staff sign-in (additive): the password-reset link is wrong, expired or already used. */
+  | 'auth_link_invalid'
+  /** Staff sign-in (additive): too many tries or emails; wait and try again. */
   | 'auth_rate_limited'
-  /** Staff sign-in (additive): the email has no accepted invite (sign-up is off). */
+  /** Staff sign-in (additive): the email is not on the staff allowlist, so it can't make an account. */
   | 'auth_not_invited'
+  /** Staff sign-in (additive): create account with an email that already has one. */
+  | 'auth_account_exists'
+  /** Staff sign-in (additive): the password is too short or too weak. */
+  | 'auth_weak_password'
+  /** Staff sign-in (additive): the new password is the same as the old one. */
+  | 'auth_same_password'
+  /** Staff sign-in (additive): the auth server says the address can't be an email. */
+  | 'auth_email_invalid'
   | 'network'
   | 'timeout'
   | 'unknown';
@@ -67,22 +77,32 @@ export function toApiError(
 }
 
 /**
- * Turns a supabase-js auth error (sign-in, code check) into an ApiError the dashboard can explain.
- * GoTrue sends a stable `code` on newer servers; the message checks cover older ones.
+ * Turns a supabase-js auth error (sign-in, create account, password reset) into an ApiError the
+ * dashboard can explain. GoTrue sends a stable `code` on newer servers; the message checks cover older ones.
  */
 export function toAuthError(err: { message?: string; code?: string; status?: number } | null | undefined): ApiError {
   const message = err?.message ?? '';
   const code = err?.code ?? '';
   const status = err?.status || undefined;
-  if (code === 'otp_expired' || code === 'invalid_credentials' || /token has expired|invalid login credentials/i.test(message)) {
-    return new ApiError('auth_code_invalid', message, status);
-  }
-  if (code === 'over_email_send_rate_limit' || code === 'over_request_rate_limit' || status === 429) {
-    return new ApiError('auth_rate_limited', message, status);
-  }
-  if (code === 'signup_disabled' || code === 'user_not_found' || code === 'otp_disabled' || /signups not allowed/i.test(message)) {
+  const is = (codes: string[], text?: RegExp) => codes.includes(code) || (text !== undefined && text.test(message));
+  // The staff allowlist hook (migration 20261011160000_staff_signup_gate.sql) refuses with this message.
+  if (is(['signup_disabled', 'user_not_found'], /staff_not_invited|signups not allowed/i)) {
     return new ApiError('auth_not_invited', message, status);
   }
+  if (is(['invalid_credentials', 'email_not_confirmed'], /invalid login credentials|email not confirmed/i)) {
+    return new ApiError('auth_wrong_password', message, status);
+  }
+  if (is(['otp_expired'], /token has expired|link is invalid/i)) return new ApiError('auth_link_invalid', message, status);
+  if (is(['over_email_send_rate_limit', 'over_request_rate_limit']) || status === 429) {
+    return new ApiError('auth_rate_limited', message, status);
+  }
+  if (is(['user_already_exists', 'email_exists'], /already registered/i)) {
+    return new ApiError('auth_account_exists', message, status);
+  }
+  // Before weak_password: its message ("New password should be different…") also says "password should".
+  if (is(['same_password'], /different from the old password/i)) return new ApiError('auth_same_password', message, status);
+  if (is(['weak_password'], /password should/i)) return new ApiError('auth_weak_password', message, status);
+  if (is(['email_address_invalid'])) return new ApiError('auth_email_invalid', message, status);
   if (!status && /fetch|network|Load failed/i.test(message)) return new ApiError('network', message);
   return new ApiError('unknown', message || 'unknown error', status);
 }

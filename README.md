@@ -17,13 +17,13 @@ pnpm dev:dashboard          # staff dashboard (UI-2)
 
 Put the `API URL` and `anon key` that `supabase start` prints into `.env` as `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. Both apps read the root `.env`. The student app runs on http://localhost:5173. The dashboard runs on http://127.0.0.1:5174, which is the local auth site URL, so keep that port. Without the two `VITE_SUPABASE_*` values, the student app still runs: joining uses an offline stand-in and events stay queued on the device. The dashboard shows a setup message instead.
 
-**Demo:** class code `HYD234`. Facilitator sign-in is `demo.facilitator@example.org`, password `paisa-demo-2026` (local only; the dashboard's dev build has a "Use the local demo facilitator" button), or use an email code. Inbucket at http://127.0.0.1:54324 shows the emails. The seeded students and quiz results are labelled demo data. `pnpm seed` loads only into a local or CI database unless you pass `--allow-remote-demo`.
+**Demo:** class code `HYD234`. Facilitator sign-in is `demo.facilitator@example.org`, password `paisa-demo-2026` (local only; the dashboard's dev build has a "Use the local demo facilitator" button). Password-reset emails go out through the Gmail SMTP account in `.env` (`SMTP_*`), locally too; `supabase start` reads them from the root `.env`. The seeded students and quiz results are labelled demo data. `pnpm seed` loads only into a local or CI database unless you pass `--allow-remote-demo`.
 
 ### Hosted project
 
 1. Create the Supabase project in region **ap-south-1 (South Asia, Mumbai)**. The region is fixed at creation and cannot be set in `config.toml`. Verify it under Project Settings → General ("Region: South Asia (Mumbai)"), or with `npx supabase projects list`.
 2. `npx supabase login`, `npx supabase link --project-ref <ref>`, then `npx supabase db push` (migrations only; never load `seed.sql` there, it has a known password).
-3. Auth and email: put the `SMTP_*` values in `.env` (custom SMTP is required: free projects reject custom email templates without it), and `DASHBOARD_URL` (the deployed dashboard, https, no trailing slash; sign-in and invite emails link there). If `config push` prints `WARN: environment variable is unset: DASHBOARD_URL`, stop: it would set the site URL to the literal text. Check `project_id` in the `[remotes.production]` block at the end of `supabase/config.toml`, then run `set -a && . ./.env && set +a && npx supabase config push`. Then check Authentication → URL Configuration and → Emails → SMTP in the dashboard. Sign-up is off, email confirmation is on and sign-in codes are 6 digits and expire after 10 minutes.
+3. Auth and email: put the `SMTP_*` values in `.env` (custom SMTP is required: free projects reject custom email templates without it), and `DASHBOARD_URL` (the deployed dashboard, https, no trailing slash; password-reset emails link there). If `config push` prints `WARN: environment variable is unset: DASHBOARD_URL`, stop: it would set the site URL to the literal text. Check `project_id` in the `[remotes.production]` block at the end of `supabase/config.toml`, then run `set -a && . ./.env && set +a && npx supabase config push`. Then check Authentication → URL Configuration and → Emails → SMTP in the dashboard. Sign-up is on but only for emails on the staff list (the `before_user_created` hook), email confirmation is off, and password-reset links work for 1 hour.
 4. Invite yourself as staff (below), then load the demo class: `SUPABASE_DB_URL=<hosted connection string> pnpm seed -- --hosted-demo you@team.org`. It loads class `HYD234` with 24 demo students and gives it to that invited account. It creates no user and no password, and re-running it replaces the demo class.
 
 ### Deploy (Vercel)
@@ -45,18 +45,18 @@ Demo mode (planned, not wired in the student app yet): `https://<student>.vercel
 
 ### Staff accounts
 
-Sign-up is disabled, and signing in alone does not make someone a facilitator. To add one, as the project owner, run:
+Only emails on the staff list (`public.staff`) can create an account; anyone else is refused. To add someone, as the project owner, run:
 
 ```bash
 SUPABASE_URL=https://<ref>.supabase.co SUPABASE_SERVICE_ROLE_KEY=<service_role key> DASHBOARD_URL=https://<dashboard>.vercel.app \
   pnpm staff:invite -- name@ngo.org
 ```
 
-It sends the invite email through the Supabase Admin API (the link opens `DASHBOARD_URL` when it is set) and adds the email, lowercase, to `public.staff`. Running it again for the same email is harmless: an invite not yet accepted is sent again, and an account that already accepted keeps its access. The service role key is under Project Settings → API (locally, `npx supabase status`); keep it in your shell for that command only, never in a `VITE_*` variable or in git. Locally, `SUPABASE_URL` can be left out: the script falls back to `VITE_SUPABASE_URL`.
+It adds the email, lowercase, to `public.staff` and prints what to tell the person. It sends no email. Running it again for the same email is harmless. The service role key is under Project Settings → API (locally, `npx supabase status`); keep it in your shell for that command only, never in a `VITE_*` variable or in git. Locally, `SUPABASE_URL` can be left out: the script falls back to `VITE_SUPABASE_URL`.
 
-The person then clicks **Accept the invite** in the email once. After that they sign in with their email and the 6-digit code we send. A code request before the invite is accepted fails with `signup_disabled`.
+The person then opens the dashboard, taps **First time here? Create your account**, types that email and picks a password (at least 8 characters). They are signed in straight away and sign in with email + password from then on. A forgotten password: **Forgot password?** emails a link that works for 1 hour, on any device.
 
-Without the script: invite the email in Studio (Authentication → Invite user), then `insert into public.staff (email) values ('name@ngo.org');` (lowercase) in the SQL editor.
+Without the script: `insert into public.staff (email) values ('name@ngo.org');` (lowercase) in the SQL editor.
 
 Removing the row from `public.staff` revokes access to all their classes immediately.
 
@@ -81,7 +81,7 @@ The new owner must also be in `public.staff`.
 | `pnpm db:test:up`                         | Starts Supabase's Postgres image (the hosted version) for the SQL tests, on port 54330. If Windows reserves that port, set `PAISA_TEST_DB_PORT` and `SUPABASE_TEST_DB_URL` to another (`.env.example`) |
 | `pnpm lint:content`                       | Guardrail linter over `packages/content` (`-- --strict` also fails on drafts; use it for release builds)                                                                                               |
 | `pnpm seed`                               | Regenerates `supabase/seed.sql` from the engine and loads it into `SUPABASE_DB_URL`                                                                                                                    |
-| `pnpm staff:invite -- name@ngo.org`       | Invites a facilitator and adds them to the staff allowlist ("Staff accounts")                                                                                                                          |
+| `pnpm staff:invite -- name@ngo.org`       | Adds a facilitator to the staff allowlist, so they can create their account ("Staff accounts")                                                                                                         |
 | `pnpm dev:student` / `pnpm dev:dashboard` | The two apps                                                                                                                                                                                           |
 
 ## Layout

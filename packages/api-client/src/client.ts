@@ -44,7 +44,7 @@ export interface ApiClientOptions {
 
 /**
  * The only way apps talk to the backend (CLAUDE.md 6). Students use joinClass and
- * pushEvents with the anon key and never sign in; staff sign in with an email code.
+ * pushEvents with the anon key and never sign in; staff sign in with email + password.
  */
 export function createApiClient(options: ApiClientOptions) {
   const sb = options.supabase ?? createClient(options.url, options.anonKey);
@@ -113,27 +113,46 @@ export function createApiClient(options: ApiClientOptions) {
     },
 
     // ---- Staff (dashboard) ----
-    /**
-     * Sends a sign-in code. Staff accounts are invited by an admin (sign-up is off in
-     * supabase/config.toml) and must be on the staff allowlist to see any class.
-     */
-    async signInWithEmail(email: string): Promise<void> {
-      const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
-      if (error) throw toAuthError(error);
-    },
-
-    async verifyEmailCode(email: string, token: string): Promise<void> {
-      const { error } = await sb.auth.verifyOtp({ email, token, type: 'email' });
-      if (error) throw toAuthError(error);
-    },
-
-    /**
-     * Password sign-in, for the local demo facilitator only (supabase/seed.sql). Hosted staff
-     * accounts have no password; they use the email code.
-     */
+    /** Email + password sign-in. A wrong email or password gives auth_wrong_password. */
     async signInWithPassword(email: string, password: string): Promise<void> {
       const { error } = await sb.auth.signInWithPassword({ email, password });
       if (error) throw toAuthError(error);
+    },
+
+    /**
+     * Creates a staff account and signs it in. Only an email on the staff allowlist may
+     * (supabase/config.toml before_user_created hook): any other gives auth_not_invited, and one
+     * that already has an account gives auth_account_exists. Resolves `signedIn: false` only if
+     * the server still asks for email confirmation (it is off in supabase/config.toml).
+     */
+    async signUpWithPassword(email: string, password: string): Promise<{ signedIn: boolean }> {
+      const { data, error } = await sb.auth.signUp({ email, password });
+      if (error) throw toAuthError(error);
+      return { signedIn: data.session !== null };
+    },
+
+    /**
+     * Emails a "choose a new password" link (supabase/templates/recovery.html) that opens
+     * `redirectTo` with ?reset=<token hash>. An email with no account gets nothing, and no error,
+     * so the form never tells a stranger who has an account.
+     */
+    async sendPasswordReset(email: string, redirectTo: string): Promise<void> {
+      const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo });
+      if (error) throw toAuthError(error);
+    },
+
+    /** Signs in with the token hash from a reset link, so setPassword can run. Used links give auth_link_invalid. */
+    async verifyPasswordReset(tokenHash: string): Promise<void> {
+      const { error } = await sb.auth.verifyOtp({ token_hash: tokenHash, type: 'recovery' });
+      if (error) throw toAuthError(error);
+    },
+
+    /** Sets the signed-in user's password, then signs out their other sessions (anyone who had the old one). */
+    async setPassword(password: string): Promise<void> {
+      const { error } = await sb.auth.updateUser({ password });
+      if (error) throw toAuthError(error);
+      // Best effort: the new password is already saved.
+      await sb.auth.signOut({ scope: 'others' });
     },
 
     async signOut(): Promise<void> {

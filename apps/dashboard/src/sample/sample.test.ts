@@ -104,26 +104,32 @@ describe('sample data matches the content pack', () => {
 });
 
 describe('sample api', () => {
-  it('signs in with any email and any 6 digits, and refuses anything else', async () => {
+  it('signs in, or creates an account, with any email and any password', async () => {
     const api = createSampleApi({ now: NOW, delayMs: 0 });
     expect(await api.currentEmail()).toBeNull();
-    await api.signInWithEmail('anyone@school.org');
-    await expect(api.verifyEmailCode('anyone@school.org', '12345')).rejects.toMatchObject({
-      code: 'auth_code_invalid',
-    });
-    await api.verifyEmailCode(' Anyone@School.org ', '123456');
+    await api.signInWithPassword(' Anyone@School.org ', 'x');
     expect(await api.currentEmail()).toBe('anyone@school.org');
     expect(await api.isStaff()).toBe(true);
+    await api.signOut();
+    expect(await api.signUpWithPassword('new@school.org', 'whatever')).toEqual({ signedIn: true });
+    expect(await api.currentEmail()).toBe('new@school.org');
+  });
+
+  it('sends no reset email, so a reset link never works', async () => {
+    const api = createSampleApi({ now: NOW, delayMs: 0 });
+    await api.sendPasswordReset('a@b.org', 'http://x/');
+    await expect(api.verifyPasswordReset('hash')).rejects.toMatchObject({ code: 'auth_link_invalid' });
+    expect(await api.currentEmail()).toBeNull();
   });
 
   it('tells listeners about sign-in and sign-out', async () => {
     const api = createSampleApi({ now: NOW, delayMs: 0 });
     const seen: (string | null)[] = [];
     const off = api.onAuthChange((e) => seen.push(e));
-    await api.verifyEmailCode('a@b.org', '000000');
+    await api.signInWithPassword('a@b.org', 'pw');
     await api.signOut();
     off();
-    await api.verifyEmailCode('c@d.org', '000000');
+    await api.signInWithPassword('c@d.org', 'pw');
     expect(seen).toEqual(['a@b.org', null]);
   });
 
@@ -134,7 +140,7 @@ describe('sample api', () => {
 
   it('creates and changes classes in memory', async () => {
     const api = createSampleApi({ now: NOW, delayMs: 0 });
-    await api.verifyEmailCode('a@b.org', '000000');
+    await api.signInWithPassword('a@b.org', 'pw');
     const before = await api.listClasses();
     const cls = await api.createClass('Class 9 C', 'hi');
     const after = await api.listClasses();
@@ -151,7 +157,7 @@ describe('sample api', () => {
 
   it('resets a rejoin code', async () => {
     const api = createSampleApi({ now: NOW, delayMs: 0 });
-    await api.verifyEmailCode('a@b.org', '000000');
+    await api.signInWithPassword('a@b.org', 'pw');
     const [cls] = await api.listClasses();
     const [first] = await api.listStudents(cls!.id);
     const code = await api.resetRejoinCode(first!.anon_id);
@@ -165,7 +171,7 @@ describe('sample api', () => {
       setItem: (k: string, v: string) => void data.set(k, v),
       removeItem: (k: string) => void data.delete(k),
     };
-    await createSampleApi({ now: NOW, delayMs: 0, storage }).verifyEmailCode('a@b.org', '000000');
+    await createSampleApi({ now: NOW, delayMs: 0, storage }).signInWithPassword('a@b.org', 'pw');
     expect(await createSampleApi({ now: NOW, delayMs: 0, storage }).currentEmail()).toBe('a@b.org');
   });
 });
