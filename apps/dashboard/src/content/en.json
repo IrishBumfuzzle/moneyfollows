@@ -48,7 +48,7 @@
   "signin.err.unknown": "Something went wrong. Please try again.",
   "signin.err.demo": "The demo account only exists on a local Supabase. Sign in with an email code instead.",
 
-  "sample.banner": "Sample data. This is a made-up school for trying out the dashboard. There are no real students here, and nothing you change is saved.",
+  "sample.banner": "Sample data. This is a made-up school for trying out the dashboard: no real students, and nothing you change is saved. Its class codes and QR codes are made up too, so they won't work in the student app.",
   "sample.leave": "Leave sample data",
   "sample.try_title": "No invite yet?",
   "sample.try_body": "See how the dashboard works with a made-up school of 5 classes. No sign-up needed, and nothing is saved.",
