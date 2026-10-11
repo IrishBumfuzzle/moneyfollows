@@ -5,6 +5,7 @@ import { t } from './content';
 import { COLUMNS, GAME_WEEKS, isInactive, personaKey, type SortKey, type SortState } from './progress';
 
 const NUMERIC = new Set<SortKey>([
+  'modules_done',
   'weeks_played',
   'decisions',
   'news_editions',
@@ -53,7 +54,7 @@ export function ProgressTable({ rows, lang, sort, onSort, now }: Props) {
           <tr>
             {COLUMNS.map((key) => {
               const active = sort.key === key;
-              const arrow = active ? (sort.dir === 'asc' ? '▲' : '▼') : '↕';
+              // Only the sorted column shows an arrow: less noise, and the headers stay narrow enough to fit.
               return (
                 <th
                   key={key}
@@ -63,9 +64,11 @@ export function ProgressTable({ rows, lang, sort, onSort, now }: Props) {
                 >
                   <button type="button" className="sort" onClick={() => onSort(key)}>
                     <span>{tr(`col.${key}`)}</span>
-                    <span aria-hidden="true" className={active ? 'progress-arrow on' : 'progress-arrow'}>
-                      {arrow}
-                    </span>
+                    {active && (
+                      <span aria-hidden="true" className="progress-arrow">
+                        {sort.dir === 'asc' ? '▲' : '▼'}
+                      </span>
+                    )}
                   </button>
                 </th>
               );
@@ -89,6 +92,7 @@ export function ProgressTable({ rows, lang, sort, onSort, now }: Props) {
                   )}
                 </div>
               </td>
+              <td className="num">{formatNumber(r.modules_done)}</td>
               <td className="num">
                 {formatNumber(r.weeks_played)}/{GAME_WEEKS}
               </td>

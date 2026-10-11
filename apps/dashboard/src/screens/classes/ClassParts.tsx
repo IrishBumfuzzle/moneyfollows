@@ -50,15 +50,18 @@ export function CodeBlock({ cls, lang, label = true }: { cls: ClassRow; lang: La
   );
 }
 
-/** A QR for the join link, with the link as text underneath for anyone who can't scan. Nothing without the student app's address. */
-export function JoinQr({ cls, lang }: { cls: ClassRow; lang: Lang }) {
+/**
+ * A QR for the join link, with the link as text underneath for anyone who can't scan. `big` is sized
+ * for a projector, so a whole room can scan it. Nothing without the student app's address.
+ */
+export function JoinQr({ cls, lang, big = false }: { cls: ClassRow; lang: Lang; big?: boolean }) {
   if (!studentUrlConfigured) return null;
   const url = joinUrl(cls.class_code);
   return (
-    <figure className="qr">
+    <figure className={big ? 'qr big' : 'qr'}>
       <QRCodeSVG
         value={url}
-        size={140}
+        size={big ? 280 : 140}
         level="M"
         marginSize={2}
         bgColor="#ffffff"

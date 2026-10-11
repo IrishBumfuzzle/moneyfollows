@@ -27,7 +27,7 @@ export function orderRows(rows: readonly GainRow[]): GainRow[] {
 }
 
 export interface GainsSummary {
-  /** Mean over the pillars with data, rounded to whole percent. */
+  /** Mean of the whole-percent values the bars show, over the pillars with data, rounded. */
   from: number;
   to: number;
   /** Matched students: the most any one pillar has (a student answers every pillar, so that is the headcount). */
@@ -39,8 +39,9 @@ export interface GainsSummary {
 export function summarizeGains(rows: readonly GainRow[]): GainsSummary | null {
   const used = rows.filter(isMatched);
   if (used.length === 0) return null;
+  // Average the numbers printed on the bars, so anyone checking the sentence against the chart gets the same.
   const mean = (pick: (r: GainRow) => number | null) =>
-    Math.round(used.reduce((sum, r) => sum + (pick(r) ?? 0), 0) / used.length);
+    Math.round(used.reduce((sum, r) => sum + Math.round(pick(r) ?? 0), 0) / used.length);
   const from = mean((r) => r.baseline_avg);
   const to = mean((r) => r.endline_avg);
   return {

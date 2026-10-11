@@ -12,6 +12,7 @@ export type SortKey =
   | 'persona'
   | 'lang'
   | 'last_active'
+  | 'modules_done'
   | 'weeks_played'
   | 'decisions'
   | 'news_editions'
@@ -30,6 +31,7 @@ export const COLUMNS: readonly SortKey[] = [
   'persona',
   'lang',
   'last_active',
+  'modules_done',
   'weeks_played',
   'decisions',
   'news_editions',

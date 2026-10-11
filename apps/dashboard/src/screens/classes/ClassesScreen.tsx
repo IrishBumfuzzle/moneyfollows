@@ -18,7 +18,7 @@ interface Props {
   onClassChange: (cls: ClassRow) => void;
 }
 
-/** Create a class and see every class as a short row; a class just created shows in full with its QR. */
+/** Create a class, then every class below as a short row; a class just created shows in full with its QR. */
 export function ClassesScreen({ api, lang, classes, onClassChange }: Props) {
   const tr = (key: string, vars?: Record<string, string | number>) => t(lang, key, vars);
   const [createdId, setCreatedId] = useState<string | null>(null);
@@ -28,17 +28,6 @@ export function ClassesScreen({ api, lang, classes, onClassChange }: Props) {
   const searchable = classes.length > CLASS_SEARCH_FROM;
   const shown = filterClasses(classes, searchable ? query : '').filter((c) => c !== created);
 
-  const createForm = (
-    <CreateClassForm
-      api={api}
-      lang={lang}
-      onCreated={(cls) => {
-        onClassChange(cls);
-        setCreatedId(cls.id);
-      }}
-    />
-  );
-
   return (
     <div className="stack">
       <div>
@@ -47,6 +36,15 @@ export function ClassesScreen({ api, lang, classes, onClassChange }: Props) {
       </div>
 
       {!studentUrlConfigured && <StudentUrlWarning text={tr('classes.no_student_url')} />}
+
+      <CreateClassForm
+        api={api}
+        lang={lang}
+        onCreated={(cls) => {
+          onClassChange(cls);
+          setCreatedId(cls.id);
+        }}
+      />
 
       <div role="status">
         {created && (
@@ -58,9 +56,6 @@ export function ClassesScreen({ api, lang, classes, onClassChange }: Props) {
           </div>
         )}
       </div>
-
-      {/* Staff open this page to reach their classes; the form goes first only while there are none. */}
-      {classes.length === 0 && createForm}
 
       {created && <ClassCard cls={created} lang={lang} highlighted onPrint={print} />}
 
@@ -98,7 +93,6 @@ export function ClassesScreen({ api, lang, classes, onClassChange }: Props) {
           )}
         </>
       )}
-      {classes.length > 0 && createForm}
       {sheet}
     </div>
   );

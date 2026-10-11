@@ -88,6 +88,17 @@ describe('summarizeGains', () => {
     expect(summarizeGains([row('plan_budget', 60, 60, 5)])?.direction).toBe('same');
   });
 
+  it('averages the whole numbers the bars show, not the raw averages', () => {
+    // Bars read 51, 51, 50, 50 (mean 50.5 -> 51). Averaging the raw 50.5, 50.5, 50.4, 50.4 would say 50.
+    const rows = [
+      row('plan_budget', 50.5, 60, 4),
+      row('save_manage', 50.5, 60, 4),
+      row('understand_investing', 50.4, 60, 4),
+      row('stay_safe', 50.4, 60, 4),
+    ];
+    expect(summarizeGains(rows)).toMatchObject({ from: 51, to: 60 });
+  });
+
   it('compares the rounded numbers so the sentence matches what is shown', () => {
     expect(summarizeGains([row('plan_budget', 50.2, 50.4, 5)])).toMatchObject({ from: 50, to: 50, direction: 'same' });
   });
